@@ -1,0 +1,31 @@
+This is a rough outline of upcoming tasks:
+
+[ ] Prove that CompleteTree.heapUpdateAt returns the element at the given index
+[ ] Prove that CompleteTree.heapRemoveLastWithIndex and CompleteTree.heapRemoveLast yield the same tree
+[ ] Prove that CompleteTree.heapRemoveLastWithIndex and CompleteTree.heapRemoveLast yield the same element
+[ ] Prove that CompleteTree.heapRemoveLastWithIndex indeed removes the last element
+    - This automatically serves as a proof for CompleteTree.heapRemoveLast, once it is shown that they
+      yield the same tree
+    - A potential approach is to show that any index in the resulting tree can be converted into an index
+      in the original tree (by adding one if it's >= the returned index of heapRemoveLastWithIndex), and getting
+      elements from both trees.
+    - **EASIER**: Or just show that except for the n=1 case the value is unchanged.
+      The type signature proves the rest.
+[ ] Prove that if CompleteTree.indexOf returns some, CompleteTree.get with that result fulfills the predicate.
+[ ] Prove that CompleteTree.heapUpdateRoot indeed removes the value at the root.
+    [x] A part of this is to show that the new root is not the old root, but rather the passed in value or
+        the root of one of the sub-trees.
+    [ ] The second part is to show that the recursion (if there is one) does not pass on the old root.
+        - Basically that heapUpdateRoot either does not recurse, or recurses with the value it started out with.
+          - This should be relatively straightforward. (left unchanged or left.heapUpdateRoot value and right 
+            unchanged or right.heapUpdateRoot value)
+    [x] The last part would be to show that only one element gets removed
+        - Enforced by type signature.
+[ ] Prove that CompleteTree.heapUpdateAt indeed removes the value at the given index.
+    - Basically making sure that if index != 0 the recursion does either pass on the passed-in value, or the current
+      node's value.
+      - This sounds so trivial, that I am not sure if it's even worth the effort.
+    - The Heap Property that has already been proven shows the rest.
+
+
+[ ] Write the performance part of this file.
