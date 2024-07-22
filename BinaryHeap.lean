@@ -17,10 +17,10 @@ def new (α : Type u) {le : α → α → Bool} (h₁ : BinaryHeap.transitive_le
   }
 
 /-- Adds an element into a heap. O(log(n)) -/
-def push {α : Type u} {lt : α → α → Bool} {n : Nat} : α → BinaryHeap α lt n → BinaryHeap α lt (n+1)
+def push {α : Type u} {le : α → α → Bool} {n : Nat} : α → BinaryHeap α le n → BinaryHeap α le (n+1)
 | elem, .mk tree valid wellDefinedLe =>
   let valid := tree.heapPushIsHeap valid wellDefinedLe.left wellDefinedLe.right
-  let tree := tree.heapPush lt elem
+  let tree := tree.heapPush le elem
   {tree, valid, wellDefinedLe}
 
 /-- Removes the smallest element from the heap and returns it. O(log(n)) -/
@@ -48,3 +48,25 @@ def updateAt {α : Type u} {le : α → α → Bool} {n : Nat} : (BinaryHeap α 
 def indexOf {α : Type u} {le : α → α → Bool} {n : Nat} : BinaryHeap α le (n+1) → (pred : α → Bool) → Option (Fin (n+1))
 | {tree, valid := _, wellDefinedLe := _}, pred =>
   tree.indexOf pred
+
+instance : GetElem (BinaryHeap α le n) (Nat) α (λ _ index ↦ index > 0 ∧ index < n) where
+  getElem := λ heap index h₁ ↦ match n, heap, index with
+  | (_+1), {tree, ..}, index => tree.get ⟨index, h₁.right⟩
+
+instance : GetElem (BinaryHeap α le n) (Fin n) α (λ _ _ ↦ n > 0) where
+  getElem := λ heap index _ ↦ match n, heap, index with
+  | (_+1), {tree, ..}, index => tree.get index
+
+/--Helper for the common case of using natural numbers for sorting.-/
+theorem nat_ble_to_heap_le_total : total_le Nat.ble := by
+  unfold total_le
+  simp only [Nat.ble_eq]
+  exact Nat.le_total
+
+/--Helper for the common case of using natural numbers for sorting.-/
+theorem nat_ble_to_heap_transitive_le : transitive_le Nat.ble := by
+  unfold transitive_le
+  intros a b c
+  repeat rw[Nat.ble_eq]
+  rw[and_imp]
+  exact Nat.le_trans

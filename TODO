@@ -1,5 +1,7 @@
 This is a rough outline of upcoming tasks:
 
+[ ] Prove that an index exists such that after CompleteTree.heapPush the pushed element can be obtained by
+    CompleteTree.get
 [ ] Prove that CompleteTree.heapUpdateAt returns the element at the given index
 [ ] Prove that CompleteTree.heapRemoveLastWithIndex and CompleteTree.heapRemoveLast yield the same tree
 [ ] Prove that CompleteTree.heapRemoveLastWithIndex and CompleteTree.heapRemoveLast yield the same element
@@ -9,19 +11,24 @@ This is a rough outline of upcoming tasks:
     - A potential approach is to show that any index in the resulting tree can be converted into an index
       in the original tree (by adding one if it's >= the returned index of heapRemoveLastWithIndex), and getting
       elements from both trees.
-    - **EASIER**: Or just show that except for the n=1 case the value is unchanged.
-      The type signature proves the rest.
+    - Maybe easier: Or show that except for the n=1 case the value is unchanged.
+      The type signature proves the rest, so try, like induction maybe?
 [ ] Prove that if CompleteTree.indexOf returns some, CompleteTree.get with that result fulfills the predicate.
-[ ] Prove that CompleteTree.heapUpdateRoot indeed removes the value at the root.
-    [x] A part of this is to show that the new root is not the old root, but rather the passed in value or
-        the root of one of the sub-trees.
-    [ ] The second part is to show that the recursion (if there is one) does not pass on the old root.
-        - Basically that heapUpdateRoot either does not recurse, or recurses with the value it started out with.
-          - This should be relatively straightforward. (left unchanged or left.heapUpdateRoot value and right 
-            unchanged or right.heapUpdateRoot value)
-    [x] The last part would be to show that only one element gets removed
-        - Enforced by type signature.
-[ ] Prove that CompleteTree.heapUpdateAt indeed removes the value at the given index.
+[ ] Prove that CompleteTree.heapUpdateRoot indeed exchanges the value at the root.
+    - Straightforward, but hard to prove:
+      [ ] Show that for each index in the original heap (except 0) the element is now either the new root, or
+          in the left or in the right subtree.
+          - Maybe a new predicate? CompleteTree.contains x => root = x OR left.contains x OR right.contains x
+          - Try unfolding both functions like in heapRemoveLastWithIndexReturnsItemAtIndex.
+    - Alternative approach, but less convincing
+      [x] A part of this is to show that the new root is not the old root, but rather the passed in value or
+          the root of one of the sub-trees.
+      [ ] The second part is to show that the recursion (if there is one) does not pass on the old root.
+          - Basically that heapUpdateRoot either does not recurse, or recurses with the value it started out with.
+            - This should be relatively straightforward. (left unchanged or left.heapUpdateRoot value and right 
+              unchanged or right.heapUpdateRoot value)
+[ ] Prove that CompleteTree.heapUpdateAt indeed updates the value at the given index.
+    - Use contains again (if that works), or
     - Basically making sure that if index != 0 the recursion does either pass on the passed-in value, or the current
       node's value.
       - This sounds so trivial, that I am not sure if it's even worth the effort.
