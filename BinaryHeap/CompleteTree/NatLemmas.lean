@@ -1,10 +1,6 @@
 namespace Nat
 
-theorem Nat.power_of_two_go_eq_eq (n : Nat) (p : n >0) : Nat.nextPowerOfTwo.go n n p = n := by
-  unfold Nat.nextPowerOfTwo.go
-  simp_arith
-
-theorem Nat.smaller_smaller_exp {n m o : Nat} (p : o ^ n < o ^ m) (q : o > 0) : n < m :=
+theorem smaller_smaller_exp {n m o : Nat} (p : o ^ n < o ^ m) (q : o > 0) : n < m :=
   if h₁ : m ≤ n  then
     by have h₂ := Nat.pow_le_pow_of_le_right (q) h₁
        have h₃ := Nat.lt_of_le_of_lt h₂ p
@@ -24,7 +20,7 @@ private theorem mul2_isPowerOfTwo_smaller_smaller_equal (n : Nat) (power : Nat) 
   apply (Nat.pow_le_pow_of_le_right h₆)
   rewrite [h₅] at h₃
   rewrite [h₄] at h₃
-  have h₃ := Nat.smaller_smaller_exp h₃
+  have h₃ := smaller_smaller_exp h₃
   simp_arith at h₃
   assumption
 

@@ -1,3 +1,6 @@
+/-
+  This file contains the Binary Heap type and its basic operations.
+-/
 import BinaryHeap.CompleteTree
 
 structure BinaryHeap (α : Type u) (le : α → α → Bool) (n : Nat) where
