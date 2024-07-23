@@ -1,6 +1,7 @@
 import BinaryHeap.HeapPredicate
 import BinaryHeap.CompleteTree.Basic
 import BinaryHeap.CompleteTree.HeapOperations
+import BinaryHeap.CompleteTree.AdditionalOperations
 import BinaryHeap.CompleteTree.HeapProofs
 import BinaryHeap.CompleteTree.AdditionalProofs
 

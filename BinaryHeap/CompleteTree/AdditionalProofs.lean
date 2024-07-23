@@ -1,4 +1,5 @@
 import BinaryHeap.CompleteTree.Lemmas
+import BinaryHeap.CompleteTree.AdditionalOperations
 import BinaryHeap.CompleteTree.HeapOperations
 
 namespace BinaryHeap
