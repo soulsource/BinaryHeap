@@ -64,16 +64,16 @@ instance {α : Type u} [DecidableEq α] {tree : CompleteTree α n} {element : α
     | 0, .leaf => Decidable.isFalse $ not_false_eq_true.mpr $ (eq_self 0).mp (rfl (a := 0))
     | p+q+1, .branch v l r _ _ _ =>
       if t : v = element then
-            Decidable.isTrue $ Or.inl t
-          else
-            have hl := go p l
-            have hr := go q r
-            if h₁ : hl.decide then
-              Decidable.isTrue $ Or.inr $ Or.inl $ decide_eq_true_eq.mp h₁
-            else if h₂ : hr.decide then
-              Decidable.isTrue $ Or.inr $ Or.inr $ decide_eq_true_eq.mp h₂
-            else
-              have h₁ : ¬l.contains element := decide_eq_true_eq.subst h₁
-              have h₂ : ¬r.contains element := decide_eq_true_eq.subst h₂
-              Decidable.isFalse $ not_or_intro t $ not_or_intro h₁ h₂
+        Decidable.isTrue $ Or.inl t
+      else
+        have hl := go p l
+        have hr := go q r
+        if h₁ : hl.decide then
+          Decidable.isTrue $ Or.inr $ Or.inl $ decide_eq_true_eq.mp h₁
+        else if h₂ : hr.decide then
+          Decidable.isTrue $ Or.inr $ Or.inr $ decide_eq_true_eq.mp h₂
+        else
+          have h₁ : ¬l.contains element := decide_eq_true_eq.subst h₁
+          have h₂ : ¬r.contains element := decide_eq_true_eq.subst h₂
+          Decidable.isFalse $ not_or_intro t $ not_or_intro h₁ h₂
   go n tree
