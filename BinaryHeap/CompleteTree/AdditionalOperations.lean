@@ -49,3 +49,31 @@ def CompleteTree.get {α : Type u} {n : Nat} (index : Fin (n+1)) (heap : Complet
       have _termination : j - o < index.val := (Fin.val_inj.mpr h₁).substr (Nat.sub_lt_succ j o)
       match p with
       | (pp + 1) => get ⟨j - o, h₆⟩ r
+
+----------------------------------------------------------------------------------------------
+-- contains - implemented as decidable proposition
+
+def CompleteTree.contains {α : Type u} {n : Nat} (tree : CompleteTree α n) (element : α) : Prop :=
+  match n, tree with
+  | 0, .leaf => False
+  | (_+_+1), .branch v l r _ _ _ => v = element ∨ (l.contains element) ∨ (r.contains element)
+
+instance {α : Type u} [DecidableEq α] {tree : CompleteTree α n} {element : α} : Decidable (tree.contains element) :=
+  let rec go : [DecidableEq α] → (o :Nat) → (tree : CompleteTree α o) → Decidable (tree.contains element) := λ o tree ↦
+    match o, tree with
+    | 0, .leaf => Decidable.isFalse $ not_false_eq_true.mpr $ (eq_self 0).mp (rfl (a := 0))
+    | p+q+1, .branch v l r _ _ _ =>
+      if t : v = element then
+            Decidable.isTrue $ Or.inl t
+          else
+            have hl := go p l
+            have hr := go q r
+            if h₁ : hl.decide then
+              Decidable.isTrue $ Or.inr $ Or.inl $ decide_eq_true_eq.mp h₁
+            else if h₂ : hr.decide then
+              Decidable.isTrue $ Or.inr $ Or.inr $ decide_eq_true_eq.mp h₂
+            else
+              have h₁ : ¬l.contains element := decide_eq_true_eq.subst h₁
+              have h₂ : ¬r.contains element := decide_eq_true_eq.subst h₂
+              Decidable.isFalse $ not_or_intro t $ not_or_intro h₁ h₂
+  go n tree
