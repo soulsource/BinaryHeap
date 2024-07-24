@@ -3,7 +3,7 @@ import BinaryHeap.CompleteTree.Lemmas
 
 namespace BinaryHeap
 
-theorem CompleteTree.emptyIsHeap {α : Type u} (le : α → α → Bool) : HeapPredicate CompleteTree.empty le := by trivial
+theorem CompleteTree.emptyIsHeap {α : Type u} (le : α → α → Bool) : HeapPredicate CompleteTree.empty le := True.intro
 
 ----------------------------------------------------------------------------------------------
 -- heapPush

@@ -1,13 +1,13 @@
 import BinaryHeap.CompleteTree.Basic
 import BinaryHeap.CompleteTree.NatLemmas
 
-namespace BinaryHeap
+namespace BinaryHeap.CompleteTree
 
 ----------------------------------------------------------------------------------------------
 -- indexOf
 
 /--Helper function for CompleteTree.indexOf.-/
-private def CompleteTree.indexOfAux {α : Type u} (heap : CompleteTree α o) (pred : α → Bool) (currentIndex : Nat) : Option (Fin (o+currentIndex)) :=
+private def indexOfAux {α : Type u} (heap : CompleteTree α o) (pred : α → Bool) (currentIndex : Nat) : Option (Fin (o+currentIndex)) :=
   match o, heap with
   | 0, .leaf => none
   | (n+m+1), .branch a left right _ _ _ =>
@@ -25,7 +25,7 @@ private def CompleteTree.indexOfAux {α : Type u} (heap : CompleteTree α o) (pr
       found_right
 
 /--Finds the first occurance of a given element in the heap and returns its index. Indices are depth first.-/
-def CompleteTree.indexOf {α : Type u} (heap : CompleteTree α o) (pred : α → Bool) : Option (Fin o) :=
+def indexOf {α : Type u} (heap : CompleteTree α o) (pred : α → Bool) : Option (Fin o) :=
   indexOfAux heap pred 0
 
 
@@ -33,13 +33,13 @@ def CompleteTree.indexOf {α : Type u} (heap : CompleteTree α o) (pred : α →
 -- get
 
 /--Returns the lement at the given index. Indices are depth first.-/
-def CompleteTree.get {α : Type u} {n : Nat} (index : Fin (n+1)) (heap : CompleteTree α (n+1)) : α :=
+def get' {α : Type u} {n : Nat} (index : Fin (n+1)) (heap : CompleteTree α (n+1)) : α :=
   match h₁ : index, h₂ : n, heap with
   | 0, (_+_), .branch v _ _ _ _ _ => v
   | ⟨j+1,h₃⟩, (o+p), .branch _ l r _ _ _ =>
     if h₄ : j < o then
       match o with
-      | (oo+1) => get ⟨j, h₄⟩ l
+      | (oo+1) => get' ⟨j, h₄⟩ l
     else
       have h₅ : n - o = p := Nat.sub_eq_of_eq_add $ (Nat.add_comm o p).subst h₂
       have : p ≠ 0 :=
@@ -48,12 +48,16 @@ def CompleteTree.get {α : Type u} {n : Nat} (index : Fin (n+1)) (heap : Complet
       have h₆ : j - o < p := h₅.subst $ Nat.sub_lt_sub_right (Nat.ge_of_not_lt h₄) $ Nat.lt_of_succ_lt_succ h₃
       have _termination : j - o < index.val := (Fin.val_inj.mpr h₁).substr (Nat.sub_lt_succ j o)
       match p with
-      | (pp + 1) => get ⟨j - o, h₆⟩ r
+      | (pp + 1) => get' ⟨j - o, h₆⟩ r
+
+def get {α : Type u} {n : Nat} (index : Fin n) (heap : CompleteTree α n) (_ : n > 0) : α :=
+  match n, index, heap with
+  | (_+1), index, heap => heap.get' index
 
 ----------------------------------------------------------------------------------------------
 -- contains - implemented as decidable proposition
 
-def CompleteTree.contains {α : Type u} {n : Nat} (tree : CompleteTree α n) (element : α) : Prop :=
+def contains {α : Type u} {n : Nat} (tree : CompleteTree α n) (element : α) : Prop :=
   match n, tree with
   | 0, .leaf => False
   | (_+_+1), .branch v l r _ _ _ => v = element ∨ (l.contains element) ∨ (r.contains element)

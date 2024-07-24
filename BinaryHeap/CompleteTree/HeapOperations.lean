@@ -1,7 +1,7 @@
 import BinaryHeap.CompleteTree.Basic
 import BinaryHeap.CompleteTree.NatLemmas
 
-namespace BinaryHeap
+namespace BinaryHeap.CompleteTree
 
 ----------------------------------------------------------------------------------------------
 -- heapPush
@@ -18,9 +18,9 @@ private theorem power_of_two_mul_two_lt {n m : Nat} (h₁ : m.isPowerOfTwo) (h�
     Nat.lt_of_le_of_ne ((Nat.not_lt_eq _ _).mp h₄) h₅
 
 /--Adds a new element to a given CompleteTree.-/
-def CompleteTree.heapPush (le : α → α → Bool) (elem : α) (heap : CompleteTree α o) : CompleteTree α (o+1) :=
+def heapPush (le : α → α → Bool) (elem : α) (heap : CompleteTree α o) : CompleteTree α (o+1) :=
   match o, heap with
-  | 0, .leaf => CompleteTree.branch elem (CompleteTree.leaf) (CompleteTree.leaf) (by simp) (by simp) (by simp[Nat.one_isPowerOfTwo])
+  | 0, .leaf => .branch elem (.leaf) (.leaf) (by simp) (by simp) (by simp[Nat.one_isPowerOfTwo])
   | (n+m+1), .branch a left right p max_height_difference subtree_complete =>
     let (elem, a) := if le elem a then (a, elem) else (elem, a)
     -- okay, based on n and m we know if we want to add left or right.
@@ -95,7 +95,7 @@ private theorem power_of_two_mul_two_le {n m : Nat} (h₁ : (n+1).isPowerOfTwo) 
     h₅.resolve_left h₆
 
 /-- Helper for heapRemoveLastAux -/
-private theorem CompleteTree.removeRightRightNotEmpty {n m : Nat} (m_gt_0_or_rightIsFull : m > 0 ∨ ((m+1).nextPowerOfTwo = m+1 : Bool)) (h₁ : 0 ≠ n + m) (h₂ : ¬(m < n ∧ ((m+1).nextPowerOfTwo = m+1 : Bool))) : m > 0 :=
+private theorem removeRightRightNotEmpty {n m : Nat} (m_gt_0_or_rightIsFull : m > 0 ∨ ((m+1).nextPowerOfTwo = m+1 : Bool)) (h₁ : 0 ≠ n + m) (h₂ : ¬(m < n ∧ ((m+1).nextPowerOfTwo = m+1 : Bool))) : m > 0 :=
   match m_gt_0_or_rightIsFull with
   | Or.inl h => h
   | Or.inr h => by
@@ -108,7 +108,7 @@ private theorem CompleteTree.removeRightRightNotEmpty {n m : Nat} (m_gt_0_or_rig
       . exact Nat.succ_pos _
 
 /-- Helper for heapRemoveLastAux -/
-private theorem CompleteTree.removeRightLeftIsFull {n m : Nat} (r : ¬(m < n ∧ ((m+1).nextPowerOfTwo = m+1 : Bool))) (m_le_n : m ≤ n) (subtree_complete : (n + 1).isPowerOfTwo ∨ (m + 1).isPowerOfTwo) : (n+1).isPowerOfTwo := by
+private theorem removeRightLeftIsFull {n m : Nat} (r : ¬(m < n ∧ ((m+1).nextPowerOfTwo = m+1 : Bool))) (m_le_n : m ≤ n) (subtree_complete : (n + 1).isPowerOfTwo ∨ (m + 1).isPowerOfTwo) : (n+1).isPowerOfTwo := by
   rewrite[Decidable.not_and_iff_or_not] at r
   cases r
   case inl h₁ => rewrite[Nat.not_lt_eq] at h₁
@@ -121,7 +121,7 @@ private theorem CompleteTree.removeRightLeftIsFull {n m : Nat} (r : ¬(m < n ∧
                  assumption
 
 /-- Helper for heapRemoveLastAux -/
-private theorem CompleteTree.stillInRange {n m : Nat} (r : ¬(m < n ∧ ((m+1).nextPowerOfTwo = m+1 : Bool))) (m_le_n : m ≤ n) (m_gt_0 : m > 0) (leftIsFull : (n+1).isPowerOfTwo) (max_height_difference: n < 2 * (m + 1)) : n < 2*m := by
+private theorem stillInRange {n m : Nat} (r : ¬(m < n ∧ ((m+1).nextPowerOfTwo = m+1 : Bool))) (m_le_n : m ≤ n) (m_gt_0 : m > 0) (leftIsFull : (n+1).isPowerOfTwo) (max_height_difference: n < 2 * (m + 1)) : n < 2*m := by
   rewrite[Decidable.not_and_iff_or_not] at r
   cases r with
   | inl h₁ => have m_eq_n : m = n := Nat.le_antisymm m_le_n (Nat.not_lt.mp h₁)
@@ -136,7 +136,7 @@ private theorem CompleteTree.stillInRange {n m : Nat} (r : ¬(m < n ∧ ((m+1).n
   **BEWARE** that "last" here means the underlying complete tree. It is *not* the elemenent
   at the largest index, nor is it the largest element in the heap.
 -/
-protected def CompleteTree.Internal.heapRemoveLastAux
+protected def Internal.heapRemoveLastAux
 {α : Type u}
 {β : Nat → Type u}
 {o : Nat}
@@ -179,7 +179,7 @@ protected def CompleteTree.Internal.heapRemoveLastAux
   Removes the last element in the complete Tree. This is **NOT** the element with the
   largest index, nor is it the largest element in the heap.
 -/
-protected def CompleteTree.Internal.heapRemoveLast {α : Type u} {o : Nat} (heap : CompleteTree α (o+1)) : (CompleteTree α o × α) :=
+protected def Internal.heapRemoveLast {α : Type u} {o : Nat} (heap : CompleteTree α (o+1)) : (CompleteTree α o × α) :=
   Internal.heapRemoveLastAux heap id (λ(a : α) _ ↦ a) (λa _ _ ↦ a)
 
 /--
@@ -188,7 +188,7 @@ protected def CompleteTree.Internal.heapRemoveLast {α : Type u} {o : Nat} (heap
 
   Also returns the index of the removed element.
 -/
-protected def CompleteTree.heapRemoveLastWithIndex {α : Type u} {o : Nat} (heap : CompleteTree α (o+1)) : (CompleteTree α o × α × Fin (o+1)) :=
+protected def heapRemoveLastWithIndex {α : Type u} {o : Nat} (heap : CompleteTree α (o+1)) : (CompleteTree α o × α × Fin (o+1)) :=
   Internal.heapRemoveLastAux heap (β := λn ↦ α × Fin n)
   (λ(a : α) ↦ (a, Fin.mk 0 (Nat.succ_pos 0)))
   (λ(a, prev_idx) h₁ ↦ (a, prev_idx.succ.castLE $ Nat.succ_le_of_lt h₁) )
@@ -198,9 +198,9 @@ protected def CompleteTree.heapRemoveLastWithIndex {α : Type u} {o : Nat} (heap
 -- heapUpdateRoot
 
 /--
-  Helper for CompleteTree.heapUpdateAt. Makes proofing heap predicate work in Lean 4.9
+  Helper for heapUpdateAt. Makes proofing heap predicate work in Lean 4.9
   -/
-def CompleteTree.heapUpdateRoot  {α : Type u} {n : Nat} (le : α → α → Bool) (value : α) (heap : CompleteTree α n) (_ : n > 0) : CompleteTree α n × α :=
+def heapUpdateRoot  {α : Type u} {n : Nat} (le : α → α → Bool) (value : α) (heap : CompleteTree α n) (_ : n > 0) : CompleteTree α n × α :=
 match n, heap with
   | (o+p+1), .branch v l r h₃ h₄ h₅ =>
     if h₆ : o = 0 then
@@ -234,11 +234,11 @@ match n, heap with
 -- heapRemoveAt
 
 /--
-  Helper for CompleteTree.heapRemoveAt.
+  Helper for heapRemoveAt.
   Removes the element at index, and instead inserts the given value.
   Returns the element at index, and the resulting tree.
   -/
-def CompleteTree.heapUpdateAt {α : Type u} {n : Nat} (le : α → α → Bool) (index : Fin n) (value : α) (heap : CompleteTree α n) (h₁ : n > 0) : CompleteTree α n × α :=
+def heapUpdateAt {α : Type u} {n : Nat} (le : α → α → Bool) (index : Fin n) (value : α) (heap : CompleteTree α n) (h₁ : n > 0) : CompleteTree α n × α :=
   if h₂ : index == ⟨0,h₁⟩ then
     heapUpdateRoot le value heap h₁
   else
@@ -268,7 +268,7 @@ def CompleteTree.heapUpdateAt {α : Type u} {n : Nat} (le : α → α → Bool) 
 ----------------------------------------------------------------------------------------------
 -- heapPop
 
-def CompleteTree.heapPop {α : Type u} {n : Nat} (le : α → α → Bool) (heap : CompleteTree α (n+1)) : CompleteTree α n × α :=
+def heapPop {α : Type u} {n : Nat} (le : α → α → Bool) (heap : CompleteTree α (n+1)) : CompleteTree α n × α :=
   let l := Internal.heapRemoveLast heap
   if p : n > 0 then
     heapUpdateRoot le l.snd l.fst p
@@ -278,8 +278,8 @@ def CompleteTree.heapPop {α : Type u} {n : Nat} (le : α → α → Bool) (heap
 ----------------------------------------------------------------------------------------------
 -- heapRemoveAt
 
-/--Removes the element at a given index. Use `CompleteTree.indexOf` to find the respective index.-/
-def CompleteTree.heapRemoveAt {α : Type u} {n : Nat} (le : α → α → Bool) (index : Fin (n+1)) (heap : CompleteTree α (n+1)) : CompleteTree α n × α :=
+/--Removes the element at a given index. Use `indexOf` to find the respective index.-/
+def heapRemoveAt {α : Type u} {n : Nat} (le : α → α → Bool) (index : Fin (n+1)) (heap : CompleteTree α (n+1)) : CompleteTree α n × α :=
   --Since we cannot even temporarily break the completeness property, we go with the
   --version from Wikipedia: We first remove the last element, and then update values in the tree
   --indices are depth first, but "last" means last element of the complete tree.
