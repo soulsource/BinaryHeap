@@ -24,6 +24,8 @@ theorem CompleteTree.left_unfold {α : Type u} {o p : Nat} (v : α) (l : Complet
 
 theorem CompleteTree.leftLen_unfold {α : Type u} {o p : Nat} (v : α) (l : CompleteTree α o) (r : CompleteTree α p) (h₁ : p ≤ o) (h₂ : o < 2 * (p + 1)) (h₃ : (o + 1).isPowerOfTwo ∨ (p + 1).isPowerOfTwo) (h₄ : o + p + 1 > 0): (CompleteTree.branch v l r h₁ h₂ h₃).leftLen h₄ = o := rfl
 
+theorem CompleteTree.rightLen_unfold {α : Type u} {o p : Nat} (v : α) (l : CompleteTree α o) (r : CompleteTree α p) (h₁ : p ≤ o) (h₂ : o < 2 * (p + 1)) (h₃ : (o + 1).isPowerOfTwo ∨ (p + 1).isPowerOfTwo) (h₄ : o + p + 1 > 0): (CompleteTree.branch v l r h₁ h₂ h₃).rightLen h₄ = p := rfl
+
 /-- Helper to rw away right, because Lean 4.9 makes it unnecessarily hard to deal with match in tactics mode... -/
 theorem CompleteTree.right_unfold {α : Type u} {o p : Nat} (v : α) (l : CompleteTree α o) (r : CompleteTree α p) (h₁ : p ≤ o) (h₂ : o < 2 * (p + 1)) (h₃ : (o + 1).isPowerOfTwo ∨ (p + 1).isPowerOfTwo) (h₄ : o + p + 1 > 0): (CompleteTree.branch v l r h₁ h₂ h₃).right h₄ = r := rfl
 
@@ -50,3 +52,16 @@ theorem CompleteTree.leftLenLtN {α : Type u} {n : Nat} (tree : CompleteTree α 
   rw[length]
   rename_i o p _ _ _ _ _ _ _
   exact Nat.lt_of_le_of_lt (Nat.le_add_right o p) (Nat.lt_succ_self (o+p))
+
+theorem CompleteTree.rightLenLtN {α : Type u} {n : Nat} (tree : CompleteTree α n) (h₁ : n>0) : tree.rightLen h₁ < n := by
+  unfold rightLen
+  split
+  rw[length]
+  rename_i o p _ _ _ _ _ _ _
+  exact Nat.lt_of_le_of_lt (Nat.le_add_left p o) (Nat.lt_succ_self (o+p))
+
+theorem CompleteTree.lengthEqLeftRightLenSucc {α : Type u} {n : Nat} (tree : CompleteTree α n) (h₁ : n>0) : tree.length = tree.leftLen h₁ + tree.rightLen h₁ + 1 := by
+  unfold leftLen rightLen
+  split
+  unfold length
+  rfl
