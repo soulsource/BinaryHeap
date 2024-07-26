@@ -188,7 +188,7 @@ protected def Internal.heapRemoveLast {α : Type u} {o : Nat} (heap : CompleteTr
 
   Also returns the index of the removed element.
 -/
-protected def heapRemoveLastWithIndex {α : Type u} {o : Nat} (heap : CompleteTree α (o+1)) : (CompleteTree α o × α × Fin (o+1)) :=
+protected def Internal.heapRemoveLastWithIndex {α : Type u} {o : Nat} (heap : CompleteTree α (o+1)) : (CompleteTree α o × α × Fin (o+1)) :=
   Internal.heapRemoveLastAux heap (β := λn ↦ α × Fin n)
   (λ(a : α) ↦ (a, Fin.mk 0 (Nat.succ_pos 0)))
   (λ(a, prev_idx) h₁ ↦ (a, prev_idx.succ.castLE $ Nat.succ_le_of_lt h₁) )
@@ -287,7 +287,7 @@ def heapRemoveAt {α : Type u} {n : Nat} (le : α → α → Bool) (index : Fin 
   if index_ne_zero : index = 0 then
     heapPop le heap
   else
-    let (remaining_tree, removed_element, removed_index) := heap.heapRemoveLastWithIndex
+    let (remaining_tree, removed_element, removed_index) := Internal.heapRemoveLastWithIndex heap
     if p : index = removed_index then
       (remaining_tree, removed_element)
     else

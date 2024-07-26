@@ -5,7 +5,7 @@ This is a rough outline of upcoming tasks:
 [ ] Prove that CompleteTree.heapUpdateAt returns the element at the given index
 [ ] Prove that CompleteTree.heapRemoveLastWithIndex and CompleteTree.heapRemoveLast yield the same tree
 [ ] Prove that CompleteTree.heapRemoveLastWithIndex and CompleteTree.heapRemoveLast yield the same element
-[ ] Prove that CompleteTree.heapRemoveLastWithIndex indeed removes the last element
+[ ] Prove that CompleteTree.heapRemoveLastWithIndex only removes one element and leaves the rest unchanged
     - This automatically serves as a proof for CompleteTree.heapRemoveLast, once it is shown that they
       yield the same tree
     - A potential approach is to show that any index in the resulting tree can be converted into an index

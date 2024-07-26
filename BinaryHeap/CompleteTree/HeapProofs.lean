@@ -202,7 +202,7 @@ private theorem CompleteTree.heapRemoveLastAuxLeaf
     | .leaf => rfl
   exact h₁
 
-private theorem CompleteTree.heapRemoveLastAuxLeavesRoot
+protected theorem CompleteTree.heapRemoveLastAuxLeavesRoot
 {α : Type u}
 {β : Nat → Type u}
 (heap : CompleteTree α (n+1))
@@ -274,7 +274,7 @@ private theorem CompleteTree.heapRemoveLastAuxIsHeap
               simp only [heapRemoveLastAuxIsHeap aux0 auxl auxr h₁.left h₂ h₃, h₁.right.left, h₁.right.right.right, and_true, true_and]
               unfold HeapPredicate.leOrLeaf
               simp only
-              rw[←heapRemoveLastAuxLeavesRoot]
+              rw[←CompleteTree.heapRemoveLastAuxLeavesRoot]
               exact h₁.right.right.left
         else by
           simp[h₅]
@@ -290,14 +290,14 @@ private theorem CompleteTree.heapRemoveLastAuxIsHeap
             | 0 => rfl
             | o+1 =>
               have h₉ : le v ((Internal.heapRemoveLastAux r _ _ _).fst.root (Nat.zero_lt_succ o)) := by
-                rw[←heapRemoveLastAuxLeavesRoot]
+                rw[←CompleteTree.heapRemoveLastAuxLeavesRoot]
                 exact h₁.right.right.right
               h₉
 
 private theorem CompleteTree.heapRemoveLastIsHeap {α : Type u} {heap : CompleteTree α (o+1)} {le : α → α → Bool} (h₁ : HeapPredicate heap le) (h₂ : transitive_le le) (h₃ : total_le le) : HeapPredicate (Internal.heapRemoveLast heap).fst le :=
   heapRemoveLastAuxIsHeap _ _ _ h₁ h₂ h₃
 
-private theorem CompleteTree.heapRemoveLastWithIndexIsHeap {α : Type u} {heap : CompleteTree α (o+1)} {le : α → α → Bool} (h₁ : HeapPredicate heap le) (h₂ : transitive_le le) (h₃ : total_le le) : HeapPredicate (heap.heapRemoveLastWithIndex.fst) le :=
+private theorem CompleteTree.heapRemoveLastWithIndexIsHeap {α : Type u} {heap : CompleteTree α (o+1)} {le : α → α → Bool} (h₁ : HeapPredicate heap le) (h₂ : transitive_le le) (h₃ : total_le le) : HeapPredicate ((Internal.heapRemoveLastWithIndex heap).fst) le :=
   heapRemoveLastAuxIsHeap _ _ _ h₁ h₂ h₃
 
 ----------------------------------------------------------------------------------------------
@@ -676,12 +676,12 @@ theorem CompleteTree.heapPopIsHeap {α : Type u} {n : Nat} (le : α → α → B
 -- heapRemoveAt
 
 theorem CompleteTree.heapRemoveAtIsHeap {α : Type u} {n : Nat} (le : α → α → Bool) (index : Fin (n+1)) (heap : CompleteTree α (n+1)) (h₁ : HeapPredicate heap le) (wellDefinedLe : transitive_le le ∧ total_le le) : HeapPredicate (heap.heapRemoveAt le index).fst le := by
-  have h₂ : HeapPredicate heap.heapRemoveLastWithIndex.fst le := heapRemoveLastWithIndexIsHeap h₁ wellDefinedLe.left wellDefinedLe.right
+  have h₂ : HeapPredicate (Internal.heapRemoveLastWithIndex heap).fst le := heapRemoveLastWithIndexIsHeap h₁ wellDefinedLe.left wellDefinedLe.right
   unfold heapRemoveAt
   split
   case isTrue => exact heapPopIsHeap le heap h₁ wellDefinedLe
   case isFalse h₃ =>
-    cases h: (index = heap.heapRemoveLastWithIndex.snd.snd : Bool)
+    cases h: (index = (Internal.heapRemoveLastWithIndex heap).snd.snd : Bool)
     <;> simp_all
     split
     <;> apply heapUpdateAtIsHeap <;> simp_all

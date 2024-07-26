@@ -1,8 +1,12 @@
 import BinaryHeap.CompleteTree.Lemmas
 import BinaryHeap.CompleteTree.AdditionalOperations
 import BinaryHeap.CompleteTree.HeapOperations
+import BinaryHeap.CompleteTree.HeapProofs
 
 namespace BinaryHeap.CompleteTree.AdditionalProofs
+
+----------------------------------------------------------------------------------------------
+-- contains
 
 private theorem if_get_eq_contains {α : Type u} {o : Nat} (tree : CompleteTree α (o+1)) (element : α) (index : Fin (o+1)) : tree.get' index = element → tree.contains element := by
     unfold get' contains
@@ -199,7 +203,7 @@ private theorem if_contains_get_eq {α : Type u} {o : Nat} (tree : CompleteTree 
   termination_by o
 
 
-theorem contains_iff_index_exists {α : Type u} {o : Nat} (tree : CompleteTree α (o+1)) (element : α) : tree.contains element ↔ ∃ (index : Fin (o+1)), tree.get' index = element := by
+theorem contains_iff_index_exists' {α : Type u} {o : Nat} (tree : CompleteTree α (o+1)) (element : α) : tree.contains element ↔ ∃ (index : Fin (o+1)), tree.get' index = element := by
   constructor
   case mpr =>
     simp only [forall_exists_index]
@@ -207,9 +211,16 @@ theorem contains_iff_index_exists {α : Type u} {o : Nat} (tree : CompleteTree �
   case mp =>
     exact if_contains_get_eq tree element
 
+theorem contains_iff_index_exists {α : Type u} {n : Nat} (tree : CompleteTree α n) (element : α) (h₁ : n > 0): tree.contains element ↔ ∃ (index : Fin n), tree.get index h₁ = element :=
+  match n, tree with
+  | _+1, tree => contains_iff_index_exists' tree element
+
+----------------------------------------------------------------------------------------------
+-- heapRemoveLast
+
 /--Shows that the index and value returned by heapRemoveLastWithIndex are consistent.-/
-protected theorem heapRemoveLastWithIndexReturnsItemAtIndex {α : Type u} {o : Nat} (heap : CompleteTree α (o+1)) : heap.get' heap.heapRemoveLastWithIndex.snd.snd = heap.heapRemoveLastWithIndex.snd.fst := by
-  unfold CompleteTree.heapRemoveLastWithIndex CompleteTree.Internal.heapRemoveLastAux
+protected theorem heapRemoveLastWithIndexReturnsItemAtIndex {α : Type u} {o : Nat} (heap : CompleteTree α (o+1)) : heap.get' (Internal.heapRemoveLastWithIndex heap).snd.snd = (Internal.heapRemoveLastWithIndex heap).snd.fst := by
+  unfold CompleteTree.Internal.heapRemoveLastWithIndex CompleteTree.Internal.heapRemoveLastAux
   split
   rename_i n m v l r m_le_n max_height_difference subtree_full
   simp only [Nat.add_eq, Fin.zero_eta, Fin.isValue, decide_eq_true_eq, Fin.castLE_succ]
@@ -286,3 +297,57 @@ protected theorem heapRemoveLastWithIndexReturnsItemAtIndex {α : Type u} {o : N
         simp only [Nat.pred_succ, Fin.isValue, Nat.add_sub_cancel, Fin.eta]
         apply AdditionalProofs.heapRemoveLastWithIndexReturnsItemAtIndex
         done
+
+private theorem heapRemoveLastWithIndexLeavesRoot {α : Type u} {n: Nat} (heap : CompleteTree α (n+1)) (h₁ : n > 0) : heap.root (Nat.succ_pos n) = (CompleteTree.Internal.heapRemoveLastWithIndex heap).fst.root h₁ :=
+  CompleteTree.heapRemoveLastAuxLeavesRoot heap _ _ _ h₁
+
+/--If the resulting tree contains all elements except the removed one, and contains one less than the original, well, you get the idea.-/
+protected theorem heapRemoveLastWithIndexOnlyRemovesOneElement {α : Type u} {n : Nat} (heap : CompleteTree α (n+1)) (index : Fin (n+1)) :
+  let (newHeap, removedValue, removedIndex) := Internal.heapRemoveLastWithIndex heap
+  (h₁ : index ≠ removedIndex) → newHeap.contains (heap.get index (Nat.succ_pos n)) := by
+  simp only
+  intro h₁
+  have h₂ : n > 0 := by omega --cases on n, zero -> h₁ = False as Fin 1 only has one value.
+  unfold get get'
+  split
+  case h_1 o p v l r m_le_n max_height_difference subtree_complete del =>
+    -- this should be reducible to heapRemoveLastWithIndexLeavesRoot
+    clear del
+    unfold contains
+    split
+    case h_1 _ hx _ => exact absurd hx (Nat.ne_of_gt h₂)
+    case h_2 del2 del1 oo pp vv ll rr _ _ _ he heq =>
+      clear del1 del2
+      left
+      have h₃ := heqSameRoot he h₂ heq
+      have h₄ := heapRemoveLastWithIndexLeavesRoot ((branch v l r m_le_n max_height_difference subtree_complete)) h₂
+      rw[←h₄] at h₃
+      rw[root_unfold] at h₃
+      rw[root_unfold] at h₃
+      exact h₃.symm
+  case h_2 j o p v l r m_le_n max_height_difference subtree_complete del h₃ =>
+    -- this should be solvable by recursion
+    clear del
+    simp
+    split
+    case isTrue j_lt_o =>
+      split
+      rename_i o d1 d2 d3 d4 d5 oo l _ _ _ h₄
+      clear d1 d2 d3 d4 d5
+      revert h₁
+      unfold Internal.heapRemoveLastWithIndex Internal.heapRemoveLastAux
+      unfold contains --without this split fails...
+      simp only
+      intro h₁
+      have : 0 ≠ oo.succ+p := by simp_arith
+      simp only[this, reduceDite] at h₁
+      simp [this]
+      split
+      case h_1 hx _ => exact absurd hx (Nat.ne_of_gt $ Nat.lt_add_right p $ Nat.succ_pos oo)
+      case h_2 =>
+        rename_i heq
+        sorry
+    case isFalse j_ge_o =>
+      split
+      rename_i pp r _ _ _ _
+      sorry
