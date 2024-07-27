@@ -312,6 +312,17 @@ private theorem leftLen_sees_through_cast {α : Type u} {p q : Nat} (h₁ : q+p+
     revert hb ha heap h₁
     assumption
 
+private theorem left_sees_through_cast {α : Type u} {p q : Nat} (h₁ : q+p+1 = q+1+p) (heap : CompleteTree α (q+p+1)) (ha : q+p+1 > 0) (hb : q+1+p > 0): HEq (heap.left ha) ((h₁▸heap).left hb) := by
+  induction p generalizing q
+  case zero => simp only [Nat.add_zero, heq_eq_eq]
+  case succ pp hp =>
+    have h₂ := hp (q := q+1)
+    have h₃ : (q + 1 + pp + 1) = q + (pp + 1) + 1 := by simp_arith
+    have h₄ : (q + 1 + 1 + pp) = q + 1 + (pp + 1) := by simp_arith
+    rw[h₃, h₄] at h₂
+    revert hb ha heap h₁
+    assumption
+
 /--Helper for heapRemoveLastWithIndexOnlyRemovesOneElement_Auxllength to allow splitting the goal-/
 private theorem heapRemoveLastWithIndexOnlyRemovesOneElement_Auxllength2 {α : Type u} {n : Nat} (tree : CompleteTree α (n+1)) (h₁ : n > 0)
 :
@@ -368,42 +379,62 @@ private theorem heapRemoveLastWithIndexOnlyRemovesOneElement_Auxl2 {α : Type u}
   let o := tree.leftLen'
   let p := tree.rightLen'
   (h₂ : o > 0) →
-  (h₃ : p < (o+1) ∧ ((p+1).nextPowerOfTwo = p+1 : Bool)) →
+  (h₃ : p < o ∧ ((p+1).nextPowerOfTwo = p+1 : Bool)) →
   HEq ((Internal.heapRemoveLastWithIndex tree).fst.left h₁) (heapRemoveLastWithIndex' (tree.left') h₂).fst
 := by
   simp only
   intro h₂ h₃
+  --sorry for this wild mixture of working on the LHS and RHS of the goal.
+  --this function is trial and error, I'm fighting an uphill battle agains tactics mode here,
+  --which keeps randomly failing on me if I do steps in what the tactics
+  --percieve to be the "wrong" order.
   have h₄ := heapRemoveLastWithIndex'_unfold2 tree.left' h₂
   split at h₄
   rename_i d3 d2 d1 oo l o_gt_0 he1 he2 he3
   clear d1 d2 d3
-
-
-  --generalize hi : (Internal.heapRemoveLastWithIndex tree).fst = input
-  --unfold Internal.heapRemoveLastWithIndex Internal.heapRemoveLastAux at hi
-  --split at hi
-
-  match n, tree, h₁ with
-  | (o2+p2), .branch vv ll rr xx1 xx2 xx3, h₁ =>
-    unfold left' leftLen' rightLen' at *
-    rw[left_unfold] at *
-    rw[leftLen_unfold, rightLen_unfold] at *
-    subst o2
-    simp at he2
-    subst ll
-    rw[h₄]
-    generalize hi : ((Internal.heapRemoveLastWithIndex (branch vv l rr _ _ _)).fst) = input
-    unfold Internal.heapRemoveLastWithIndex at hi
-    unfold Internal.heapRemoveLastAux at hi
-    rw[←hi]
-    sorry
+  --okay, I have no clue why generalizing here is needed.
+  --I mean, why does unfolding and simplifying work if it's a separate hypothesis,
+  --but not within the goal?
+  generalize hi : (Internal.heapRemoveLastWithIndex tree).fst = input
+  unfold Internal.heapRemoveLastWithIndex Internal.heapRemoveLastAux at hi
+  split at hi
+  rename_i o2 p vv ll rr _ _ _
+  unfold left' leftLen' rightLen' at *
+  rw[left_unfold] at *
+  rw[leftLen_unfold, rightLen_unfold] at *
+  subst o2
+  simp at he2
+  subst ll
+  rw[h₄]
+  have : (0 ≠ oo.succ + p) := by simp_arith
+  simp[this, h₃] at hi
+  have : oo + 1 + p > 0 := by simp_arith
+  have : (p+1).isPowerOfTwo := by
+    have h₃ := h₃.right
+    simp at h₃
+    exact (Nat.power_of_two_iff_next_power_eq (p+1)).mpr h₃
+  have := left_sees_through_cast (by simp_arith) (branch vv
+      (Internal.heapRemoveLastAux (β := λn ↦ α × Fin n) l (fun a => (a, 0))
+          (fun {prev_size curr_size} x h₁ => (x.fst, Fin.castLE (Nat.succ_le_of_lt h₁) x.snd.succ))
+          fun {prev_size curr_size} x left_size h₁ => (x.fst, Fin.castLE (by omega) (x.snd.addNat left_size).succ)).fst
+      rr (by omega) (by omega) (Or.inr this))
+  rw[hi] at this
+  clear hi
+  have := this (by simp) (by simp_arith)
+  simp only [left_unfold] at this
+  unfold Internal.heapRemoveLastWithIndex
+  simp
+  exact this.symm
 
 
 private theorem heapRemoveLastWithIndexOnlyRemovesOneElement_Auxl {α : Type u} {o p : Nat} (v : α) (l : CompleteTree α (o+1)) (r : CompleteTree α p) (h₁ : p ≤ (o+1)) (h₂ : (o+1) < 2 * (p + 1)) (h₃ : (o + 1 + 1).isPowerOfTwo ∨ (p + 1).isPowerOfTwo) (h₄ : p < (o+1) ∧ ((p+1).nextPowerOfTwo = p+1 : Bool))
 :
   HEq ((Internal.heapRemoveLastWithIndex (branch v l r h₁ h₂ h₃)).fst.left (Nat.lt_add_right p $ Nat.succ_pos o)) (Internal.heapRemoveLastWithIndex l).fst
 := by
-  --same problem as heapRemoveLastWithIndexOnlyRemovesOneElement_Auxllength
+  --okay, let me be frank here: I have absolutely no clue why I need heapRemoveLastWithIndexOnlyRemovesOneElement_Auxl2.
+  --from the looks of it, I should just be able to generalize the LHS, and unfold things and be happy.
+  --However, tactic unfold fails.
+
   sorry
 
 /--If the resulting tree contains all elements except the removed one, and contains one less than the original, well, you get the idea.-/
