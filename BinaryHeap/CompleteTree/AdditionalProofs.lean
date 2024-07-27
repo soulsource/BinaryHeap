@@ -354,19 +354,50 @@ private def heapRemoveLastWithIndex' {α : Type u} {o : Nat} (heap : CompleteTre
 
 private theorem heapRemoveLastWithIndex'_unfold {α : Type u} {o : Nat} (heap : CompleteTree α (o+1)): (heapRemoveLastWithIndex' heap (Nat.succ_pos o)).fst = (Internal.heapRemoveLastWithIndex heap).fst := rfl
 
-/--Helper for heapRemoveLastWithIndexOnlyRemovesOneElement_Auxllength to allow splitting the goal-/
+private theorem heapRemoveLastWithIndex'_unfold2 {α : Type u} {o : Nat} (heap : CompleteTree α o) (h₁ : o > 0)
+:
+  match o, heap with
+  | (oo+1), heap => (heapRemoveLastWithIndex' heap h₁).fst = (Internal.heapRemoveLastWithIndex heap).fst
+:= by
+  split
+  rfl
+
+/--Helper for heapRemoveLastWithIndexOnlyRemovesOneElement_Auxl to allow splitting the goal-/
 private theorem heapRemoveLastWithIndexOnlyRemovesOneElement_Auxl2 {α : Type u} {n : Nat} (tree : CompleteTree α (n+1)) (h₁ : n > 0)
 :
   let o := tree.leftLen'
   let p := tree.rightLen'
   (h₂ : o > 0) →
-  (h₃ : p < o ∧ (p+1).nextPowerOfTwo = p+1) →
+  (h₃ : p < (o+1) ∧ ((p+1).nextPowerOfTwo = p+1 : Bool)) →
   HEq ((Internal.heapRemoveLastWithIndex tree).fst.left h₁) (heapRemoveLastWithIndex' (tree.left') h₂).fst
 := by
   simp only
   intro h₂ h₃
+  have h₄ := heapRemoveLastWithIndex'_unfold2 tree.left' h₂
+  split at h₄
+  rename_i d3 d2 d1 oo l o_gt_0 he1 he2 he3
+  clear d1 d2 d3
 
-  sorry
+
+  --generalize hi : (Internal.heapRemoveLastWithIndex tree).fst = input
+  --unfold Internal.heapRemoveLastWithIndex Internal.heapRemoveLastAux at hi
+  --split at hi
+
+  match n, tree, h₁ with
+  | (o2+p2), .branch vv ll rr xx1 xx2 xx3, h₁ =>
+    unfold left' leftLen' rightLen' at *
+    rw[left_unfold] at *
+    rw[leftLen_unfold, rightLen_unfold] at *
+    subst o2
+    simp at he2
+    subst ll
+    rw[h₄]
+    generalize hi : ((Internal.heapRemoveLastWithIndex (branch vv l rr _ _ _)).fst) = input
+    unfold Internal.heapRemoveLastWithIndex at hi
+    unfold Internal.heapRemoveLastAux at hi
+    rw[←hi]
+    sorry
+
 
 private theorem heapRemoveLastWithIndexOnlyRemovesOneElement_Auxl {α : Type u} {o p : Nat} (v : α) (l : CompleteTree α (o+1)) (r : CompleteTree α p) (h₁ : p ≤ (o+1)) (h₂ : (o+1) < 2 * (p + 1)) (h₃ : (o + 1 + 1).isPowerOfTwo ∨ (p + 1).isPowerOfTwo) (h₄ : p < (o+1) ∧ ((p+1).nextPowerOfTwo = p+1 : Bool))
 :
