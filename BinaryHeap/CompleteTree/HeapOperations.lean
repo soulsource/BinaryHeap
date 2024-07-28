@@ -173,7 +173,8 @@ protected def Internal.heapRemoveLastAux
         have leftIsFull : (n+1).isPowerOfTwo := removeRightLeftIsFull r m_le_n subtree_complete
         have still_in_range : n < 2 * (l+1) := h₂.substr (p := λx ↦ n < 2 * x) $ stillInRange r m_le_n m_gt_0 leftIsFull max_height_difference
         let res := auxr res n (by omega)
-        (h₂▸CompleteTree.branch a left newRight (Nat.le_of_succ_le (h₂▸m_le_n)) still_in_range (Or.inl leftIsFull), res)
+        have h₃ : n + l.succ = n + m := Nat.add_left_cancel_iff.mpr h₂ -- for easier proving.
+        (h₃▸CompleteTree.branch a left newRight (Nat.le_of_succ_le (h₂▸m_le_n)) still_in_range (Or.inl leftIsFull), res)
 
 /--
   Removes the last element in the complete Tree. This is **NOT** the element with the
