@@ -5,14 +5,11 @@ This is a rough outline of upcoming tasks:
 [ ] Prove that CompleteTree.heapUpdateAt returns the element at the given index
 [ ] Prove that CompleteTree.heapRemoveLastWithIndex and CompleteTree.heapRemoveLast yield the same tree
 [ ] Prove that CompleteTree.heapRemoveLastWithIndex and CompleteTree.heapRemoveLast yield the same element
-[ ] Prove that CompleteTree.heapRemoveLastWithIndex only removes one element and leaves the rest unchanged
+[x] Prove that CompleteTree.heapRemoveLastWithIndex only removes one element and leaves the rest unchanged
     - This automatically serves as a proof for CompleteTree.heapRemoveLast, once it is shown that they
       yield the same tree
-    - A potential approach is to show that any index in the resulting tree can be converted into an index
-      in the original tree (by adding one if it's >= the returned index of heapRemoveLastWithIndex), and getting
-      elements from both trees.
-    - Maybe easier: Or show that except for the n=1 case the value is unchanged.
-      The type signature proves the rest, so try, like induction maybe?
+    - Done by showing that each element of the input tree is in the output tree, except for the one at the
+      returned index.
 [ ] Prove that if CompleteTree.indexOf returns some, CompleteTree.get with that result fulfills the predicate.
 [ ] Prove that CompleteTree.heapUpdateRoot indeed exchanges the value at the root.
     - Straightforward, but hard to prove:
