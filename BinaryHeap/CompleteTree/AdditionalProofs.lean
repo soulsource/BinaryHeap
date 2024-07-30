@@ -370,6 +370,39 @@ private theorem heapRemoveLastWithIndexOnlyRemovesOneElement_AuxLLength {α : Ty
   simp only [decide_eq_true_eq] at h₄
   assumption
 
+/--Helper for heapRemoveLastWithIndexOnlyRemovesOneElement_Auxllength to allow splitting the goal-/
+private theorem heapRemoveLastWithIndexOnlyRemovesOneElement_AuxRLengthAux {α : Type u} {n : Nat} (tree : CompleteTree α (n+1)) (h₁ : n > 0)
+:
+  let o := tree.leftLen'
+  let p := tree.rightLen'
+  (h₂ : ¬(p < o ∧ ((p+1).nextPowerOfTwo = p+1 : Bool))) → (Internal.heapRemoveLastWithIndex tree).fst.rightLen h₁ = p.pred
+:= by
+  simp only
+  intro h₂
+  unfold Internal.heapRemoveLastWithIndex Internal.heapRemoveLastAux
+  split --finally
+  rename_i del1 del2 o p v l r o_le_p max_height_difference subtree_complete
+  clear del2 del1
+  unfold rightLen' leftLen' at h₂
+  simp only [leftLen_unfold, rightLen_unfold] at h₂
+  have : 0 ≠ o + p := Nat.ne_of_lt h₁
+  simp only [this, ↓reduceDite, h₂, decide_True, and_self]
+  cases p
+  case zero =>
+    simp at h₂ h₁
+    simp (config := {ground:=true})[h₁] at h₂
+  case succ pp =>
+    simp[rightLen', rightLen_unfold]
+
+private theorem heapRemoveLastWithIndexOnlyRemovesOneElement_AuxRLength {α : Type u} {o p : Nat} (v : α) (l : CompleteTree α o) (r : CompleteTree α (p+1)) (h₁ : p+1 ≤ o) (h₂ : o < 2 * (p + 1 + 1)) (h₃ : (o + 1).isPowerOfTwo ∨ (p + 1 + 1).isPowerOfTwo) (h₄ : ¬(p + 1 < o ∧ ((p+1+1).nextPowerOfTwo = p+1+1 : Bool)))
+:
+  (Internal.heapRemoveLastWithIndex (branch v l r h₁ h₂ h₃)).fst.rightLen (Nat.lt_add_left o $ Nat.succ_pos p) = p
+:= by
+  apply heapRemoveLastWithIndexOnlyRemovesOneElement_AuxRLengthAux (branch v l r h₁ h₂ h₃) (Nat.lt_add_left o $ Nat.succ_pos p)
+  unfold leftLen' rightLen'
+  simp only [leftLen_unfold, rightLen_unfold]
+  assumption
+
 private def heapRemoveLastWithIndex' {α : Type u} {o : Nat} (heap : CompleteTree α o) (_ : o > 0) : (CompleteTree α o.pred × α × Fin o) :=
   match o, heap with
   | _+1, heap => Internal.heapRemoveLastWithIndex heap
@@ -444,6 +477,58 @@ private theorem heapRemoveLastWithIndexOnlyRemovesOneElement_AuxL {α : Type u} 
   --However, tactic unfold fails. So, let's just forward this to the helper.
   have h₅ : (branch v l r h₁ h₂ h₃).leftLen' > 0 := Nat.succ_pos o
   heapRemoveLastWithIndexOnlyRemovesOneElement_AuxLAux _ _ h₅ h₄
+
+/--Helper for heapRemoveLastWithIndexOnlyRemovesOneElement_AuxR to allow splitting the goal-/
+private theorem heapRemoveLastWithIndexOnlyRemovesOneElement_AuxRAux {α : Type u} {n : Nat} (tree : CompleteTree α (n+1)) (h₁ : n > 0)
+:
+  let o := tree.leftLen'
+  let p := tree.rightLen'
+  (h₂ : p > 0) →
+  (h₃ : ¬(p < o ∧ ((p+1).nextPowerOfTwo = p+1 : Bool))) →
+  HEq ((Internal.heapRemoveLastWithIndex tree).fst.right h₁) (heapRemoveLastWithIndex' (tree.right') h₂).fst
+:= by
+  simp only
+  intro h₂ h₃
+  --sorry for this wild mixture of working on the LHS and RHS of the goal.
+  --this function is trial and error, I'm fighting an uphill battle agains tactics mode here,
+  --which keeps randomly failing on me if I do steps in what the tactics
+  --percieve to be the "wrong" order.
+  have h₄ := heapRemoveLastWithIndex'_unfold tree.right' h₂
+  split at h₄
+  rename_i d3 d2 d1 pp l o_gt_0 he1 he2 he3
+  clear d1 d2 d3
+  --okay, I have no clue why generalizing here is needed.
+  --I mean, why does unfolding and simplifying work if it's a separate hypothesis,
+  --but not within the goal?
+  generalize hi : (Internal.heapRemoveLastWithIndex tree).fst = input
+  unfold Internal.heapRemoveLastWithIndex Internal.heapRemoveLastAux at hi
+  split at hi
+  rename_i o p2 vv ll rr m_le_n max_height_difference subtree_complete
+  unfold right' leftLen' rightLen' at *
+  rw[right_unfold] at *
+  rw[leftLen_unfold, rightLen_unfold] at *
+  subst p2
+  simp at he2
+  subst rr
+  rw[h₄]
+  have : (0 ≠ o + pp.succ) := by simp_arith
+  simp[this] at hi
+  have : ¬(pp + 1 < o ∧ (pp + 1 + 1).nextPowerOfTwo = pp + 1 + 1) := by simp; simp at h₃; assumption
+  simp[this] at hi
+  subst input
+  simp[right_unfold, Internal.heapRemoveLastWithIndex]
+  done
+
+/--Shows that if the removal happens in the left tree, the new left-tree is the old left-tree with the last element removed.-/
+private theorem heapRemoveLastWithIndexOnlyRemovesOneElement_AuxR {α : Type u} {o p : Nat} (v : α) (l : CompleteTree α o) (r : CompleteTree α (p+1)) (h₁ : (p+1) ≤ o) (h₂ : o < 2 * (p + 1 + 1)) (h₃ : (o + 1).isPowerOfTwo ∨ (p + 1 + 1).isPowerOfTwo) (h₄ : ¬(p + 1 < o ∧ ((p + 1 + 1).nextPowerOfTwo = p + 1 + 1 : Bool)))
+:
+  HEq ((Internal.heapRemoveLastWithIndex (branch v l r h₁ h₂ h₃)).fst.right (Nat.lt_add_left o $ Nat.succ_pos p)) (Internal.heapRemoveLastWithIndex r).fst
+:=
+  --okay, let me be frank here: I have absolutely no clue why I need heapRemoveLastWithIndexOnlyRemovesOneElement_Auxl2.
+  --from the looks of it, I should just be able to generalize the LHS, and unfold things and be happy.
+  --However, tactic unfold fails. So, let's just forward this to the helper.
+  have h₅ : (branch v l r h₁ h₂ h₃).rightLen' > 0 := Nat.succ_pos p
+  heapRemoveLastWithIndexOnlyRemovesOneElement_AuxRAux _ _ h₅ h₄
 
 /--Helper for heapRemoveLastWithIndexOnlyRemovesOneElement_Auxllength to allow splitting the goal-/
 private theorem heapRemoveLastWithIndexOnlyRemovesOneElement_AuxLLength2Aux {α : Type u} {n : Nat} (tree : CompleteTree α (n+1)) (h₁ : n > 0)
@@ -605,7 +690,7 @@ private theorem heapRemoveLastWithIndexOnlyRemovesOneElement_AuxR2 {α : Type u}
 
 
 /--Helper for heapRemoveLastWithIndexOnlyRemovesOneElement_AuxlIndexNe-/
-private theorem heapRemoveLastWithIndexOnlyRemovesOneElement_AuxlIndexNeAux {α : Type u} {n j : Nat} (tree : CompleteTree α (n+1)) (h₁ : (n+1) > 0) (h₂ : j < tree.leftLen h₁) (h₃ : j.succ < (n+1)) (h₄ : tree.rightLen' < tree.leftLen' ∧ ((tree.rightLen'+1).nextPowerOfTwo = tree.rightLen'+1 : Bool)) (h₅ : ⟨j.succ, h₃⟩ ≠ (Internal.heapRemoveLastWithIndex tree).2.snd) : ⟨j, h₂⟩ ≠ (heapRemoveLastWithIndex' (tree.left h₁) (Nat.zero_lt_of_lt h₂)).snd.snd := by
+private theorem heapRemoveLastWithIndexOnlyRemovesOneElement_AuxLIndexNeAux {α : Type u} {n j : Nat} (tree : CompleteTree α (n+1)) (h₁ : (n+1) > 0) (h₂ : j < tree.leftLen h₁) (h₃ : j.succ < (n+1)) (h₄ : tree.rightLen' < tree.leftLen' ∧ ((tree.rightLen'+1).nextPowerOfTwo = tree.rightLen'+1 : Bool)) (h₅ : ⟨j.succ, h₃⟩ ≠ (Internal.heapRemoveLastWithIndex tree).2.snd) : ⟨j, h₂⟩ ≠ (heapRemoveLastWithIndex' (tree.left h₁) (Nat.zero_lt_of_lt h₂)).snd.snd := by
   have h₆ := heapRemoveLastWithIndex'_unfold tree.left' $ Nat.zero_lt_of_lt h₂
   split at h₆
   rename_i d3 d2 d1 oo l o_gt_0 he1 he2 he3
@@ -627,14 +712,45 @@ private theorem heapRemoveLastWithIndexOnlyRemovesOneElement_AuxlIndexNeAux {α 
   unfold Internal.heapRemoveLastWithIndex
   assumption
 
-private theorem heapRemoveLastWithIndexOnlyRemovesOneElement_AuxlIndexNe {α : Type u} {o p j : Nat} (v : α) (l : CompleteTree α (o+1)) (r : CompleteTree α p) (h₁ : p ≤ (o+1)) (h₂ : (o+1) < 2 * (p + 1)) (h₃ : (o + 1 + 1).isPowerOfTwo ∨ (p + 1).isPowerOfTwo) (h₄ : j < o+1) (h₅ : p < (o+1) ∧ ((p+1).nextPowerOfTwo = p+1 : Bool)) (h₆ : ⟨j.succ, (by omega)⟩ ≠ (Internal.heapRemoveLastWithIndex (branch v l r h₁ h₂ h₃)).2.snd) : ⟨j,h₄⟩ ≠ (Internal.heapRemoveLastWithIndex l).snd.snd :=
+private theorem heapRemoveLastWithIndexOnlyRemovesOneElement_AuxLIndexNe {α : Type u} {o p j : Nat} (v : α) (l : CompleteTree α (o+1)) (r : CompleteTree α p) (h₁ : p ≤ (o+1)) (h₂ : (o+1) < 2 * (p + 1)) (h₃ : (o + 1 + 1).isPowerOfTwo ∨ (p + 1).isPowerOfTwo) (h₄ : j < o+1) (h₅ : p < (o+1) ∧ ((p+1).nextPowerOfTwo = p+1 : Bool)) (h₆ : ⟨j.succ, (by omega)⟩ ≠ (Internal.heapRemoveLastWithIndex (branch v l r h₁ h₂ h₃)).2.snd) : ⟨j,h₄⟩ ≠ (Internal.heapRemoveLastWithIndex l).snd.snd :=
   --splitting at h₅ does not work. Probably because we have o+1...
   --helper function it is...
-  heapRemoveLastWithIndexOnlyRemovesOneElement_AuxlIndexNeAux (branch v l r h₁ h₂ h₃) (Nat.succ_pos _) _ (by omega) h₅ h₆
+  heapRemoveLastWithIndexOnlyRemovesOneElement_AuxLIndexNeAux (branch v l r h₁ h₂ h₃) (Nat.succ_pos _) _ (by omega) h₅ h₆
+
+/--Helper for heapRemoveLastWithIndexOnlyRemovesOneElement_AuxlIndexNe-/
+private theorem heapRemoveLastWithIndexOnlyRemovesOneElement_AuxRIndexNeAux {α : Type u} {n j : Nat} (tree : CompleteTree α (n+1)) (h₁ : (n+1) > 0) (h₂ : j - tree.leftLen h₁ < tree.rightLen h₁) (h₃ : j.succ < (n+1)) (h₄ : tree.leftLen' ≤ j) (h₅ : ¬(tree.rightLen' < tree.leftLen' ∧ ((tree.rightLen'+1).nextPowerOfTwo = tree.rightLen'+1 : Bool))) (h₆ : ⟨j.succ, h₃⟩ ≠ (Internal.heapRemoveLastWithIndex tree).2.snd) : ⟨j - tree.leftLen h₁, h₂⟩ ≠ (heapRemoveLastWithIndex' (tree.right h₁) (Nat.zero_lt_of_lt h₂)).snd.snd := by
+  have h₇ := heapRemoveLastWithIndex'_unfold tree.right' (Nat.zero_lt_of_lt h₂)
+  split at h₇
+  rename_i d3 d2 d1 pp r o_gt_0 he1 he2 he3
+  clear d1 d2 d3
+  unfold Internal.heapRemoveLastWithIndex Internal.heapRemoveLastAux at h₆
+  split at h₆
+  rename_i o p2 vv ll rr _ _ _
+  unfold right' rightLen' leftLen' at *
+  rw[right_unfold] at *
+  rw[leftLen_unfold, rightLen_unfold] at *
+  subst he1
+  simp at he2
+  subst he2
+  rw[h₇]
+  have : ¬0 = o + pp.succ := by omega
+  simp only [this, h₅, and_true, reduceDite] at h₆
+  rw[←Fin.val_ne_iff] at h₆ ⊢
+  simp at h₆
+  unfold Internal.heapRemoveLastWithIndex
+  simp[leftLen_unfold]
+  rw[Nat.sub_eq_iff_eq_add h₄]
+  assumption
+
+
+private theorem heapRemoveLastWithIndexOnlyRemovesOneElement_AuxRIndexNe {α : Type u} {o p j : Nat} (v : α) (l : CompleteTree α o) (r : CompleteTree α (p+1)) (h₁ : p+1 ≤ o) (h₂ : o < 2 * (p + 1 + 1)) (h₃ : (o + 1).isPowerOfTwo ∨ (p + 1 + 1).isPowerOfTwo) (h₄ : j - o < p + 1) (h₅ : o ≤ j) (h₆ : ¬(p + 1 < o ∧ ((p+1+1).nextPowerOfTwo = p+1+1 : Bool))) (h₇ : ⟨j.succ, (by omega)⟩ ≠ (Internal.heapRemoveLastWithIndex (branch v l r h₁ h₂ h₃)).2.snd) : ⟨j-o,h₄⟩ ≠ (Internal.heapRemoveLastWithIndex r).snd.snd :=
+  --splitting at h₅ does not work. Probably because we have o+1...
+  --helper function it is...
+  heapRemoveLastWithIndexOnlyRemovesOneElement_AuxRIndexNeAux (branch v l r h₁ h₂ h₃) (Nat.succ_pos _) _ _ h₅ h₆ h₇
 
 /--If the resulting tree contains all elements except the removed one, and contains one less than the original, well, you get the idea.-/
 protected theorem heapRemoveLastWithIndexOnlyRemovesOneElement {α : Type u} {n : Nat} (heap : CompleteTree α (n+1)) (index : Fin (n+1)) :
-  let (newHeap, removedValue, removedIndex) := Internal.heapRemoveLastWithIndex heap
+  let (newHeap, _, removedIndex) := Internal.heapRemoveLastWithIndex heap
   (h₁ : index ≠ removedIndex) → newHeap.contains (heap.get index (Nat.succ_pos n)) := by
   simp only
   intro h₁
@@ -664,7 +780,7 @@ protected theorem heapRemoveLastWithIndexOnlyRemovesOneElement {α : Type u} {n 
     split
     case isTrue j_lt_o =>
       split
-      rename_i o d1 d2 d3 d4 d5 oo l ht1 ht2 ht3 h₄
+      rename_i o d1 d2 d3 d4 d5 oo l ht1 ht2 ht3 _
       clear d1 d2 d3 d4 d5
       rw[contains_as_root_left_right _ _ (Nat.lt_add_right p $ Nat.succ_pos oo)]
       right
@@ -676,7 +792,7 @@ protected theorem heapRemoveLastWithIndexOnlyRemovesOneElement {α : Type u} {n 
         have h₇ := heapRemoveLastWithIndexOnlyRemovesOneElement_AuxLLength v l r ht1 ht2 ht3 h₅
         have h₈ := heqContains h₇ h₆
         rw[h₈]
-        have h₉ : ⟨j,j_lt_o⟩ ≠ (Internal.heapRemoveLastWithIndex l).snd.snd := heapRemoveLastWithIndexOnlyRemovesOneElement_AuxlIndexNe v l r ht1 ht2 ht3 j_lt_o h₅ h₁
+        have h₉ : ⟨j,j_lt_o⟩ ≠ (Internal.heapRemoveLastWithIndex l).snd.snd := heapRemoveLastWithIndexOnlyRemovesOneElement_AuxLIndexNe v l r ht1 ht2 ht3 j_lt_o h₅ h₁
         exact CompleteTree.AdditionalProofs.heapRemoveLastWithIndexOnlyRemovesOneElement _ _ h₉
       else
         have h₆ := heapRemoveLastWithIndexOnlyRemovesOneElement_AuxL2 v l r ht1 ht2 ht3 h₅
@@ -687,7 +803,7 @@ protected theorem heapRemoveLastWithIndexOnlyRemovesOneElement {α : Type u} {n 
         exists ⟨j, j_lt_o⟩
     case isFalse j_ge_o =>
       split
-      rename_i p d1 d2 d3 d4 d5 h₆ pp r ht1 ht2 ht3 h₄ h₅
+      rename_i p d1 d2 d3 d4 d5 h₆ pp r ht1 ht2 ht3 _ h₅
       clear d1 d2 d3 d4 d5
       rw[contains_as_root_left_right _ _ (Nat.lt_add_left o $ Nat.succ_pos pp)]
       right
@@ -702,4 +818,10 @@ protected theorem heapRemoveLastWithIndexOnlyRemovesOneElement {α : Type u} {n 
         have : p = pp.succ := (Nat.add_sub_cancel pp.succ o).subst $ (Nat.add_comm o (pp.succ)).subst (motive := λx ↦ p = x-o ) h₅.symm
         exists ⟨j-o,this.subst h₆⟩
       else
-        sorry
+        have h₈ := heapRemoveLastWithIndexOnlyRemovesOneElement_AuxR v l r ht1 ht2 ht3 h₇
+        have h₉ := heapRemoveLastWithIndexOnlyRemovesOneElement_AuxRLength v l r ht1 ht2 ht3 h₇
+        have h₁₀ := heqContains h₉ h₈
+        rw[h₁₀]
+        have : p = pp.succ := (Nat.add_sub_cancel pp.succ o).subst $ (Nat.add_comm o (pp.succ)).subst (motive := λx ↦ p = x-o ) h₅.symm
+        have h₉ : ⟨j-o,this.subst h₆⟩ ≠ (Internal.heapRemoveLastWithIndex r).snd.snd := heapRemoveLastWithIndexOnlyRemovesOneElement_AuxRIndexNe v l r ht1 ht2 ht3 (this.subst h₆) (by omega) h₇ h₁
+        exact CompleteTree.AdditionalProofs.heapRemoveLastWithIndexOnlyRemovesOneElement _ _ h₉
