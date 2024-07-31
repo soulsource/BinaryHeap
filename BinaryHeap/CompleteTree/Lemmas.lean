@@ -81,3 +81,11 @@ theorem CompleteTree.lengthEqLeftRightLenSucc {α : Type u} {n : Nat} (tree : Co
   split
   unfold length
   rfl
+
+theorem HeapPredicate.leOrLeaf_transitive (h₁ : transitive_le le) : le a b → HeapPredicate.leOrLeaf le b h → HeapPredicate.leOrLeaf le a h := by
+  unfold HeapPredicate.leOrLeaf
+  intros h₂ h₃
+  rename_i n
+  cases n <;> simp
+  apply h₁ a b _
+  exact ⟨h₂, h₃⟩
