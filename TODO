@@ -3,10 +3,10 @@ This is a rough outline of upcoming tasks:
 [ ] Prove that an index exists such that after CompleteTree.heapPush the pushed element can be obtained by
     CompleteTree.get
 [ ] Prove that CompleteTree.heapUpdateAt returns the element at the given index
-[ ] Prove that CompleteTree.heapRemoveLastWithIndex and CompleteTree.heapRemoveLast yield the same tree
-[ ] Prove that CompleteTree.heapRemoveLastWithIndex and CompleteTree.heapRemoveLast yield the same element
+[x] Prove that CompleteTree.heapRemoveLastWithIndex and CompleteTree.heapRemoveLast yield the same tree
+[x] Prove that CompleteTree.heapRemoveLastWithIndex and CompleteTree.heapRemoveLast yield the same element
 [x] Prove that CompleteTree.heapRemoveLastWithIndex only removes one element and leaves the rest unchanged
-    - This automatically serves as a proof for CompleteTree.heapRemoveLast, once it is shown that they
+    [x] This automatically serves as a proof for CompleteTree.heapRemoveLast, once it is shown that they
       yield the same tree
     - Done by showing that each element of the input tree is in the output tree, except for the one at the
       returned index.

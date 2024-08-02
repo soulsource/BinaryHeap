@@ -611,3 +611,93 @@ protected theorem heapRemoveLastWithIndexOnlyRemovesOneElement {α : Type u} {n 
         have : p = pp.succ := (Nat.add_sub_cancel pp.succ o).subst $ (Nat.add_comm o (pp.succ)).subst (motive := λx ↦ p = x-o ) h₅.symm
         have h₉ : ⟨j-o,this.subst h₆⟩ ≠ (Internal.heapRemoveLastWithIndex r).snd.snd := heapRemoveLastWithIndexOnlyRemovesOneElement_AuxRIndexNe v l r ht1 ht2 ht3 (this.subst h₆) (by omega) h₇ h₁
         exact CompleteTree.AdditionalProofs.heapRemoveLastWithIndexOnlyRemovesOneElement _ _ h₉
+
+protected theorem heapRemoveLastWithIndexHeapRemoveLastSameTree {α : Type u} {n : Nat} (tree : CompleteTree α (n+1)) : (CompleteTree.Internal.heapRemoveLast tree).fst = (CompleteTree.Internal.heapRemoveLastWithIndex tree).fst := by
+  unfold Internal.heapRemoveLast Internal.heapRemoveLastWithIndex Internal.heapRemoveLastAux
+  split
+  rename_i o p v l r _ _ _
+  split
+  case isTrue h₁ => trivial
+  case isFalse h₁ =>
+    simp only
+    split
+    case isTrue h₂ =>
+      cases o;
+      case zero => exact absurd h₂.left $ Nat.not_lt_zero p
+      case succ oo =>
+        simp only
+        have h₃ := CompleteTree.AdditionalProofs.heapRemoveLastWithIndexHeapRemoveLastSameTree l
+        unfold Internal.heapRemoveLast Internal.heapRemoveLastWithIndex at h₃
+        rw[h₃]
+    case isFalse h₂ =>
+      simp only
+      cases p
+      case zero =>
+        simp (config := { ground := true }) only [Nat.zero_add, decide_True, and_true, Nat.not_lt, Nat.le_zero_eq] at h₂
+        simp only [Nat.add_zero] at h₁
+        exact absurd h₂.symm h₁
+      case succ pp =>
+        simp only
+        have h₃ := CompleteTree.AdditionalProofs.heapRemoveLastWithIndexHeapRemoveLastSameTree r
+        unfold Internal.heapRemoveLast Internal.heapRemoveLastWithIndex at h₃
+        rw[h₃]
+
+protected theorem heapRemoveLastWithIndexHeapRemoveLastSameElement {α : Type u} {n : Nat} (tree : CompleteTree α (n+1)) : (CompleteTree.Internal.heapRemoveLast tree).snd = (CompleteTree.Internal.heapRemoveLastWithIndex tree).snd.fst := by
+  unfold Internal.heapRemoveLast Internal.heapRemoveLastWithIndex Internal.heapRemoveLastAux
+  split
+  rename_i o p v l r _ _ _
+  split
+  case isTrue h₁ =>
+    simp only [id_eq, Nat.add_eq, Fin.zero_eta, Fin.isValue]
+    have h₂ : o = 0 := And.left $ Nat.add_eq_zero.mp h₁.symm
+    have h₃ : p = 0 := And.right $ Nat.add_eq_zero.mp h₁.symm
+    subst o p
+    rfl
+  case isFalse h₁ =>
+    simp only
+    split
+    case isTrue h₂ =>
+      cases o;
+      case zero => exact absurd h₂.left $ Nat.not_lt_zero p
+      case succ oo =>
+        simp only
+        have h₃ := CompleteTree.AdditionalProofs.heapRemoveLastWithIndexHeapRemoveLastSameElement l
+        unfold Internal.heapRemoveLast Internal.heapRemoveLastWithIndex at h₃
+        rw[h₃]
+    case isFalse h₂ =>
+      simp only
+      cases p
+      case zero =>
+        simp (config := { ground := true }) only [Nat.zero_add, decide_True, and_true, Nat.not_lt, Nat.le_zero_eq] at h₂
+        simp only [Nat.add_zero] at h₁
+        exact absurd h₂.symm h₁
+      case succ pp =>
+        simp only
+        have h₃ := CompleteTree.AdditionalProofs.heapRemoveLastWithIndexHeapRemoveLastSameElement r
+        unfold Internal.heapRemoveLast Internal.heapRemoveLastWithIndex at h₃
+        rw[h₃]
+
+protected theorem heapRemoveLastWithIndexEitherContainsOrReturnsElement {α : Type u} {n : Nat} (heap : CompleteTree α (n+1)) (index : Fin (n+1)) :
+  let (newHeap, removedElement, _) := Internal.heapRemoveLastWithIndex heap
+  newHeap.contains (heap.get index (Nat.succ_pos n)) ∨ removedElement = heap.get index (Nat.succ_pos n)
+:=
+  let removedIndex := (Internal.heapRemoveLastWithIndex heap).snd.snd
+  if h₁ : index ≠ removedIndex then
+    Or.inl $ CompleteTree.AdditionalProofs.heapRemoveLastWithIndexOnlyRemovesOneElement heap index h₁
+  else by
+    right
+    have h₂ := CompleteTree.AdditionalProofs.heapRemoveLastWithIndexReturnsItemAtIndex heap
+    unfold get
+    simp at h₁
+    subst index
+    exact h₂.symm
+
+protected theorem heapRemoveLastEitherContainsOrReturnsElement {α : Type u} {n : Nat} (heap : CompleteTree α (n+1)) (index : Fin (n+1)) :
+  let (newHeap, removedElement) := Internal.heapRemoveLast heap
+  newHeap.contains (heap.get index (Nat.succ_pos n)) ∨ removedElement = heap.get index (Nat.succ_pos n)
+:= by
+  have h₁ := CompleteTree.AdditionalProofs.heapRemoveLastWithIndexEitherContainsOrReturnsElement heap index
+  simp at h₁ ⊢
+  rewrite[CompleteTree.AdditionalProofs.heapRemoveLastWithIndexHeapRemoveLastSameElement]
+  rewrite[CompleteTree.AdditionalProofs.heapRemoveLastWithIndexHeapRemoveLastSameTree]
+  assumption
