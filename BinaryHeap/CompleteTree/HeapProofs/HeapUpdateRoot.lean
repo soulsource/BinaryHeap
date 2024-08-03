@@ -3,7 +3,7 @@ import BinaryHeap.CompleteTree.Lemmas
 
 namespace BinaryHeap.CompleteTree
 
-private theorem heapUpdateRootReturnsRoot {α : Type u} {n : Nat} (le : α → α → Bool) (value : α) (heap : CompleteTree α n) (h₁ : n > 0) : (heap.heapUpdateRoot le value h₁).snd = heap.root h₁ := by
+theorem heapUpdateRootReturnsRoot {α : Type u} {n : Nat} (le : α → α → Bool) (value : α) (heap : CompleteTree α n) (h₁ : n > 0) : (heap.heapUpdateRoot le value h₁).snd = heap.root h₁ := by
   unfold heapUpdateRoot
   split
   rename_i o p v l r h₃ h₄ h₅ h₁
