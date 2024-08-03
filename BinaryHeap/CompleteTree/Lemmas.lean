@@ -89,3 +89,12 @@ theorem HeapPredicate.leOrLeaf_transitive (h₁ : transitive_le le) : le a b →
   cases n <;> simp
   apply h₁ a b _
   exact ⟨h₂, h₃⟩
+
+theorem CompleteTree.get_zero_eq_root {α : Type u} {n : Nat} (tree : CompleteTree α n) (h₁ : n > 0): tree.root h₁ = tree.get ⟨0,h₁⟩ h₁ := by
+  unfold get
+  match n with
+  | nn+1 =>
+    unfold get'
+    split
+    case h_2 hx => exact absurd (Fin.mk.inj hx) (Nat.zero_ne_add_one _)
+    case h_1 => trivial
