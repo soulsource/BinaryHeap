@@ -1,3 +1,4 @@
 import BinaryHeap.CompleteTree.AdditionalProofs.Contains
 import BinaryHeap.CompleteTree.AdditionalProofs.HeapRemoveLast
 import BinaryHeap.CompleteTree.AdditionalProofs.HeapUpdateRoot
+import BinaryHeap.CompleteTree.AdditionalProofs.HeapPop

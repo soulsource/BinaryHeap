@@ -14,7 +14,7 @@ This is a rough outline of upcoming tasks:
 [x] Prove that CompleteTree.heapUpdateRoot indeed exchanges the value at the root.
     - Done by showing that the new tree contains all elements except the root, and the updated value.
 [ ] Prove that heapPop leaves all values in the tree, except the root.
-[ ] Prove that heapPop returns the root
+[x] Prove that heapPop returns the root
 [ ] Prove that CompleteTree.heapUpdateAt returns the element at the given index
 [ ] Prove that CompleteTree.heapUpdateAt indeed updates the value at the given index.
     - Use the same approach as heapUpdateRoot

@@ -84,7 +84,7 @@ protected theorem heapRemoveLastWithIndexReturnsItemAtIndex {α : Type u} {o : N
         apply AdditionalProofs.heapRemoveLastWithIndexReturnsItemAtIndex
         done
 
-private theorem heapRemoveLastWithIndexLeavesRoot {α : Type u} {n: Nat} (heap : CompleteTree α (n+1)) (h₁ : n > 0) : heap.root (Nat.succ_pos n) = (CompleteTree.Internal.heapRemoveLastWithIndex heap).fst.root h₁ :=
+protected theorem heapRemoveLastWithIndexLeavesRoot {α : Type u} {n: Nat} (heap : CompleteTree α (n+1)) (h₁ : n > 0) : heap.root (Nat.succ_pos n) = (CompleteTree.Internal.heapRemoveLastWithIndex heap).fst.root h₁ :=
   CompleteTree.heapRemoveLastAuxLeavesRoot heap _ _ _ h₁
 
 private theorem lens_see_through_cast {α : Type u} {p q : Nat} (h₁ : q+p+1 = q+1+p) (len : {n : Nat} → CompleteTree α n → (n > 0) → Nat) (heap : CompleteTree α (q+p+1)) (ha : q+p+1 > 0) (hb : q+1+p > 0): len heap ha = len (h₁▸heap) hb:= by
@@ -553,7 +553,7 @@ protected theorem heapRemoveLastWithIndexOnlyRemovesOneElement {α : Type u} {n 
       clear del1 del2
       left
       have h₃ := heqSameRoot he h₂ heq
-      have h₄ := heapRemoveLastWithIndexLeavesRoot ((branch v l r m_le_n max_height_difference subtree_complete)) h₂
+      have h₄ := CompleteTree.AdditionalProofs.heapRemoveLastWithIndexLeavesRoot ((branch v l r m_le_n max_height_difference subtree_complete)) h₂
       rw[←h₄] at h₃
       rw[root_unfold] at h₃
       rw[root_unfold] at h₃
