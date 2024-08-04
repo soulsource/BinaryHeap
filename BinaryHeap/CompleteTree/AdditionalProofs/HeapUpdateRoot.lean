@@ -108,5 +108,16 @@ theorem heapUpdateRootOnlyUpdatesRoot {α : Type u} {n : Nat} (le : α → α �
         else
           -- index was in r
           simp only [h, ↓reduceDite] at h₃
-          sorry
+          split
+          case isTrue h₄ _ _ _ _ _ =>
+            simp
+            rw[contains_as_root_left_right _ _ (Nat.succ_pos _)]
+            right
+            right
+            rw[←h₃, contains_iff_index_exists', right_unfold]
+            have h₄ : j < oo + 1 + (pp + 1) := Nat.lt_of_succ_lt_succ h₄
+            have : oo + 1 ≤ j := Nat.le_of_not_gt h
+            have : j - (oo + 1) < pp + 1 := Nat.sub_lt_left_of_lt_add this h₄
+            exists ⟨j-(oo+1), this⟩
+          case isFalse => sorry
 termination_by n
