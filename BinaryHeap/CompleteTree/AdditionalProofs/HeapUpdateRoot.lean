@@ -6,6 +6,9 @@ import BinaryHeap.CompleteTree.AdditionalProofs.Contains
 namespace BinaryHeap.CompleteTree.AdditionalProofs
 
 -- That heapUpdateRootReturnsRoot is already proven in HeapProofs.HeapUpdateRoot
+-- but still, re-export it.
+
+abbrev heapUpdateRootReturnsRoot {α : Type u} {n : Nat} (le : α → α → Bool) (value : α) (heap : CompleteTree α n) (h₁ : n > 0)  := CompleteTree.heapUpdateRootReturnsRoot le value heap h₁
 
 theorem heapUpdateRootOnlyUpdatesRoot {α : Type u} {n : Nat} (le : α → α → Bool) (tree : CompleteTree α n) (h₁ : n > 0) (index : Fin n) (h₂ : index ≠ ⟨0, h₁⟩) (value : α) : (tree.heapUpdateRoot le value h₁).fst.contains $ tree.get index h₁ := by
   generalize h₃ : (get index tree h₁) = oldVal
@@ -153,3 +156,38 @@ theorem heapUpdateRootOnlyUpdatesRoot {α : Type u} {n : Nat} (le : α → α �
                 apply Fin.ne_of_val_ne
                 simp only [Nat.add_one_ne_zero, not_false_eq_true]
 termination_by n
+
+theorem heapUpdateRootContainsUpdatedElement {α : Type u} {n : Nat} (tree : CompleteTree α n) (le : α → α → Bool) (value : α) (h₁ : n > 0): (tree.heapUpdateRoot le value h₁).fst.contains value := by
+  unfold heapUpdateRoot
+  split
+  rename_i o p v l r _ _ _ h₁
+  cases o <;> simp only [Nat.add_eq, Nat.succ_eq_add_one, Nat.add_one_ne_zero, ↓reduceDite]
+  case zero => simp only [contains, true_or]
+  case succ oo _ _ _ =>
+    cases p <;> simp only [Nat.add_one_ne_zero, ↓reduceDite]
+    case zero =>
+      split
+      case isTrue => simp only [contains, true_or]
+      case isFalse =>
+        rw[contains_as_root_left_right _ _ (Nat.succ_pos _)]
+        right
+        left
+        rw[left_unfold]
+        exact heapUpdateRootContainsUpdatedElement l le value _
+    case succ pp _ _ _ =>
+      split
+      case isTrue => simp only [contains, true_or]
+      case isFalse =>
+        split
+        case isTrue =>
+          rw[contains_as_root_left_right _ _ (Nat.succ_pos _)]
+          right
+          left
+          rw[left_unfold]
+          exact heapUpdateRootContainsUpdatedElement l le value _
+        case isFalse =>
+          rw[contains_as_root_left_right _ _ (Nat.succ_pos _)]
+          right
+          right
+          rw[right_unfold]
+          exact heapUpdateRootContainsUpdatedElement r le value _
