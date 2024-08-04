@@ -108,6 +108,8 @@ theorem heapUpdateRootOnlyUpdatesRoot {α : Type u} {n : Nat} (le : α → α �
         else
           -- index was in r
           simp only [h, ↓reduceDite] at h₃
+          rename_i h₄ _ _ _ _
+          have h₄ : j - (oo + 1) < pp + 1 := Nat.sub_lt_left_of_lt_add (Nat.le_of_not_gt h) (Nat.lt_of_succ_lt_succ h₄)
           split
           case isTrue h₄ _ _ _ _ _ =>
             simp
@@ -115,9 +117,39 @@ theorem heapUpdateRootOnlyUpdatesRoot {α : Type u} {n : Nat} (le : α → α �
             right
             right
             rw[←h₃, contains_iff_index_exists', right_unfold]
-            have h₄ : j < oo + 1 + (pp + 1) := Nat.lt_of_succ_lt_succ h₄
-            have : oo + 1 ≤ j := Nat.le_of_not_gt h
-            have : j - (oo + 1) < pp + 1 := Nat.sub_lt_left_of_lt_add this h₄
-            exists ⟨j-(oo+1), this⟩
-          case isFalse => sorry
+            exists ⟨j-(oo+1), h₄⟩
+          case isFalse =>
+            split
+            <;> rw[heapUpdateRootReturnsRoot]
+            case isTrue =>
+              --l.root gets moved up
+              rw[contains_as_root_left_right _ _ (Nat.succ_pos _)]
+              right
+              right
+              simp only [right_unfold]
+              rw[←h₃, contains_iff_index_exists']
+              exists ⟨j- (oo + 1), h₄⟩
+            case isFalse =>
+              --r.root gets moved up
+              simp only
+              generalize h₅ : j - (oo + 1) = jr
+              simp only [h₅] at h₃
+              have h₄ : jr < pp+1 := h₅.subst (motive := λx ↦ x < pp+1) h₄
+              cases jr
+              case zero =>
+                rw[get_zero_eq_root]
+                unfold get
+                simp only
+                rw[h₃, contains_as_root_left_right _ _ (Nat.succ_pos _)]
+                left
+                rw[root_unfold]
+              case succ jjr =>
+                rw[contains_as_root_left_right _ _ (Nat.succ_pos _)]
+                right
+                right
+                rw[←h₃, right_unfold]
+                have : pp + 1 < oo + 1 + pp + 1 + 1 := by simp_arith --termination
+                apply heapUpdateRootOnlyUpdatesRoot
+                apply Fin.ne_of_val_ne
+                simp only [Nat.add_one_ne_zero, not_false_eq_true]
 termination_by n
