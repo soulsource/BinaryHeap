@@ -2,7 +2,7 @@ This is a rough outline of upcoming tasks:
 
 [ ] Prove that an index exists such that after CompleteTree.heapPush the pushed element can be obtained by
     CompleteTree.get
-[ ] Prove that CompleteTree.heapUpdateAt returns the element at the given index
+[ ] Prove that CompleteTree.heapPush leaves all elements that were already in the heap in the heap.
 [x] Prove that CompleteTree.heapRemoveLastWithIndex and CompleteTree.heapRemoveLast yield the same tree
 [x] Prove that CompleteTree.heapRemoveLastWithIndex and CompleteTree.heapRemoveLast yield the same element
 [x] Prove that CompleteTree.heapRemoveLastWithIndex only removes one element and leaves the rest unchanged
@@ -11,25 +11,15 @@ This is a rough outline of upcoming tasks:
     - Done by showing that each element of the input tree is in the output tree, except for the one at the
       returned index.
 [ ] Prove that if CompleteTree.indexOf returns some, CompleteTree.get with that result fulfills the predicate.
-[ ] Prove that CompleteTree.heapUpdateRoot indeed exchanges the value at the root.
-    - Straightforward, but hard to prove:
-      [ ] Show that for each index in the original heap (except 0) the element is now either the new root, or
-          in the left or in the right subtree.
-          - Maybe a new predicate? CompleteTree.contains x => root = x OR left.contains x OR right.contains x
-          - Try unfolding both functions like in heapRemoveLastWithIndexReturnsItemAtIndex.
-    - Alternative approach, but less convincing
-      [x] A part of this is to show that the new root is not the old root, but rather the passed in value or
-          the root of one of the sub-trees.
-      [ ] The second part is to show that the recursion (if there is one) does not pass on the old root.
-          - Basically that heapUpdateRoot either does not recurse, or recurses with the value it started out with.
-            - This should be relatively straightforward. (left unchanged or left.heapUpdateRoot value and right 
-              unchanged or right.heapUpdateRoot value)
+[x] Prove that CompleteTree.heapUpdateRoot indeed exchanges the value at the root.
+    - Done by showing that the new tree contains all elements except the root, and the updated value.
+[ ] Prove that heapPop leaves all values in the tree, except the root.
+[ ] Prove that heapPop returns the root
+[ ] Prove that CompleteTree.heapUpdateAt returns the element at the given index
 [ ] Prove that CompleteTree.heapUpdateAt indeed updates the value at the given index.
-    - Use contains again (if that works), or
-    - Basically making sure that if index != 0 the recursion does either pass on the passed-in value, or the current
-      node's value.
-      - This sounds so trivial, that I am not sure if it's even worth the effort.
-    - The Heap Property that has already been proven shows the rest.
+    - Use the same approach as heapUpdateRoot
+[ ] Prove that CompleteTree.heapRemoveAt returns the element at the given index
+[ ] Prove that CompleteTree.heapRemoveAt leaves all values in the tree except at the input index.
 
 
 [ ] Write the performance part of this file.
