@@ -701,3 +701,142 @@ protected theorem heapRemoveLastEitherContainsOrReturnsElement {α : Type u} {n 
   rewrite[CompleteTree.AdditionalProofs.heapRemoveLastWithIndexHeapRemoveLastSameElement]
   rewrite[CompleteTree.AdditionalProofs.heapRemoveLastWithIndexHeapRemoveLastSameTree]
   assumption
+
+protected theorem heapRemoveLastLeavesRoot {α : Type u} {n: Nat} (heap : CompleteTree α (n+1)) (h₁ : n > 0) : heap.root (Nat.succ_pos n) = (CompleteTree.Internal.heapRemoveLast heap).fst.root h₁ :=
+  CompleteTree.heapRemoveLastAuxLeavesRoot heap _ _ _ h₁
+
+private theorem heapRemoveLastWithIndexIndexNeZeroForNGt1 {α : Type u} {n : Nat} (heap : CompleteTree α (n+1)) : (CompleteTree.Internal.heapRemoveLastWithIndex heap).snd.snd = 0 ↔ n = 0 := by
+  constructor
+  case mp =>
+    unfold Internal.heapRemoveLastWithIndex Internal.heapRemoveLastAux
+    split
+    rename_i o p v l r _ _ _
+    split
+    case isTrue =>
+      intro
+      rename 0 = o + p => h₁
+      exact h₁.symm
+    case isFalse =>
+      intro h₁
+      simp at h₁
+      split at h₁
+      case isTrue =>
+        cases o; omega
+        case succ oo _ _ _ _ _ =>
+          simp at h₁
+          exact absurd h₁ $ Fin.succ_ne_zero _
+      case isFalse =>
+        simp at h₁
+        exact absurd h₁ $ Fin.succ_ne_zero _
+  case mpr =>
+    intro h₁
+    unfold Internal.heapRemoveLastWithIndex Internal.heapRemoveLastAux
+    split
+    rename_i o p v l r _ _ _
+    simp at h₁
+    simp[h₁]
+    have : o = 0 := And.left $ Nat.add_eq_zero_iff.mp h₁
+    subst o
+    have : p = 0 := And.right $ Nat.add_eq_zero_iff.mp h₁
+    subst p
+    rfl
+
+
+protected theorem heapRemoveLastWithIndexRelationGt {α : Type u} {n : Nat} (heap : CompleteTree α (n+1)) (index : Fin (n+1)) (h₁ : index > (CompleteTree.Internal.heapRemoveLastWithIndex heap).snd.snd) :
+  have : (CompleteTree.Internal.heapRemoveLastWithIndex heap).snd.snd ≥ 0 := Fin.zero_le _
+  have : index > 0 := by omega
+  (CompleteTree.Internal.heapRemoveLastWithIndex heap).fst.get (index.pred $ Fin.ne_of_gt this) (by omega) = heap.get index (by omega)
+:= by
+have h₂ : 0 ≠ n := by omega
+revert h₁
+unfold Internal.heapRemoveLastWithIndex Internal.heapRemoveLastAux
+intro h₁
+split at h₁
+rename_i o p v l r _ _ _ _
+simp at h₂
+simp[h₂] at h₁ ⊢
+split
+case isFalse h₃ =>
+  --removed right
+  simp[h₃] at h₁ ⊢
+  cases p <;> simp at h₁ ⊢
+  case zero =>
+    simp (config := {ground := true}) at h₃
+    subst o
+    contradiction
+  case succ pp _ _ _ _ =>
+    generalize hold : get index (branch v l r _ _ _) _ = oldValue
+    unfold get at hold ⊢
+    simp at hold ⊢
+    unfold get' at hold ⊢
+    split
+    <;> split at hold
+    case h_1.h_1 =>
+      exact absurd h₁ $ Fin.not_lt_zero _
+    case h_1.h_2 j _ _ _ _ _ _ _ _ _ _ _ _ _ hj =>
+      have h₃ : j = 0 := by simp at hj; exact Fin.val_eq_of_eq hj
+      subst j
+      simp at h₁
+      have := Fin.lt_iff_val_lt_val.mp h₁
+      simp_arith at this
+    case h_2.h_1 hx =>
+      contradiction
+    case h_2.h_2 j2 h₃2 or pr vr lr rr _ _ _ d3 he3 he4 j h₃ o2 p2 v2 l2 r2 _ _ _ d2 he1 he2 d1 hje =>
+      clear d2 d3
+      have : j = j2 + 1 := by simp at hje; assumption
+      subst j
+      have : o = o2 := heqSameLeftLen (congrArg Nat.succ he1) (by omega) he2
+      have : (pp+1) = p2 := heqSameRightLen (congrArg Nat.succ he1) (by omega) he2
+      subst o2 p2
+      simp at he2
+      have := he2.left
+      have := he2.right.left
+      have := he2.right.right
+      subst v2 l2 r2
+      have : o = or := heqSameLeftLen (congrArg Nat.succ he3) (by omega) he4
+      have : (pp + 1 - 1) = pr := heqSameRightLen (congrArg Nat.succ he3) (by omega) he4
+      subst or pr
+      simp at he4
+      have := he4.left
+      have := he4.right.left
+      subst lr vr
+      simp at he4
+      have : ¬j2 + 1 < o := by simp_arith[Fin.lt_iff_val_lt_val] at h₁; omega
+      simp[this] at hold
+      have : ¬j2 < o := by simp_arith[Fin.lt_iff_val_lt_val] at h₁; omega
+      simp[this]
+      --cases pp
+      --omega
+      split
+      rename_i d2 d3 d4 d5 d6 d7 d8
+      clear d2 d3 d4 d5 d6 d7 d8 hje d1
+      rename_i d2 d3 d4 d5 d6 d7 d8 d9 h₆2 pp2 rr2 _ _ _ h₂ h₅ d1 h₆ he6 he5
+      clear d1 d2 d3 d4 d5 d6 d7 d8 d9 h₆2
+      simp at he6
+      subst he6
+      simp at he5
+      subst rr2
+      sorry
+case isTrue h₃ =>
+  --removed left
+  sorry
+
+protected theorem heapRemoveLastWithIndexRelation {α : Type u} {n : Nat} (heap : CompleteTree α (n+1)) (index : Fin (n+1)):
+  let (result, removedElement, oldIndex) := CompleteTree.Internal.heapRemoveLastWithIndex heap
+  if h₁ : index > oldIndex then
+    have : oldIndex ≥ 0 := Fin.zero_le oldIndex
+    have : index > 0 := by omega
+    result.get (index.pred $ Fin.ne_of_gt this) (by omega) = heap.get index (by omega)
+  else if h₂ : index < oldIndex then
+    result.get (index.castLT (by omega)) (by omega) = heap.get index (by omega)
+  else
+    removedElement = heap.get index (Nat.succ_pos _)
+:= by
+  simp
+  split
+  case isTrue h₁ =>
+    apply CompleteTree.AdditionalProofs.heapRemoveLastWithIndexRelationGt
+    assumption
+  split
+  case isFalse.isTrue h₁ h₂ => sorry
+  case isFalse.isFalse h₁ h₂ => sorry
