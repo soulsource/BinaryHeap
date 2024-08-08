@@ -816,10 +816,16 @@ case isFalse h₃ =>
       subst he6
       simp at he5
       subst rr2
+      subst oldValue
+      have : pp2+1+1 < o + (pp2 + 1 + 1) := by omega
+      have : ⟨j2 + 1 - o, by omega⟩ > (CompleteTree.Internal.heapRemoveLastWithIndex r).snd.snd := sorry
+      --have htest := CompleteTree.AdditionalProofs.heapRemoveLastWithIndexRelationGt r ⟨j2 + 1 - o, by omega⟩ this
+      --simp at htest
       sorry
 case isTrue h₃ =>
   --removed left
   sorry
+--termination_by n
 
 protected theorem heapRemoveLastWithIndexRelation {α : Type u} {n : Nat} (heap : CompleteTree α (n+1)) (index : Fin (n+1)):
   let (result, removedElement, oldIndex) := CompleteTree.Internal.heapRemoveLastWithIndex heap
