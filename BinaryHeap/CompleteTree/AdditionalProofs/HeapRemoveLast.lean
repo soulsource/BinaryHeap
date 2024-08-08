@@ -781,15 +781,29 @@ case isFalse h₃ =>
       simp at h₅
       omega
     have h₇ : ↑index - o - 1 < pp + 1 := by
-      have := index.isLt
+      have : ↑index < o.add (pp + 1) + 1 := index.isLt
+      unfold Fin.pred Fin.subNat at h₅
       simp at h₅
-      sorry
+      generalize index.val = i at h₅ h₆ this ⊢
+      simp at this
+      omega
+    have h₈ : ⟨↑index - o - 1, h₇⟩ > (Internal.heapRemoveLastWithIndex r).snd.snd := by
+      unfold Internal.heapRemoveLastWithIndex
+      simp
+      rw[Fin.lt_iff_val_lt_val] at h₁ ⊢
+      simp at h₁ ⊢
+      generalize Fin.val (Internal.heapRemoveLastAux (β := λn ↦ α × Fin n) r _ _ _).2.snd = indexInR at h₁ ⊢
+      omega
     rw[get_right' _ h₅]
     rw[get_right' _ h₆] at hold
     rw[←hold]
-    have := CompleteTree.AdditionalProofs.heapRemoveLastWithIndexRelationGt r ⟨↑index - o - 1, h₇⟩
-    --have : (⟨↑(index.pred (this)) - o - 1, _⟩ : Fin (pp+1)) = (⟨↑index - o - 1, _⟩ : Fin (pp + 1 + 1)).pred _:= sorry
-    sorry
+    have h₉ := CompleteTree.AdditionalProofs.heapRemoveLastWithIndexRelationGt r ⟨↑index - o - 1, h₇⟩ h₈
+    unfold Internal.heapRemoveLastWithIndex at h₉
+    unfold Fin.pred Fin.subNat at h₉
+    simp at h₉
+    simp
+    have : ↑index - 1 - o - 1 = ↑index - o - 1 - 1 := by omega
+    simp[this, h₉]
 case isTrue h₃ =>
   --removed left
   sorry
