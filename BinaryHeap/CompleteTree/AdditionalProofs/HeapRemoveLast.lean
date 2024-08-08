@@ -1,6 +1,7 @@
 import BinaryHeap.CompleteTree.HeapOperations
 import BinaryHeap.CompleteTree.HeapProofs.HeapRemoveLast
 import BinaryHeap.CompleteTree.AdditionalProofs.Contains
+import BinaryHeap.CompleteTree.AdditionalProofs.Get
 
 namespace BinaryHeap.CompleteTree.AdditionalProofs
 
@@ -741,6 +742,10 @@ private theorem heapRemoveLastWithIndexIndexNeZeroForNGt1 {α : Type u} {n : Nat
     subst p
     rfl
 
+private theorem Fin.ne_zero_of_gt {n : Nat} {i j : Fin (n+1)} (h₁ : i > j) : i ≠ 0 :=
+  have : 0 ≤ j := Fin.zero_le _
+  by omega
+
 
 protected theorem heapRemoveLastWithIndexRelationGt {α : Type u} {n : Nat} (heap : CompleteTree α (n+1)) (index : Fin (n+1)) (h₁ : index > (CompleteTree.Internal.heapRemoveLastWithIndex heap).snd.snd) :
   have : (CompleteTree.Internal.heapRemoveLastWithIndex heap).snd.snd ≥ 0 := Fin.zero_le _
@@ -766,62 +771,25 @@ case isFalse h₃ =>
     contradiction
   case succ pp _ _ _ _ =>
     generalize hold : get index (branch v l r _ _ _) _ = oldValue
-    unfold get at hold ⊢
-    simp at hold ⊢
-    unfold get' at hold ⊢
-    split
-    <;> split at hold
-    case h_1.h_1 =>
-      exact absurd h₁ $ Fin.not_lt_zero _
-    case h_1.h_2 j _ _ _ _ _ _ _ _ _ _ _ _ _ hj =>
-      have h₃ : j = 0 := by simp at hj; exact Fin.val_eq_of_eq hj
-      subst j
+    have h₄ : index ≠ 0 := Fin.ne_zero_of_gt h₁
+    have h₅ : index.pred h₄ > o := by
+      simp
+      rw[Fin.lt_iff_val_lt_val] at h₁
       simp at h₁
-      have := Fin.lt_iff_val_lt_val.mp h₁
-      simp_arith at this
-    case h_2.h_1 hx =>
-      contradiction
-    case h_2.h_2 j2 h₃2 or pr vr lr rr _ _ _ d3 he3 he4 j h₃ o2 p2 v2 l2 r2 _ _ _ d2 he1 he2 d1 hje =>
-      clear d2 d3
-      have : j = j2 + 1 := by simp at hje; assumption
-      subst j
-      have : o = o2 := heqSameLeftLen (congrArg Nat.succ he1) (by omega) he2
-      have : (pp+1) = p2 := heqSameRightLen (congrArg Nat.succ he1) (by omega) he2
-      subst o2 p2
-      simp at he2
-      have := he2.left
-      have := he2.right.left
-      have := he2.right.right
-      subst v2 l2 r2
-      have : o = or := heqSameLeftLen (congrArg Nat.succ he3) (by omega) he4
-      have : (pp + 1 - 1) = pr := heqSameRightLen (congrArg Nat.succ he3) (by omega) he4
-      subst or pr
-      simp at he4
-      have := he4.left
-      have := he4.right.left
-      subst lr vr
-      simp at he4
-      have : ¬j2 + 1 < o := by simp_arith[Fin.lt_iff_val_lt_val] at h₁; omega
-      simp[this] at hold
-      have : ¬j2 < o := by simp_arith[Fin.lt_iff_val_lt_val] at h₁; omega
-      simp[this]
-      --cases pp
-      --omega
-      split
-      rename_i d2 d3 d4 d5 d6 d7 d8
-      clear d2 d3 d4 d5 d6 d7 d8 hje d1
-      rename_i d2 d3 d4 d5 d6 d7 d8 d9 h₆2 pp2 rr2 _ _ _ h₂ h₅ d1 h₆ he6 he5
-      clear d1 d2 d3 d4 d5 d6 d7 d8 d9 h₆2
-      simp at he6
-      subst he6
-      simp at he5
-      subst rr2
-      subst oldValue
-      have : pp2+1+1 < o + (pp2 + 1 + 1) := by omega
-      have : ⟨j2 + 1 - o, by omega⟩ > (CompleteTree.Internal.heapRemoveLastWithIndex r).snd.snd := sorry
-      --have htest := CompleteTree.AdditionalProofs.heapRemoveLastWithIndexRelationGt r ⟨j2 + 1 - o, by omega⟩ this
-      --simp at htest
+      omega
+    have h₆ : index > o := by
+      simp at h₅
+      omega
+    have h₇ : ↑index - o - 1 < pp + 1 := by
+      have := index.isLt
+      simp at h₅
       sorry
+    rw[get_right' _ h₅]
+    rw[get_right' _ h₆] at hold
+    rw[←hold]
+    have := CompleteTree.AdditionalProofs.heapRemoveLastWithIndexRelationGt r ⟨↑index - o - 1, h₇⟩
+    --have : (⟨↑(index.pred (this)) - o - 1, _⟩ : Fin (pp+1)) = (⟨↑index - o - 1, _⟩ : Fin (pp + 1 + 1)).pred _:= sorry
+    sorry
 case isTrue h₃ =>
   --removed left
   sorry
