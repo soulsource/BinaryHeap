@@ -746,7 +746,6 @@ private theorem Fin.ne_zero_of_gt {n : Nat} {i j : Fin (n+1)} (h₁ : i > j) : i
   have : 0 ≤ j := Fin.zero_le _
   by omega
 
-
 protected theorem heapRemoveLastWithIndexRelationGt {α : Type u} {n : Nat} (heap : CompleteTree α (n+1)) (index : Fin (n+1)) (h₁ : index > (CompleteTree.Internal.heapRemoveLastWithIndex heap).snd.snd) :
   have : (CompleteTree.Internal.heapRemoveLastWithIndex heap).snd.snd ≥ 0 := Fin.zero_le _
   have : index > 0 := by omega
@@ -806,8 +805,36 @@ case isFalse h₃ =>
     simp[this, h₉]
 case isTrue h₃ =>
   --removed left
-  sorry
---termination_by n
+  simp[h₃] at h₁ ⊢
+  cases o
+  case zero => exact absurd h₃.left $ Nat.not_lt_zero p
+  case succ oo _ _ _ _ =>
+    simp at h₁ ⊢
+    if h₄ : index > oo + 1 then
+      -- get goes into the right branch
+      rw[get_right' _ h₄]
+      have h₅ : index ≠ 0 := Fin.ne_zero_of_gt h₁
+      have h₆ : index.pred h₅ > oo := by simp; omega
+      rw[get_right]
+      case h₂ =>
+        rw[←lens_see_through_cast _ leftLen _ (Nat.succ_pos _) _]
+        rw[leftLen_unfold]
+        assumption
+      simp[←lens_see_through_cast _ leftLen _ (Nat.succ_pos _) _]
+      simp only[leftLen_unfold]
+      have h₇ :=
+        right_sees_through_cast (by simp_arith : oo + p + 1 = oo + 1 + p) (
+            branch v
+            (
+              (Internal.heapRemoveLastAux (β := λn ↦ α × Fin n) l (fun a => (a, 0))
+                  (fun {prev_size curr_size} x h₁ => (x.fst, Fin.castLE (by omega) x.snd.succ))
+                  fun {prev_size curr_size} x left_size h₁ => (x.fst, Fin.castLE (by omega) (x.snd.addNat left_size).succ)).fst
+            )
+            r (by omega) (by omega) (by simp[Nat.power_of_two_iff_next_power_eq, h₃])) (Nat.succ_pos _) (by omega)
+      sorry
+    else
+      -- get goes into the left branch
+      sorry
 
 protected theorem heapRemoveLastWithIndexRelation {α : Type u} {n : Nat} (heap : CompleteTree α (n+1)) (index : Fin (n+1)):
   let (result, removedElement, oldIndex) := CompleteTree.Internal.heapRemoveLastWithIndex heap

@@ -3,6 +3,15 @@ import BinaryHeap.CompleteTree.Lemmas
 
 namespace BinaryHeap.CompleteTree.AdditionalProofs
 
+theorem get_zero_eq_root {α : Type u} {n : Nat} (tree : CompleteTree α n) (h₁ : n > 0): tree.root h₁ = tree.get ⟨0,h₁⟩ h₁ := by
+  unfold get
+  match n with
+  | nn+1 =>
+    unfold get'
+    split
+    case h_2 hx => exact absurd (Fin.mk.inj hx) (Nat.zero_ne_add_one _)
+    case h_1 => trivial
+
 theorem get_right {α : Type u} {n : Nat} (tree : CompleteTree α n) (index : Fin n) (h₁ : n > 0) (h₂ : index > tree.leftLen h₁) :
   have h₃ : ↑index - tree.leftLen h₁ - 1 < tree.rightLen h₁ := by
     revert h₂
