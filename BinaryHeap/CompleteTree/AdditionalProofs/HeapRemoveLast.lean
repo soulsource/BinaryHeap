@@ -746,6 +746,26 @@ private theorem Fin.ne_zero_of_gt {n : Nat} {i j : Fin (n+1)} (h₁ : i > j) : i
   have : 0 ≤ j := Fin.zero_le _
   by omega
 
+private theorem heapRemoveLastWithIndexRelationGt_Aux {α : Type u} {o p q : Nat} (index : Fin (((o + 1).add p + 1))) (h₁ : o + 1 + p = o + p + 1) (tree : CompleteTree α (o+p+1)) (h₂ : o + 1 + p > 0) (h₃ : (h₁ ▸ tree).rightLen h₂ > 0) (h₄ : ↑index - 1 - q - 1 < (h₁ ▸ tree).rightLen h₂) (h₅ : o + p + 1 > 0) (h₆ : tree.rightLen h₅ > 0) (h₇ : ↑index - (q + 1) - 1 < tree.rightLen h₅)
+:
+  get ⟨↑index - 1 - q - 1, h₄⟩
+    ((h₁ ▸ tree).right h₂) h₃ =
+  get ⟨↑index - (q + 1) - 1, h₇⟩ (tree.right h₅) h₆
+:= by
+  induction p generalizing o
+  case zero =>
+    simp
+    have : ⟨↑index - 1 - q - 1, h₄⟩ = (⟨↑index - (q + 1) - 1, h₇⟩ : Fin (tree.rightLen h₅)) := by simp; omega
+    rw[this]
+  case succ pp hp =>
+    have hp₂ := hp (o := o+1)
+    have hp₃ : (o + 1 + pp + 1) = o + (pp + 1) + 1 := by simp_arith
+    have hp₄ : (o + 1 + 1 + pp) = o + 1 + (pp + 1) := by simp_arith
+    rw[hp₃, hp₄] at hp₂
+    have hp₅ := hp₂ (index.cast (by simp_arith)) h₁ tree h₂ h₃ (by simp_arith at h₄ ⊢; omega) h₅ h₆ (by simp_arith at h₇ ⊢; omega)
+    simp at hp₅
+    assumption
+
 protected theorem heapRemoveLastWithIndexRelationGt {α : Type u} {n : Nat} (heap : CompleteTree α (n+1)) (index : Fin (n+1)) (h₁ : index > (CompleteTree.Internal.heapRemoveLastWithIndex heap).snd.snd) :
   have : (CompleteTree.Internal.heapRemoveLastWithIndex heap).snd.snd ≥ 0 := Fin.zero_le _
   have : index > 0 := by omega
@@ -822,16 +842,9 @@ case isTrue h₃ =>
         assumption
       simp[←lens_see_through_cast _ leftLen _ (Nat.succ_pos _) _]
       simp only[leftLen_unfold]
-      have h₇ :=
-        right_sees_through_cast (by simp_arith : oo + p + 1 = oo + 1 + p) (
-            branch v
-            (
-              (Internal.heapRemoveLastAux (β := λn ↦ α × Fin n) l (fun a => (a, 0))
-                  (fun {prev_size curr_size} x h₁ => (x.fst, Fin.castLE (by omega) x.snd.succ))
-                  fun {prev_size curr_size} x left_size h₁ => (x.fst, Fin.castLE (by omega) (x.snd.addNat left_size).succ)).fst
-            )
-            r (by omega) (by omega) (by simp[Nat.power_of_two_iff_next_power_eq, h₃])) (Nat.succ_pos _) (by omega)
-      sorry
+      apply heapRemoveLastWithIndexRelationGt_Aux
+      case h₁ => simp_arith
+      case h₅ => exact Nat.succ_pos _
     else
       -- get goes into the left branch
       sorry
