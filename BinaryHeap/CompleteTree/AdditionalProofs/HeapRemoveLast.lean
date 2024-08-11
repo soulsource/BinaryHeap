@@ -2,6 +2,7 @@ import BinaryHeap.CompleteTree.HeapOperations
 import BinaryHeap.CompleteTree.HeapProofs.HeapRemoveLast
 import BinaryHeap.CompleteTree.AdditionalProofs.Contains
 import BinaryHeap.CompleteTree.AdditionalProofs.Get
+import BinaryHeap.CompleteTree.NatLemmas
 
 namespace BinaryHeap.CompleteTree.AdditionalProofs
 
@@ -46,8 +47,8 @@ protected theorem heapRemoveLastWithIndexReturnsItemAtIndex {α : Type u} {o : N
 
       --but first, let's get rid of mm and nn, and vv while at it.
       -- which are equal to m, n, v, but we need to deduce this from he₃...
-      have : n = nn := heqSameLeftLen (congrArg (·+1) he₂) (by simp_arith) he₃
-      have : m = mm := heqSameRightLen (congrArg (·+1) he₂) (by simp_arith) he₃
+      have : n = nn := heqSameLeftLen (congrArg (·+1) he₂) (Nat.succ_pos _) he₃
+      have : m = mm := heqSameRightLen (congrArg (·+1) he₂) (Nat.succ_pos _) he₃
       subst nn mm
       simp only [heq_eq_eq, branch.injEq] at he₃
       -- yeah, no more HEq fuglyness!
@@ -93,8 +94,8 @@ private theorem lens_see_through_cast {α : Type u} {p q : Nat} (h₁ : q+p+1 = 
   case zero => simp only [Nat.add_zero]
   case succ pp hp =>
     have h₂ := hp (q := q+1)
-    have h₃ : (q + 1 + pp + 1) = q + (pp + 1) + 1 := by simp_arith
-    have h₄ : (q + 1 + 1 + pp) = q + 1 + (pp + 1) := by simp_arith
+    have h₃ : (q + 1 + pp + 1) = q + (pp + 1) + 1 := Nat.add_comm_right q 1 (pp + 1)
+    have h₄ : (q + 1 + 1 + pp) = q + 1 + (pp + 1) := (Nat.add_comm_right (q+1) 1 pp).substr $ Nat.add_assoc (q+1) pp 1
     rw[h₃, h₄] at h₂
     revert hb ha heap h₁
     assumption
@@ -104,8 +105,8 @@ private theorem left_sees_through_cast {α : Type u} {p q : Nat} (h₁ : q+p+1 =
   case zero => simp only [Nat.add_zero, heq_eq_eq]
   case succ pp hp =>
     have h₂ := hp (q := q+1)
-    have h₃ : (q + 1 + pp + 1) = q + (pp + 1) + 1 := by simp_arith
-    have h₄ : (q + 1 + 1 + pp) = q + 1 + (pp + 1) := by simp_arith
+    have h₃ : (q + 1 + pp + 1) = q + (pp + 1) + 1 := Nat.add_comm_right q 1 (pp + 1)
+    have h₄ : (q + 1 + 1 + pp) = q + 1 + (pp + 1) := (Nat.add_comm_right (q+1) 1 pp).substr $ Nat.add_assoc (q+1) pp 1
     rw[h₃, h₄] at h₂
     revert hb ha heap h₁
     assumption
@@ -115,8 +116,8 @@ private theorem right_sees_through_cast {α : Type u} {p q : Nat} (h₁ : q+p+1 
   case zero => simp only [Nat.add_zero, heq_eq_eq]
   case succ pp hp =>
     have h₂ := hp (q := q+1)
-    have h₃ : (q + 1 + pp + 1) = q + (pp + 1) + 1 := by simp_arith
-    have h₄ : (q + 1 + 1 + pp) = q + 1 + (pp + 1) := by simp_arith
+    have h₃ : (q + 1 + pp + 1) = q + (pp + 1) + 1 := Nat.add_comm_right q 1 (pp + 1)
+    have h₄ : (q + 1 + 1 + pp) = q + 1 + (pp + 1) := (Nat.add_comm_right (q+1) 1 pp).substr $ Nat.add_assoc (q+1) pp 1
     rw[h₃, h₄] at h₂
     revert hb ha heap h₁
     assumption
@@ -759,21 +760,20 @@ private theorem heapRemoveLastWithIndexRelationGt_Aux {α : Type u} {o p q : Nat
     rw[this]
   case succ pp hp =>
     have hp₂ := hp (o := o+1)
-    have hp₃ : (o + 1 + pp + 1) = o + (pp + 1) + 1 := by simp_arith
-    have hp₄ : (o + 1 + 1 + pp) = o + 1 + (pp + 1) := by simp_arith
+    have hp₃ : (o + 1 + pp + 1) = o + (pp + 1) + 1 := Nat.add_comm_right o 1 (pp + 1)
+    have hp₄ : (o + 1 + 1 + pp) = o + 1 + (pp + 1) := (Nat.add_comm_right (o+1) 1 pp).substr $ Nat.add_assoc (o+1) pp 1
     rw[hp₃, hp₄] at hp₂
-    have hp₅ := hp₂ (index.cast (by simp_arith)) h₁ tree h₂ h₃ (by simp_arith at h₄ ⊢; omega) h₅ h₆ (by simp_arith at h₇ ⊢; omega)
-    simp at hp₅
-    assumption
+    have : o + 1 + (pp + 1) + 1 = o + 1 + 1 + pp + 1 := Nat.add_comm_right (o + 1) (pp + 1) 1
+    exact hp₂ (index.cast this) h₁ tree h₂ h₃ h₄ h₅ h₆ h₇
 
-private theorem heapRemoveLastWithIndexRelationGt_Aux2 {α : Type u} {oo p : Nat} (index : Fin (oo + 1 + p)) (tree : CompleteTree α (oo + p + 1)) (h₁ :  oo + p + 1 = oo + 1 + p) (h₂ : oo + 1 + p > 0) (h₃ : oo + p + 1 > 0) (h₄ : index.val < oo + p + 1) : get index (h₁▸tree) h₂ = get ⟨index.val,h₄⟩ tree h₃ := by
-  induction p generalizing oo
+private theorem heapRemoveLastWithIndexRelationGt_Aux2 {α : Type u} {o p : Nat} (index : Fin (o + 1 + p)) (tree : CompleteTree α (o + p + 1)) (h₁ :  o + p + 1 = o + 1 + p) (h₂ : o + 1 + p > 0) (h₃ : o + p + 1 > 0) (h₄ : index.val < o + p + 1) : get index (h₁▸tree) h₂ = get ⟨index.val,h₄⟩ tree h₃ := by
+  induction p generalizing o
   case zero =>
     simp
   case succ pp hp =>
-    have hp₂ := hp (oo := oo+1)
-    have hp₃ : (oo + 1 + pp + 1) = oo + (pp + 1) + 1 := by simp_arith
-    have hp₄ : (oo + 1 + 1 + pp) = oo + 1 + (pp + 1) := by simp_arith
+    have hp₂ := hp (o := o+1)
+    have hp₃ : (o + 1 + pp + 1) = o + (pp + 1) + 1 := Nat.add_comm_right o 1 (pp + 1)
+    have hp₄ : (o + 1 + 1 + pp) = o + 1 + (pp + 1) := (Nat.add_comm_right (o+1) 1 pp).substr $ Nat.add_assoc (o+1) pp 1
     rw[hp₃, hp₄] at hp₂
     exact hp₂ index tree h₁ h₂ h₃ h₄
 
@@ -806,24 +806,14 @@ case isFalse h₃ =>
       simp only [Nat.add_eq, Fin.coe_pred, gt_iff_lt]
       rw[Fin.lt_iff_val_lt_val] at h₁
       simp only [Nat.succ_eq_add_one, Fin.isValue, Fin.val_succ, Fin.coe_castLE, Fin.coe_addNat] at h₁
-      omega
-    have h₆ : index > o := by
-      simp only [Nat.add_eq, Fin.coe_pred, gt_iff_lt] at h₅
-      omega
-    have h₇ : ↑index - o - 1 < pp + 1 := by
-      have : ↑index < o.add (pp + 1) + 1 := index.isLt
-      unfold Fin.pred Fin.subNat at h₅
-      simp only [Nat.add_eq, gt_iff_lt] at h₅
-      generalize index.val = i at h₅ h₆ this ⊢
-      simp only [Nat.add_eq] at this
-      omega
-    have h₈ : ⟨↑index - o - 1, h₇⟩ > (Internal.heapRemoveLastWithIndex r).snd.snd := by
-      unfold Internal.heapRemoveLastWithIndex
-      simp only [Nat.add_eq, Fin.zero_eta, Fin.isValue, Nat.succ_eq_add_one, gt_iff_lt]
-      rw[Fin.lt_iff_val_lt_val] at h₁ ⊢
-      simp only [Nat.succ_eq_add_one, Fin.isValue, Fin.val_succ, Fin.coe_castLE, Fin.coe_addNat] at h₁ ⊢
-      generalize Fin.val (Internal.heapRemoveLastAux (β := λn ↦ α × Fin n) r _ _ _).2.snd = indexInR at h₁ ⊢
-      omega
+      exact Nat.lt_of_add_right $ Nat.lt_pred_of_succ_lt h₁
+    have h₆ : index > o :=  Nat.lt_of_add_left $ Nat.succ_lt_of_lt_pred h₅
+    have h₇ : ↑index - o - 1 < pp + 1 :=
+      have : ↑index < (o + 1) + (pp + 1) := (Nat.add_comm_right o (pp+1) 1).subst index.isLt
+      have : ↑index < (pp + 1) + (o + 1) := (Nat.add_comm (o+1) (pp+1)).subst this
+      (Nat.sub_lt_of_lt_add this (Nat.succ_le_of_lt h₆) : ↑index - (o + 1) < pp + 1)
+    have h₈ : ⟨↑index - o - 1, h₇⟩ > (Internal.heapRemoveLastWithIndex r).snd.snd :=
+      Nat.lt_sub_of_add_lt (b := o+1) h₁
     rw[get_right' _ h₅]
     rw[get_right' _ h₆] at hold
     rw[←hold]
@@ -832,8 +822,12 @@ case isFalse h₃ =>
     unfold Fin.pred Fin.subNat at h₉
     simp only [Nat.add_eq, Fin.zero_eta, Fin.isValue, Nat.succ_eq_add_one] at h₉
     simp only [Nat.add_eq, Fin.coe_pred, Fin.isValue]
-    have : ↑index - 1 - o - 1 = ↑index - o - 1 - 1 := by omega
-    simp only [this, Nat.add_eq, Fin.isValue, h₉]
+    have : ↑index - 1 - o - 1 = ↑index - o - 1 - 1 :=
+      (rfl : ↑index - (o + 1 + 1) = ↑index - (o + 1 + 1))
+      |> (Nat.add_comm o 1).subst (motive := λx ↦ ↑index - (x + 1) = ↑index - (o + 1 + 1))
+      |> (Nat.sub_sub ↑index 1 (o+1)).substr
+    --exact this.substr h₉ --seems to run into a Lean 4.9 bug when proving termination
+    simp only [this, Nat.add_eq, Fin.isValue, h₉] --no idea why simp avoids the same issue...
 case isTrue h₃ =>
   --removed left
   simp only [h₃, and_self, ↓reduceDite, Fin.isValue] at h₁ ⊢
@@ -845,7 +839,7 @@ case isTrue h₃ =>
       -- get goes into the right branch
       rw[get_right' _ h₄]
       have h₅ : index ≠ 0 := Fin.ne_zero_of_gt h₁
-      have h₆ : index.pred h₅ > oo := by simp; omega
+      have h₆ : index.pred h₅ > oo := Nat.lt_pred_iff_succ_lt.mpr h₄
       rw[get_right]
       case h₂ =>
         rw[←lens_see_through_cast _ leftLen _ (Nat.succ_pos _) _]
@@ -855,27 +849,34 @@ case isTrue h₃ =>
         Fin.coe_pred, Fin.isValue, ← lens_see_through_cast _ leftLen _ (Nat.succ_pos _) _]
       simp only[leftLen_unfold]
       apply heapRemoveLastWithIndexRelationGt_Aux
-      case h₁ => simp_arith only
+      case h₁ => exact Nat.add_comm_right oo 1 p
       case h₅ => exact Nat.succ_pos _
     else
       -- get goes into the left branch
+      have h₅ : index ≠ 0 := Fin.ne_zero_of_gt h₁
       rw[heapRemoveLastWithIndexRelationGt_Aux2]
       case h₃ => exact Nat.succ_pos _
-      case h₄ => omega
+      case h₄ => exact
+        Nat.le_of_not_gt h₄
+        |> (Nat.succ_pred (Fin.val_ne_of_ne h₅)).substr
+        |> Nat.succ_le.mp
+        |> Nat.lt_add_right p
+        |> (Nat.add_comm_right oo 1 p).subst
       generalize hold :  get index (branch v l r _ _ _) _ = old
-      have h₅ : index ≠ 0 := Fin.ne_zero_of_gt h₁
-      have h₆ : index.pred h₅ ≤ oo := by
-        simp only [Nat.add_eq, Fin.coe_pred]
-        rw[Fin.lt_iff_val_lt_val] at h₁
-        simp only [Nat.succ_eq_add_one, Fin.isValue, Fin.val_succ, Fin.coe_castLE] at h₁
-        omega
-      have h₇ : ↑index - 1 < oo + p + 1 :=
-        Nat.lt_of_le_of_lt ((Fin.coe_pred index h₅).subst (motive := λx ↦ x ≤ oo) h₆) (Nat.lt_succ_of_le (Nat.le_add_right oo p))
+      have h₆ : index.pred h₅ ≤ oo := Nat.pred_le_iff_le_succ.mpr $ Nat.le_of_not_gt h₄
+      have h₇ : ↑index - 1 ≤ oo := (Fin.coe_pred index h₅).subst (motive := λx↦x ≤ oo) h₆
+      have h₈ : ↑index ≤ oo + 1 := Nat.le_succ_of_pred_le h₇
       rw[get_left']
-      <;> simp
-      case h₁ => sorry
+      case h₁ => exact Nat.zero_lt_of_lt $ Nat.lt_sub_of_add_lt h₁
       case h₂ => exact h₆
-      sorry
+      simp only [Fin.coe_pred, Fin.isValue]
+      rw[get_left'] at hold
+      case h₁ => exact Fin.pos_iff_ne_zero.mpr h₅
+      case h₂ => exact h₈
+      subst hold
+      have h₈ : ⟨↑index - 1, Nat.lt_succ.mpr h₇⟩ > (Internal.heapRemoveLastWithIndex l).snd.snd :=
+        Nat.lt_sub_of_add_lt h₁
+      exact CompleteTree.AdditionalProofs.heapRemoveLastWithIndexRelationGt l ⟨↑index - 1, Nat.lt_succ.mpr h₇⟩ h₈
 
 protected theorem heapRemoveLastWithIndexRelation {α : Type u} {n : Nat} (heap : CompleteTree α (n+1)) (index : Fin (n+1)):
   let (result, removedElement, oldIndex) := CompleteTree.Internal.heapRemoveLastWithIndex heap

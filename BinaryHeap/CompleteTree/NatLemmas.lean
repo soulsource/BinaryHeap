@@ -167,3 +167,34 @@ theorem add_eq_zero {a b : Nat} :  a + b = 0 ↔ a = 0 ∧ b = 0 := by
     simp[h₁]
   case mp =>
     cases a <;> simp_arith at *; assumption
+
+-- Yes, this is trivial. Still, I needed it so often, that it deserves its own lemma.
+theorem add_comm_right (a b c : Nat) : a + b + c = a + c + b :=
+  (rfl : a + b + c = a + b + c)
+  |> Eq.subst (Nat.add_comm a b) (motive := λx ↦ x + c = a + b + c)
+  |> Eq.subst (Nat.add_assoc b a c) (motive := λx ↦ x = a + b + c)
+  |> Eq.subst (Nat.add_comm b (a+c)) (motive := λx ↦ x = a + b + c)
+  |> Eq.symm
+
+theorem lt_of_add_left {a b c : Nat} : a + b < c → a < c := by
+  intro h₁
+  induction b generalizing a
+  case zero => exact h₁
+  case succ bb hb =>
+    have hb := hb (a := a.succ)
+    rw[Nat.add_comm bb 1] at h₁
+    rw[←Nat.add_assoc] at h₁
+    have hb := hb h₁
+    exact Nat.lt_of_succ_lt hb
+
+theorem lt_of_add_right {a b c : Nat} : a + b < c → b < c := by
+  rw[Nat.add_comm a b]
+  exact lt_of_add_left
+
+theorem lt_of_add {a b c : Nat} : a + b < c → a < c ∧ b < c := by
+  intro h₁
+  constructor
+  case left =>
+    exact lt_of_add_left h₁
+  case right =>
+    exact lt_of_add_right h₁
