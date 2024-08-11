@@ -1,5 +1,5 @@
 import BinaryHeap.CompleteTree.AdditionalOperations
-import BinaryHeap.CompleteTree.Lemmas
+import BinaryHeap.CompleteTree.AdditionalProofs.Get
 
 namespace BinaryHeap.CompleteTree.AdditionalProofs
 

@@ -60,8 +60,6 @@ theorem CompleteTree.heqContains {α : Type u} {n m : Nat} {a : CompleteTree α 
   have h₃ : a = b := eq_of_heq h₃
   congr
 
-theorem CompleteTree.get_eq_get' {α : Type u} {n : Nat} (tree : CompleteTree α (n+1)) (index : Fin (n+1)) : tree.get' index = tree.get index (Nat.succ_pos n) := rfl
-
 theorem CompleteTree.leftLenLtN {α : Type u} {n : Nat} (tree : CompleteTree α n) (h₁ : n>0) : tree.leftLen h₁ < n := by
   unfold leftLen
   split

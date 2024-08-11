@@ -894,6 +894,19 @@ protected theorem heapRemoveLastWithIndexRelation {α : Type u} {n : Nat} (heap 
   case isTrue h₁ =>
     apply CompleteTree.AdditionalProofs.heapRemoveLastWithIndexRelationGt
     assumption
-  split
-  case isFalse.isTrue h₁ h₂ => sorry
-  case isFalse.isFalse h₁ h₂ => sorry
+  case isFalse h₁ =>
+    have h₁ : (Internal.heapRemoveLastWithIndex heap).2.snd ≥ index := Fin.not_lt.mp h₁
+    split
+    case isTrue h₂ => sorry
+    case isFalse h₂ =>
+      --have h₂ : (Internal.heapRemoveLastWithIndex heap).2.snd ≤ index := Fin.not_lt.mp h₂
+      have : (index.val < (Internal.heapRemoveLastWithIndex heap).2.snd.val) = False := Fin.lt_iff_val_lt_val.subst (p := λx ↦ x = False) $ eq_false  h₂
+      have h₃ : index = (Internal.heapRemoveLastWithIndex heap).2.snd :=
+        Nat.lt_or_eq_of_le h₁
+        |> this.subst (motive := λx ↦ x ∨ index.val = (Internal.heapRemoveLastWithIndex heap).snd.snd.val)
+        |> (false_or _).mp
+        |> Fin.eq_of_val_eq
+      exact
+        CompleteTree.AdditionalProofs.heapRemoveLastWithIndexReturnsItemAtIndex heap
+        |> h₃.substr
+        |> Eq.symm

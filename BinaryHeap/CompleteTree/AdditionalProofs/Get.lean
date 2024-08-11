@@ -3,6 +3,8 @@ import BinaryHeap.CompleteTree.Lemmas
 
 namespace BinaryHeap.CompleteTree.AdditionalProofs
 
+theorem get_eq_get' {α : Type u} {n : Nat} (tree : CompleteTree α (n+1)) (index : Fin (n+1)) : tree.get' index = tree.get index (Nat.succ_pos n) := rfl
+
 theorem get_zero_eq_root {α : Type u} {n : Nat} (tree : CompleteTree α n) (h₁ : n > 0): tree.root h₁ = tree.get ⟨0,h₁⟩ h₁ := by
   unfold get
   match n with
