@@ -804,7 +804,7 @@ case isFalse h₃ =>
     have h₄ : index ≠ 0 := Fin.ne_zero_of_gt h₁
     have h₅ : index.pred h₄ > o := by
       simp only [Nat.add_eq, Fin.coe_pred, gt_iff_lt]
-      rw[Fin.lt_iff_val_lt_val] at h₁
+      rewrite[Fin.lt_iff_val_lt_val] at h₁
       simp only [Nat.succ_eq_add_one, Fin.isValue, Fin.val_succ, Fin.coe_castLE, Fin.coe_addNat] at h₁
       exact Nat.lt_of_add_right $ Nat.lt_pred_of_succ_lt h₁
     have h₆ : index > o :=  Nat.lt_of_add_left $ Nat.succ_lt_of_lt_pred h₅
@@ -814,9 +814,9 @@ case isFalse h₃ =>
       (Nat.sub_lt_of_lt_add this (Nat.succ_le_of_lt h₆) : ↑index - (o + 1) < pp + 1)
     have h₈ : ⟨↑index - o - 1, h₇⟩ > (Internal.heapRemoveLastWithIndex r).snd.snd :=
       Nat.lt_sub_of_add_lt (b := o+1) h₁
-    rw[get_right' _ h₅]
-    rw[get_right' _ h₆] at hold
-    rw[←hold]
+    rewrite[get_right' _ h₅]
+    rewrite[get_right' _ h₆] at hold
+    rewrite[←hold]
     have h₉ := CompleteTree.AdditionalProofs.heapRemoveLastWithIndexRelationGt r ⟨↑index - o - 1, h₇⟩ h₈
     unfold Internal.heapRemoveLastWithIndex at h₉
     unfold Fin.pred Fin.subNat at h₉
@@ -837,13 +837,13 @@ case isTrue h₃ =>
     simp only [Fin.isValue] at h₁ ⊢
     if h₄ : index > oo + 1 then
       -- get goes into the right branch
-      rw[get_right' _ h₄]
+      rewrite[get_right' _ h₄]
       have h₅ : index ≠ 0 := Fin.ne_zero_of_gt h₁
       have h₆ : index.pred h₅ > oo := Nat.lt_pred_iff_succ_lt.mpr h₄
-      rw[get_right]
+      rewrite[get_right]
       case h₂ =>
-        rw[←lens_see_through_cast _ leftLen _ (Nat.succ_pos _) _]
-        rw[leftLen_unfold]
+        rewrite[←lens_see_through_cast _ leftLen _ (Nat.succ_pos _) _]
+        rewrite[leftLen_unfold]
         assumption
       simp only [Nat.add_eq, ne_eq, Fin.zero_eta, Nat.succ_eq_add_one, Nat.pred_eq_sub_one,
         Fin.coe_pred, Fin.isValue, ← lens_see_through_cast _ leftLen _ (Nat.succ_pos _) _]
@@ -854,7 +854,7 @@ case isTrue h₃ =>
     else
       -- get goes into the left branch
       have h₅ : index ≠ 0 := Fin.ne_zero_of_gt h₁
-      rw[heapRemoveLastWithIndexRelationGt_Aux2]
+      rewrite[heapRemoveLastWithIndexRelationGt_Aux2]
       case h₃ => exact Nat.succ_pos _
       case h₄ => exact
         Nat.le_of_not_gt h₄
@@ -866,11 +866,11 @@ case isTrue h₃ =>
       have h₆ : index.pred h₅ ≤ oo := Nat.pred_le_iff_le_succ.mpr $ Nat.le_of_not_gt h₄
       have h₇ : ↑index - 1 ≤ oo := (Fin.coe_pred index h₅).subst (motive := λx↦x ≤ oo) h₆
       have h₈ : ↑index ≤ oo + 1 := Nat.le_succ_of_pred_le h₇
-      rw[get_left']
+      rewrite[get_left']
       case h₁ => exact Nat.zero_lt_of_lt $ Nat.lt_sub_of_add_lt h₁
       case h₂ => exact h₆
       simp only [Fin.coe_pred, Fin.isValue]
-      rw[get_left'] at hold
+      rewrite[get_left'] at hold
       case h₁ => exact Fin.pos_iff_ne_zero.mpr h₅
       case h₂ => exact h₈
       subst hold
@@ -884,13 +884,14 @@ protected theorem heapRemoveLastWithIndexRelationLt {α : Type u} {n : Nat} (hea
   (CompleteTree.Internal.heapRemoveLastWithIndex heap).fst.get ⟨index.val, this⟩ hn = heap.get index (Nat.succ_pos _)
 :=
   have hn : n > 0 := Nat.lt_of_lt_of_le (Fin.pos_iff_ne_zero.mpr $ Fin.ne_zero_of_gt h₁) (Nat.le_of_lt_succ (CompleteTree.Internal.heapRemoveLastWithIndex heap).snd.snd.isLt)
+  have hi : index.val < n := Nat.lt_of_lt_of_le h₁ $ Nat.lt_succ.mp (CompleteTree.Internal.heapRemoveLastWithIndex heap).snd.snd.isLt
   if h₂ : index = 0 then by
     subst index
-    simp
+    simp only [Fin.val_zero]
     have := Fin.zero_eta.subst (motive := λx ↦ heap.root _ = get x heap _) $ get_zero_eq_root heap (Nat.succ_pos _)
-    rw[←this]
+    rewrite[←this]
     have :=  get_zero_eq_root (Internal.heapRemoveLastWithIndex heap).fst hn
-    rw[←this]
+    rewrite[←this]
     apply Eq.symm
     apply CompleteTree.AdditionalProofs.heapRemoveLastWithIndexLeavesRoot
   else by
@@ -906,25 +907,64 @@ protected theorem heapRemoveLastWithIndexRelationLt {α : Type u} {n : Nat} (hea
     split
     case isFalse h₄ =>
       --removed right
-      simp [h₄] at h₁ ⊢
+      simp only [h₄, ↓reduceDite, Fin.isValue] at h₁ ⊢
       cases p
       case zero =>
         simp (config := { ground := true }) only [Nat.zero_add, and_true, Nat.not_lt, Nat.le_zero_eq] at h₄
         subst o
         contradiction
-      case succ pp =>
-        simp only [Fin.isValue] at h₁ ⊢
+      case succ pp _ _ _ _ =>
         if h₄ : index > o then
           --get goes into right branch -> recursion
-          rw[get_right' _ h₄]
-          sorry
+          rewrite[get_right' _ h₄]
+          have h₅ : (⟨index.val, hi⟩ : Fin (o + (pp+1))) > o := h₄
+          rewrite[get_right' _ h₅]
+          simp only [Nat.add_eq, Fin.isValue]
+          rewrite[Fin.lt_iff_val_lt_val] at h₁
+          have : ↑index - o - 1 < pp + 1 :=
+            hi
+            |> Nat.sub_lt_left_of_lt_add (n := o) (Nat.le_of_lt h₄)
+            |> (flip (Nat.sub_lt_of_lt_add)) (Nat.zero_lt_sub_of_lt h₄)
+            |> Nat.lt_succ_of_lt
+          have h₈ : ⟨↑index - o - 1, this⟩ < (Internal.heapRemoveLastWithIndex r).snd.snd :=
+            Nat.sub_lt_of_lt_add (b := o+1) h₁ h₅
+          exact CompleteTree.AdditionalProofs.heapRemoveLastWithIndexRelationLt r  ⟨↑index - o - 1, this⟩ h₈
         else
           --get goes into left branch
-          sorry
+          have h₄₂ : index ≤ o := Nat.le_of_not_gt h₄
+          have h₂₂ : index > 0 := Nat.zero_lt_of_ne_zero $ Fin.val_ne_iff.mpr h₂
+          rewrite[get_left' _ h₂₂ h₄₂]
+          have h₅ : (⟨index.val, hi⟩ : Fin (o + (pp+1))) ≤ o := h₄₂
+          have h₆ : (⟨index.val, hi⟩ : Fin (o + (pp+1))) > ⟨0,Nat.succ_pos _⟩ := h₂₂
+          rw[get_left' _ h₆ h₅]
     case isTrue h₄ =>
       --removed left
-      simp [h₄] at h₁ ⊢
-      sorry
+      --get has to go into the square hole - erm, left branch too
+      cases o
+      case zero =>
+        exact absurd h₄.left $ Nat.not_lt_zero _
+      case succ oo _ _ _ _ =>
+        rewrite[Fin.lt_iff_val_lt_val] at h₁
+        simp only [Nat.add_eq, h₄, and_self, ↓reduceDite, Fin.isValue, Fin.val_succ,
+          Fin.coe_castLE] at h₁ ⊢
+        have h₂₂ : index > 0 := Nat.zero_lt_of_ne_zero $ Fin.val_ne_iff.mpr h₂
+        have h₆ := (Nat.add_comm_right oo 1 p).subst hi
+        have h₈ : (⟨index.val, h₆⟩ : Fin (oo + p + 1)) > ⟨0,Nat.succ_pos _⟩ := h₂₂
+        have h₇ : (⟨index.val, h₆⟩ : Fin (oo + p + 1)) ≤ oo := by
+          generalize (Internal.heapRemoveLastAux l (β := λn ↦ α × Fin n) _ _ _).2.snd = i at h₁
+          have a : i.val ≤ oo := Nat.le_of_lt_succ i.isLt
+          have b : index.val ≤ i.val := Nat.le_of_lt_succ h₁
+          exact Nat.le_trans b a
+        have h₅ : index ≤ oo+1 := Nat.le_succ_of_le h₇
+        rewrite[get_left' _ h₂₂ h₅]
+        rewrite[heapRemoveLastWithIndexRelationGt_Aux2]
+        case h₃ => exact Nat.succ_pos _
+        case h₄ => exact h₆
+        rewrite[get_left' _ h₈ h₇]
+        have : index.val - 1 < oo + 1 := Nat.sub_one_lt_of_le h₂₂ h₅
+        have h₉ : ⟨↑index - 1, this⟩ < (Internal.heapRemoveLastWithIndex l).snd.snd :=
+            Nat.sub_lt_of_lt_add h₁ h₂₂
+        exact CompleteTree.AdditionalProofs.heapRemoveLastWithIndexRelationLt l ⟨↑index - 1, _⟩ h₉
 
 protected theorem heapRemoveLastWithIndexRelation {α : Type u} {n : Nat} (heap : CompleteTree α (n+1)) (index : Fin (n+1)):
   let (result, removedElement, oldIndex) := CompleteTree.Internal.heapRemoveLastWithIndex heap
