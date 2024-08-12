@@ -38,26 +38,35 @@ theorem heapPopOnlyRemovesRoot {α : Type u} {n : Nat} (tree : CompleteTree α (
       rw[←this] at h₃
       simp[h₃, heapUpdateRootContainsUpdatedElement]
     else
-      sorry
-
-
-theorem heapPopOnlyRemovesRoot2 {α : Type u} {n : Nat} (tree : CompleteTree α (n+1)) (le: α → α → Bool) (index : Fin (n+1)) (h₁ : index ≠ ⟨0, Nat.succ_pos _⟩) : (tree.heapPop le).fst.contains $ tree.get index (Nat.succ_pos _) := by
-  unfold heapPop
-  have h₂ := CompleteTree.AdditionalProofs.heapRemoveLastEitherContainsOrReturnsElement tree index
-  simp only at h₂
-  split <;> simp
-  case isFalse h₃ => omega --contradiction. if n == 0 then index cannot be ≠ 0
-  case isTrue h₃ =>
-    cases h₂
-    case inr h₂ =>
-      rw[h₂]
-      exact heapUpdateRootContainsUpdatedElement (Internal.heapRemoveLast tree).fst le (get index tree (Nat.succ_pos _)) h₃
-    case inl h₂ =>
-      generalize h₄ : (Internal.heapRemoveLast tree).fst = withoutLast
-      have h₅ := CompleteTree.AdditionalProofs.heapRemoveLastLeavesRoot tree h₃
-      rw[h₄] at h₂ h₅
-      have := heapUpdateRootOnlyUpdatesRoot le withoutLast h₃
-      rw[contains_iff_index_exists _ _ h₃] at h₂
-      -- to use h₂.elim we need to rewrite this into
-      -- ∀ (a : Fin n), get a withoutLast h₃ = get index tree ⋯ → something
-      sorry
+      have h₄ : (Internal.heapRemoveLastWithIndex tree).snd.snd ≠ 0 := by
+        have a : n ≠ 0 := Nat.ne_of_gt h₃
+        have b := CompleteTree.AdditionalProofs.heapRemoveLastWithIndexIndexNeZeroForNGt1 tree
+        simp only [ne_eq, ←b] at a
+        exact a
+      if h₅ : index < (Internal.heapRemoveLastWithIndex tree).snd.snd then
+        have h₆ := CompleteTree.AdditionalProofs.heapRemoveLastWithIndexRelationLt tree index h₅
+        simp only at h₆
+        have h₇ : index.val < n := by omega
+        have : (⟨↑index, h₇⟩ : Fin n) ≠ ⟨0, h₃⟩ := by
+          rewrite[←Fin.val_ne_iff] at h₁
+          simp only [ne_eq, Fin.mk.injEq] at h₁ ⊢
+          assumption
+        have h₈ := heapUpdateRootOnlyUpdatesRoot le (Internal.heapRemoveLastWithIndex tree).fst h₃ ⟨↑index, h₇⟩ this $ (Internal.heapRemoveLastWithIndex tree).snd.fst
+        rewrite[h₆] at h₈
+        rewrite[←CompleteTree.AdditionalProofs.heapRemoveLastWithIndexHeapRemoveLastSameElement] at h₈
+        rewrite[←CompleteTree.AdditionalProofs.heapRemoveLastWithIndexHeapRemoveLastSameTree] at h₈
+        exact h₈
+      else
+        have h₅ : index > (Internal.heapRemoveLastWithIndex tree).snd.snd := by omega
+        have h₆ := CompleteTree.AdditionalProofs.heapRemoveLastWithIndexRelationGt tree index h₅
+        simp only at h₆
+        have : index.pred h₁ ≠ ⟨0, h₃⟩ := by
+          have h₄ : (Internal.heapRemoveLastWithIndex tree).snd.snd.val > 0 := Nat.zero_lt_of_ne_zero (Fin.val_ne_of_ne h₄)
+          rewrite[←Fin.val_ne_iff]
+          simp only [Fin.coe_pred, ne_eq]
+          omega
+        have h₈ := heapUpdateRootOnlyUpdatesRoot le (Internal.heapRemoveLastWithIndex tree).fst h₃ (index.pred h₁) this $ (Internal.heapRemoveLastWithIndex tree).snd.fst
+        rewrite[h₆] at h₈
+        rewrite[←CompleteTree.AdditionalProofs.heapRemoveLastWithIndexHeapRemoveLastSameElement] at h₈
+        rewrite[←CompleteTree.AdditionalProofs.heapRemoveLastWithIndexHeapRemoveLastSameTree] at h₈
+        exact h₈

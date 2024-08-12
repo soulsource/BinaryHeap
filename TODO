@@ -8,12 +8,11 @@ This is a rough outline of upcoming tasks:
 [x] Prove that CompleteTree.heapRemoveLastWithIndex only removes one element and leaves the rest unchanged
     [x] This automatically serves as a proof for CompleteTree.heapRemoveLast, once it is shown that they
       yield the same tree
-    - Done by showing that each element of the input tree is in the output tree, except for the one at the
-      returned index.
+    - Done by showing how indices relate between both trees.
 [ ] Prove that if CompleteTree.indexOf returns some, CompleteTree.get with that result fulfills the predicate.
 [x] Prove that CompleteTree.heapUpdateRoot indeed exchanges the value at the root.
     - Done by showing that the new tree contains all elements except the root, and the updated value.
-[ ] Prove that heapPop leaves all values in the tree, except the root.
+[x] Prove that heapPop leaves all values in the tree, except the root.
 [x] Prove that heapPop returns the root
 [ ] Prove that CompleteTree.heapUpdateAt returns the element at the given index
 [ ] Prove that CompleteTree.heapUpdateAt indeed updates the value at the given index.
