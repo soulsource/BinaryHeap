@@ -52,9 +52,9 @@ def indexOf {α : Type u} {le : α → α → Bool} {n : Nat} : BinaryHeap α le
 | {tree, valid := _, wellDefinedLe := _}, pred =>
   tree.indexOf pred
 
-instance : GetElem (BinaryHeap α le n) (Nat) α (λ _ index ↦ index > 0 ∧ index < n) where
+instance : GetElem (BinaryHeap α le n) (Nat) α (λ _ index ↦ index < n) where
   getElem := λ heap index h₁ ↦ match n, heap, index with
-  | (_+1), {tree, ..}, index => tree.get' ⟨index, h₁.right⟩
+  | (_+1), {tree, ..}, index => tree.get' ⟨index, h₁⟩
 
 instance : GetElem (BinaryHeap α le n) (Fin n) α (λ _ _ ↦ n > 0) where
   getElem := λ heap index _ ↦ match n, heap, index with
