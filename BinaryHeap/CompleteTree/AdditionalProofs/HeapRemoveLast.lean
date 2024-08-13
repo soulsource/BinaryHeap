@@ -58,7 +58,7 @@ protected theorem heapRemoveLastWithIndexReturnsItemAtIndex {α : Type u} {o : N
       subst vv ll rr
       split at he₁
       <;> rename_i goLeft
-      <;> simp only [goLeft, and_self, ↓reduceDite, Fin.isValue]
+      <;> simp only [goLeft, and_self, ↓reduceDIte, Fin.isValue]
       case' isTrue =>
         cases l;
         case leaf => exact absurd goLeft.left $ Nat.not_lt_zero m
@@ -80,7 +80,7 @@ protected theorem heapRemoveLastWithIndexReturnsItemAtIndex {α : Type u} {o : N
       case' isFalse =>
         have : ¬j<n := by omega --from he₁. It has j = something + n.
       all_goals
-        simp only [this, ↓reduceDite, Nat.pred_succ, Fin.isValue]
+        simp only [this, ↓reduceDIte, Nat.pred_succ, Fin.isValue]
         subst j -- overkill, but unlike rw it works
         simp only [Nat.pred_succ, Fin.isValue, Nat.add_sub_cancel, Fin.eta]
         apply AdditionalProofs.heapRemoveLastWithIndexReturnsItemAtIndex
@@ -247,51 +247,13 @@ revert h₁
 unfold Internal.heapRemoveLastWithIndex Internal.heapRemoveLastAux
 intro h₁
 split at h₁
-rename_i o p v l r _ _ _ _
+rename_i o p v l r _ _ _
 simp only [Nat.add_eq, ne_eq] at h₂
-simp only [Nat.add_eq, h₂, ↓reduceDite, decide_eq_true_eq, Fin.zero_eta, Fin.isValue,
+simp only [Nat.add_eq, h₂, ↓reduceDIte, decide_eq_true_eq, Fin.zero_eta, Fin.isValue,
   Nat.succ_eq_add_one, Fin.castLE_succ, Nat.pred_eq_sub_one, gt_iff_lt] at h₁ ⊢
-split
-case isFalse h₃ =>
-  --removed right
-  simp only [h₃, ↓reduceDite, Fin.isValue] at h₁ ⊢
-  cases p <;> simp only [Nat.add_zero, Nat.reduceSub, Nat.reduceAdd, Fin.isValue] at h₁ ⊢
-  case zero =>
-    simp (config := { ground := true }) only [Nat.zero_add, and_true, Nat.not_lt, Nat.le_zero_eq] at h₃
-    subst o
-    contradiction
-  case succ pp _ _ _ _ =>
-    generalize hold : get index (branch v l r _ _ _) _ = oldValue
-    have h₄ : index ≠ 0 := Fin.ne_zero_of_gt h₁
-    have h₅ : index.pred h₄ > o := by
-      simp only [Nat.add_eq, Fin.coe_pred, gt_iff_lt]
-      rewrite[Fin.lt_iff_val_lt_val] at h₁
-      simp only [Nat.succ_eq_add_one, Fin.isValue, Fin.val_succ, Fin.coe_castLE, Fin.coe_addNat] at h₁
-      exact Nat.lt_of_add_right $ Nat.lt_pred_of_succ_lt h₁
-    have h₆ : index > o :=  Nat.lt_of_add_left $ Nat.succ_lt_of_lt_pred h₅
-    have h₇ : ↑index - o - 1 < pp + 1 :=
-      have : ↑index < (o + 1) + (pp + 1) := (Nat.add_comm_right o (pp+1) 1).subst index.isLt
-      have : ↑index < (pp + 1) + (o + 1) := (Nat.add_comm (o+1) (pp+1)).subst this
-      (Nat.sub_lt_of_lt_add this (Nat.succ_le_of_lt h₆) : ↑index - (o + 1) < pp + 1)
-    have h₈ : ⟨↑index - o - 1, h₇⟩ > (Internal.heapRemoveLastWithIndex r).snd.snd :=
-      Nat.lt_sub_of_add_lt (b := o+1) h₁
-    rewrite[get_right' _ h₅]
-    rewrite[get_right' _ h₆] at hold
-    rewrite[←hold]
-    have h₉ := CompleteTree.AdditionalProofs.heapRemoveLastWithIndexRelationGt r ⟨↑index - o - 1, h₇⟩ h₈
-    unfold Internal.heapRemoveLastWithIndex at h₉
-    unfold Fin.pred Fin.subNat at h₉
-    simp only [Nat.add_eq, Fin.zero_eta, Fin.isValue, Nat.succ_eq_add_one] at h₉
-    simp only [Nat.add_eq, Fin.coe_pred, Fin.isValue]
-    have : ↑index - 1 - o - 1 = ↑index - o - 1 - 1 :=
-      (rfl : ↑index - (o + 1 + 1) = ↑index - (o + 1 + 1))
-      |> (Nat.add_comm o 1).subst (motive := λx ↦ ↑index - (x + 1) = ↑index - (o + 1 + 1))
-      |> (Nat.sub_sub ↑index 1 (o+1)).substr
-    --exact this.substr h₉ --seems to run into a Lean 4.9 bug when proving termination
-    simp only [this, Nat.add_eq, Fin.isValue, h₉] --no idea why simp avoids the same issue...
-case isTrue h₃ =>
+if h₃ : p < o ∧ (p + 1).nextPowerOfTwo = p + 1 then
   --removed left
-  simp only [h₃, and_self, ↓reduceDite, Fin.isValue] at h₁ ⊢
+  simp only [h₃, and_self, ↓reduceDIte, Fin.isValue] at h₁ ⊢
   cases o
   case zero => exact absurd h₃.left $ Nat.not_lt_zero p
   case succ oo _ _ _ _ =>
@@ -338,6 +300,43 @@ case isTrue h₃ =>
       have h₈ : ⟨↑index - 1, Nat.lt_succ.mpr h₇⟩ > (Internal.heapRemoveLastWithIndex l).snd.snd :=
         Nat.lt_sub_of_add_lt h₁
       exact CompleteTree.AdditionalProofs.heapRemoveLastWithIndexRelationGt l ⟨↑index - 1, Nat.lt_succ.mpr h₇⟩ h₈
+else
+  --removed right
+  simp only [h₃, ↓reduceDIte, Fin.isValue] at h₁ ⊢
+  cases p <;> simp only [Nat.add_zero, Nat.reduceSub, Nat.reduceAdd, Fin.isValue] at h₁ ⊢
+  case zero =>
+    simp (config := { ground := true }) only [Nat.zero_add, and_true, Nat.not_lt, Nat.le_zero_eq] at h₃
+    subst o
+    contradiction
+  case succ pp _ _ _ _ =>
+    generalize hold : get index (branch v l r _ _ _) _ = oldValue
+    have h₄ : index ≠ 0 := Fin.ne_zero_of_gt h₁
+    have h₅ : index.pred h₄ > o := by
+      simp only [Nat.add_eq, Fin.coe_pred, gt_iff_lt]
+      rewrite[Fin.lt_iff_val_lt_val] at h₁
+      simp only [Nat.succ_eq_add_one, Fin.isValue, Fin.val_succ, Fin.coe_castLE, Fin.coe_addNat] at h₁
+      exact Nat.lt_of_add_right $ Nat.lt_pred_of_succ_lt h₁
+    have h₆ : index > o :=  Nat.lt_of_add_left $ Nat.succ_lt_of_lt_pred h₅
+    have h₇ : ↑index - o - 1 < pp + 1 :=
+      have : ↑index < (o + 1) + (pp + 1) := (Nat.add_comm_right o (pp+1) 1).subst index.isLt
+      have : ↑index < (pp + 1) + (o + 1) := (Nat.add_comm (o+1) (pp+1)).subst this
+      (Nat.sub_lt_of_lt_add this (Nat.succ_le_of_lt h₆) : ↑index - (o + 1) < pp + 1)
+    have h₈ : ⟨↑index - o - 1, h₇⟩ > (Internal.heapRemoveLastWithIndex r).snd.snd :=
+      Nat.lt_sub_of_add_lt (b := o+1) h₁
+    rewrite[get_right' _ h₅]
+    rewrite[get_right' _ h₆] at hold
+    rewrite[←hold]
+    have h₉ := CompleteTree.AdditionalProofs.heapRemoveLastWithIndexRelationGt r ⟨↑index - o - 1, h₇⟩ h₈
+    unfold Internal.heapRemoveLastWithIndex at h₉
+    unfold Fin.pred Fin.subNat at h₉
+    simp only [Nat.add_eq, Fin.zero_eta, Fin.isValue, Nat.succ_eq_add_one] at h₉
+    simp only [Nat.add_eq, Fin.coe_pred, Fin.isValue]
+    have : ↑index - 1 - o - 1 = ↑index - o - 1 - 1 :=
+      (rfl : ↑index - (o + 1 + 1) = ↑index - (o + 1 + 1))
+      |> (Nat.add_comm o 1).subst (motive := λx ↦ ↑index - (x + 1) = ↑index - (o + 1 + 1))
+      |> (Nat.sub_sub ↑index 1 (o+1)).substr
+    --exact this.substr h₉ --seems to run into a Lean 4.10 bug when proving termination
+    simp only [this, Nat.add_eq, Fin.isValue, h₉] --no idea why simp avoids the same issue...
 
 protected theorem heapRemoveLastWithIndexRelationLt {α : Type u} {n : Nat} (heap : CompleteTree α (n+1)) (index : Fin (n+1)) (h₁ : index < (CompleteTree.Internal.heapRemoveLastWithIndex heap).snd.snd) :
   have hn : n > 0 := Nat.lt_of_lt_of_le (Fin.pos_iff_ne_zero.mpr $ Fin.ne_zero_of_gt h₁) (Nat.le_of_lt_succ (CompleteTree.Internal.heapRemoveLastWithIndex heap).snd.snd.isLt)
@@ -361,14 +360,41 @@ protected theorem heapRemoveLastWithIndexRelationLt {α : Type u} {n : Nat} (hea
     unfold Internal.heapRemoveLastWithIndex Internal.heapRemoveLastAux
     intro h₁
     split at h₁
-    rename_i o p v l r _ _ _ _
+    rename_i o p v l r _ _ _
     simp only [Nat.add_eq, ne_eq] at h₃
     simp only [h₃, Nat.add_eq, Fin.zero_eta, Fin.isValue, decide_eq_true_eq, Nat.succ_eq_add_one,
-      Fin.castLE_succ, Nat.pred_eq_sub_one, reduceDite] at h₁ ⊢
-    split
-    case isFalse h₄ =>
+      Fin.castLE_succ, Nat.pred_eq_sub_one, reduceDIte] at h₁ ⊢
+    if h₄ : p < o ∧ (p + 1).nextPowerOfTwo = p + 1 then
+      --removed left
+      --get has to go into the square hole - erm, left branch too
+      cases o
+      case zero =>
+        exact absurd h₄.left $ Nat.not_lt_zero _
+      case succ oo _ _ _ _ =>
+        rewrite[Fin.lt_iff_val_lt_val] at h₁
+        simp only [Nat.add_eq, h₄, and_self, ↓reduceDIte, Fin.isValue, Fin.val_succ,
+          Fin.coe_castLE] at h₁ ⊢
+        have h₂₂ : index > 0 := Nat.zero_lt_of_ne_zero $ Fin.val_ne_iff.mpr h₂
+        have h₆ := (Nat.add_comm_right oo 1 p).subst hi
+        have h₈ : (⟨index.val, h₆⟩ : Fin (oo + p + 1)) > ⟨0,Nat.succ_pos _⟩ := h₂₂
+        have h₇ : (⟨index.val, h₆⟩ : Fin (oo + p + 1)) ≤ oo := by
+          generalize (Internal.heapRemoveLastAux l (β := λn ↦ α × Fin n) _ _ _).2.snd = i at h₁
+          have a : i.val ≤ oo := Nat.le_of_lt_succ i.isLt
+          have b : index.val ≤ i.val := Nat.le_of_lt_succ h₁
+          exact Nat.le_trans b a
+        have h₅ : index ≤ oo+1 := Nat.le_succ_of_le h₇
+        rewrite[get_left' _ h₂₂ h₅]
+        rewrite[heapRemoveLastWithIndexRelationGt_Aux2]
+        case h₃ => exact Nat.succ_pos _
+        case h₄ => exact h₆
+        rewrite[get_left' _ h₈ h₇]
+        have : index.val - 1 < oo + 1 := Nat.sub_one_lt_of_le h₂₂ h₅
+        have h₉ : ⟨↑index - 1, this⟩ < (Internal.heapRemoveLastWithIndex l).snd.snd :=
+            Nat.sub_lt_of_lt_add h₁ h₂₂
+        exact CompleteTree.AdditionalProofs.heapRemoveLastWithIndexRelationLt l ⟨↑index - 1, _⟩ h₉
+    else
       --removed right
-      simp only [h₄, ↓reduceDite, Fin.isValue] at h₁ ⊢
+      simp only [h₄, ↓reduceDIte, Fin.isValue] at h₁ ⊢
       cases p
       case zero =>
         simp (config := { ground := true }) only [Nat.zero_add, and_true, Nat.not_lt, Nat.le_zero_eq] at h₄
@@ -398,34 +424,6 @@ protected theorem heapRemoveLastWithIndexRelationLt {α : Type u} {n : Nat} (hea
           have h₅ : (⟨index.val, hi⟩ : Fin (o + (pp+1))) ≤ o := h₄₂
           have h₆ : (⟨index.val, hi⟩ : Fin (o + (pp+1))) > ⟨0,Nat.succ_pos _⟩ := h₂₂
           rw[get_left' _ h₆ h₅]
-    case isTrue h₄ =>
-      --removed left
-      --get has to go into the square hole - erm, left branch too
-      cases o
-      case zero =>
-        exact absurd h₄.left $ Nat.not_lt_zero _
-      case succ oo _ _ _ _ =>
-        rewrite[Fin.lt_iff_val_lt_val] at h₁
-        simp only [Nat.add_eq, h₄, and_self, ↓reduceDite, Fin.isValue, Fin.val_succ,
-          Fin.coe_castLE] at h₁ ⊢
-        have h₂₂ : index > 0 := Nat.zero_lt_of_ne_zero $ Fin.val_ne_iff.mpr h₂
-        have h₆ := (Nat.add_comm_right oo 1 p).subst hi
-        have h₈ : (⟨index.val, h₆⟩ : Fin (oo + p + 1)) > ⟨0,Nat.succ_pos _⟩ := h₂₂
-        have h₇ : (⟨index.val, h₆⟩ : Fin (oo + p + 1)) ≤ oo := by
-          generalize (Internal.heapRemoveLastAux l (β := λn ↦ α × Fin n) _ _ _).2.snd = i at h₁
-          have a : i.val ≤ oo := Nat.le_of_lt_succ i.isLt
-          have b : index.val ≤ i.val := Nat.le_of_lt_succ h₁
-          exact Nat.le_trans b a
-        have h₅ : index ≤ oo+1 := Nat.le_succ_of_le h₇
-        rewrite[get_left' _ h₂₂ h₅]
-        rewrite[heapRemoveLastWithIndexRelationGt_Aux2]
-        case h₃ => exact Nat.succ_pos _
-        case h₄ => exact h₆
-        rewrite[get_left' _ h₈ h₇]
-        have : index.val - 1 < oo + 1 := Nat.sub_one_lt_of_le h₂₂ h₅
-        have h₉ : ⟨↑index - 1, this⟩ < (Internal.heapRemoveLastWithIndex l).snd.snd :=
-            Nat.sub_lt_of_lt_add h₁ h₂₂
-        exact CompleteTree.AdditionalProofs.heapRemoveLastWithIndexRelationLt l ⟨↑index - 1, _⟩ h₉
 
 protected theorem heapRemoveLastWithIndexRelation {α : Type u} {n : Nat} (heap : CompleteTree α (n+1)) (index : Fin (n+1)):
   let (result, removedElement, oldIndex) := CompleteTree.Internal.heapRemoveLastWithIndex heap

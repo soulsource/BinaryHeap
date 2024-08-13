@@ -73,7 +73,7 @@ private theorem if_contains_get_eq_auxl {α : Type u} {o : Nat} (tree : Complete
     have h₄ : j = indexl.val := Nat.succ.inj $ h₃.subst (motive := λx↦ x = indexl.val + 1) h₂
     have : p = (branch v l r ht1 ht2 ht3).leftLen (Nat.succ_pos _) := rfl
     have h₅ : j < p := by simp only [this, indexl.isLt, h₄]
-    simp only [h₅, ↓reduceDite, Nat.add_eq]
+    simp only [h₅, ↓reduceDIte, Nat.add_eq]
     unfold get at prereq
     split at prereq
     rename_i pp ii ll _ hel hei heq _
@@ -121,7 +121,7 @@ private theorem if_contains_get_eq_auxr {α : Type u} {o : Nat} (tree : Complete
       exact Nat.succ.inj h₂
     have : p = (branch v l r ht1 ht2 ht3).leftLen (Nat.succ_pos _) := rfl
     have h₅ : ¬(j < p) := by simp_arith [this, h₄]
-    simp only [h₅, ↓reduceDite, Nat.add_eq]
+    simp only [h₅, ↓reduceDIte, Nat.add_eq]
     unfold get at prereq
     split at prereq
     rename_i pp ii rr _ hel hei heq _

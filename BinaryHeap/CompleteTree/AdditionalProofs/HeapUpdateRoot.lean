@@ -68,7 +68,7 @@ theorem heapUpdateRootOnlyUpdatesRoot {α : Type u} {n : Nat} (le : α → α �
         simp
         if h : j < oo + 1 then
           -- index was in l
-          simp only [h, ↓reduceDite] at h₃
+          simp only [h, ↓reduceDIte] at h₃
           split
           case isTrue =>
             simp
@@ -111,7 +111,7 @@ theorem heapUpdateRootOnlyUpdatesRoot {α : Type u} {n : Nat} (le : α → α �
               exists ⟨j, h⟩
         else
           -- index was in r
-          simp only [h, ↓reduceDite] at h₃
+          simp only [h, ↓reduceDIte] at h₃
           rename_i h₄ _ _ _ _
           have h₄ : j - (oo + 1) < pp + 1 := Nat.sub_lt_left_of_lt_add (Nat.le_of_not_gt h) (Nat.lt_of_succ_lt_succ h₄)
           split
@@ -162,10 +162,10 @@ theorem heapUpdateRootContainsUpdatedElement {α : Type u} {n : Nat} (tree : Com
   unfold heapUpdateRoot
   split
   rename_i o p v l r _ _ _ h₁
-  cases o <;> simp only [Nat.add_eq, Nat.succ_eq_add_one, Nat.add_one_ne_zero, ↓reduceDite]
+  cases o <;> simp only [Nat.add_eq, Nat.succ_eq_add_one, Nat.add_one_ne_zero, ↓reduceDIte]
   case zero => simp only [contains, true_or]
   case succ oo _ _ _ =>
-    cases p <;> simp only [Nat.add_one_ne_zero, ↓reduceDite]
+    cases p <;> simp only [Nat.add_one_ne_zero, ↓reduceDIte]
     case zero =>
       split
       case isTrue => simp only [contains, true_or]

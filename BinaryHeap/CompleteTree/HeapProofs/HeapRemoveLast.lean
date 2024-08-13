@@ -117,12 +117,12 @@ private theorem heapRemoveLastAuxIsHeap
   rename_i n m v l r _ _ _
   exact
     if h₄ : 0 = (n+m) then by
-      simp only [h₄, reduceDite, castZeroHeap]
+      simp only [h₄, reduceDIte, castZeroHeap]
     else by
       simp[h₄]
       exact
         if h₅ : (m<n ∧ Nat.nextPowerOfTwo (m+1) = m+1) then by
-          simp only [h₅, and_self, ↓reduceDite]
+          simp only [h₅, and_self, ↓reduceDIte]
           cases n
           case zero =>
             exact absurd h₅.left $ Nat.not_lt_zero m

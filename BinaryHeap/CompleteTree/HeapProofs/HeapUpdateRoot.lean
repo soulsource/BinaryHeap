@@ -60,7 +60,7 @@ have h₃ : 0 < leftLen heap h₂ := heapUpdateRootPossibleRootValuesAuxL heap (
   case zero => simp only[root, true_or]
   case succ oo =>
     have h₆ : p = 0 := by simp at h₁; omega
-    simp only [h₆, ↓reduceDite]
+    simp only [h₆, ↓reduceDIte]
     cases le value (l.root _)
     <;> simp[heapUpdateRootReturnsRoot, root_unfold, left_unfold]
 
@@ -81,7 +81,7 @@ have h₄ : 0 < rightLen heap h₂ := heapUpdateRootPossibleRootValuesAuxR heap 
   case zero => simp only[root, true_or]
   case succ oo =>
     have h₆ : p ≠ 0 := by simp at h₁; omega
-    simp only [Nat.add_one_ne_zero, ↓reduceDite, h₆]
+    simp only [Nat.add_one_ne_zero, ↓reduceDIte, h₆]
     cases le value (l.root _) <;> simp
     rotate_right
     cases le value (r.root _) <;> simp
@@ -161,7 +161,7 @@ theorem heapUpdateRootIsHeap {α : Type u} {n: Nat} (le : α → α → Bool) (v
     rename_i o p v l r h₇ h₈ h₉ heq
     exact
       if h₁₀ : o = 0 then by
-        simp only [Nat.add_eq, Nat.succ_eq_add_one, h₁₀, ↓reduceDite]
+        simp only [Nat.add_eq, Nat.succ_eq_add_one, h₁₀, ↓reduceDIte]
         unfold HeapPredicate at h₂ ⊢
         simp only [h₂, true_and]
         unfold HeapPredicate.leOrLeaf
@@ -172,7 +172,7 @@ theorem heapUpdateRootIsHeap {α : Type u} {n: Nat} (le : α → α → Bool) (v
         case right => match p, r with
         | Nat.zero, _ => trivial
       else if h₁₁ : p = 0 then by
-        simp only [↓reduceDite, h₁₀, h₁₁]
+        simp only [↓reduceDIte, h₁₀, h₁₁]
         cases h₉ : le value (root l (_ : 0 < o)) <;> simp
         case true =>
           unfold HeapPredicate at *
@@ -202,7 +202,7 @@ theorem heapUpdateRootIsHeap {α : Type u} {n: Nat} (le : α → α → Bool) (v
             exact h₄
       else if h₁₂ : le value (root l (Nat.zero_lt_of_ne_zero h₁₀)) ∧ le value (root r (Nat.zero_lt_of_ne_zero h₁₁)) then by
         unfold HeapPredicate at *
-        simp only [↓reduceDite, and_self, ↓reduceIte, true_and, h₁₀, h₁₁, h₁₂, h₂]
+        simp only [↓reduceDIte, and_self, ↓reduceIte, true_and, h₁₀, h₁₁, h₁₂, h₂]
         unfold HeapPredicate.leOrLeaf
         cases o
         · contradiction
@@ -210,7 +210,7 @@ theorem heapUpdateRootIsHeap {α : Type u} {n: Nat} (le : α → α → Bool) (v
           · contradiction
           · assumption
       else by
-        simp only [↓reduceDite, ↓reduceIte, h₁₀, h₁₁, h₁₂]
+        simp only [↓reduceDIte, ↓reduceIte, h₁₀, h₁₁, h₁₂]
         have h₁₃ : ¬le value (root l _) ∨ ¬le value (root r _) := (Decidable.not_and_iff_or_not (le value (root l (Nat.zero_lt_of_ne_zero h₁₀)) = true) (le value (root r (Nat.zero_lt_of_ne_zero h₁₁)) = true)).mp h₁₂
         cases h₁₄ : le (root l (_ : 0 < o)) (root r (_ : 0 < p))
         <;> simp only [Bool.false_eq_true, ↓reduceIte]

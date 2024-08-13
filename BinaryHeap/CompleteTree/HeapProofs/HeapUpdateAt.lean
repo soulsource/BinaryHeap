@@ -26,7 +26,7 @@ private theorem heapUpdateAtIsHeapLeRootAux_ValueLeRoot {α : Type u} {n : Nat} 
     unfold heapUpdateRoot
     split
     rename_i o p v l r h₆ h₇ h₈ h₂
-    cases o <;> cases p <;> simp only [↓reduceDite,HeapPredicate.leOrLeaf, root_unfold, h₄, reflexive_le]
+    cases o <;> cases p <;> simp only [↓reduceDIte,HeapPredicate.leOrLeaf, root_unfold, h₄, reflexive_le]
     <;> unfold HeapPredicate at h₁
     <;> have h₁₀ : le value $ l.root (by omega) := h₅ value v (l.root _) ⟨h₃, h₁.right.right.left⟩
     simp only [↓reduceIte, Nat.add_zero, h₁₀, root_unfold, h₄, reflexive_le]

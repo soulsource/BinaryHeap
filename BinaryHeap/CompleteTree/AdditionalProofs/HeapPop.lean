@@ -13,7 +13,7 @@ theorem heapPopReturnsRoot {α : Type u} {n : Nat} (tree : CompleteTree α (n+1)
     split
     rename_i n m v l r _ _ _
     have h₂ : 0 = n + m := Eq.symm $  Nat.eq_zero_of_le_zero $ Nat.le_of_not_gt h₁
-    simp only [h₂, ↓reduceDite, id_eq, root_unfold]
+    simp only [h₂, ↓reduceDIte, id_eq, root_unfold]
     have : n = 0 := And.left $ Nat.add_eq_zero.mp h₂.symm
     subst n
     have : m = 0 := And.right $ Nat.add_eq_zero.mp h₂.symm
