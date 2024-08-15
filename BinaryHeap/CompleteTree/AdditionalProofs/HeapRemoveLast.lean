@@ -425,6 +425,12 @@ protected theorem heapRemoveLastWithIndexRelationLt {α : Type u} {n : Nat} (hea
           have h₆ : (⟨index.val, hi⟩ : Fin (o + (pp+1))) > ⟨0,Nat.succ_pos _⟩ := h₂₂
           rw[get_left' _ h₆ h₅]
 
+/--
+  Shows that for each index in the original tree there is a corresponding index in the resulting tree of heapRemoveLast,
+  except for the element returned by heapRemoveLast (WithIndex).
+  This is a rigourous proof that heapRemoveLast does not modify the tree in any other ways than removing
+  the last element.
+ -/
 protected theorem heapRemoveLastWithIndexRelation {α : Type u} {n : Nat} (heap : CompleteTree α (n+1)) (index : Fin (n+1)):
   let (result, removedElement, oldIndex) := CompleteTree.Internal.heapRemoveLastWithIndex heap
   if h₁ : index > oldIndex then
@@ -461,7 +467,10 @@ protected theorem heapRemoveLastWithIndexRelation {α : Type u} {n : Nat} (heap 
         |> Eq.symm
 
 
-/--If the resulting tree contains all elements except the removed one, and contains one less than the original, well, you get the idea.-/
+/--
+  Shows that each element contained before removing the last that is not the last is still contained after removing the last.
+  This is not a rigorous proof that the rest of the tree remained unchanged. Such a proof exists in heapRemoveLastWithIndexRelation
+  -/
 protected theorem heapRemoveLastWithIndexOnlyRemovesOneElement {α : Type u} {n : Nat} (heap : CompleteTree α (n+1)) (index : Fin (n+1)) :
   let (newHeap, _, removedIndex) := Internal.heapRemoveLastWithIndex heap
   (h₁ : index ≠ removedIndex) → newHeap.contains (heap.get index (Nat.succ_pos n))
@@ -483,6 +492,10 @@ protected theorem heapRemoveLastWithIndexOnlyRemovesOneElement {α : Type u} {n 
     case isFalse h₅ =>
       omega --contradiction
 
+/--
+  Shows that each element contained before removing the last that is not the last is still contained after removing the last.
+  This is not a rigorous proof that the rest of the tree remained unchanged. Such a proof exists in heapRemoveLastWithIndexRelation
+  -/
 protected theorem heapRemoveLastWithIndexEitherContainsOrReturnsElement {α : Type u} {n : Nat} (heap : CompleteTree α (n+1)) (index : Fin (n+1)) :
   let (newHeap, removedElement, _) := Internal.heapRemoveLastWithIndex heap
   newHeap.contains (heap.get index (Nat.succ_pos n)) ∨ removedElement = heap.get index (Nat.succ_pos n)
@@ -498,6 +511,10 @@ protected theorem heapRemoveLastWithIndexEitherContainsOrReturnsElement {α : Ty
     subst index
     exact h₂.symm
 
+/--
+  Shows that each element contained before removing the last that is not the last is still contained after removing the last.
+  This is not a rigorous proof that the rest of the tree remained unchanged. Such a proof exists in heapRemoveLastWithIndexRelation
+  -/
 protected theorem heapRemoveLastEitherContainsOrReturnsElement {α : Type u} {n : Nat} (heap : CompleteTree α (n+1)) (index : Fin (n+1)) :
   let (newHeap, removedElement) := Internal.heapRemoveLast heap
   newHeap.contains (heap.get index (Nat.succ_pos n)) ∨ removedElement = heap.get index (Nat.succ_pos n)

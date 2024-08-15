@@ -11,6 +11,11 @@ namespace BinaryHeap.CompleteTree.AdditionalProofs
 
 abbrev heapUpdateRootReturnsRoot {α : Type u} {n : Nat} (le : α → α → Bool) (value : α) (heap : CompleteTree α n) (h₁ : n > 0)  := CompleteTree.heapUpdateRootReturnsRoot le value heap h₁
 
+/--
+  Shows that each element contained before updating the root that is not the root is still contained after updating the root.
+  This is not a rigorous proof that the rest of the tree remained unchanged. See comment on heapPopOnlyRemovesRoot.
+  Imho it is still a good indication that there are no obvious bugs.
+  -/
 theorem heapUpdateRootOnlyUpdatesRoot {α : Type u} {n : Nat} (le : α → α → Bool) (tree : CompleteTree α n) (h₁ : n > 0) (index : Fin n) (h₂ : index ≠ ⟨0, h₁⟩) (value : α) : (tree.heapUpdateRoot le value h₁).fst.contains $ tree.get index h₁ := by
   generalize h₃ : (get index tree h₁) = oldVal
   unfold get at h₃
