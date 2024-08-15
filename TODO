@@ -13,6 +13,7 @@ This is a rough outline of upcoming tasks:
 [x] Prove that CompleteTree.heapUpdateRoot indeed exchanges the value at the root.
     - Done by showing that the new tree contains all elements except the root, and the updated value.
 [x] Prove that heapPop leaves all values in the tree, except the root.
+    - Current proof is not rigorous. Needs more work in the future.
 [x] Prove that heapPop returns the root
 [ ] Prove that CompleteTree.heapUpdateAt returns the element at the given index
 [ ] Prove that CompleteTree.heapUpdateAt indeed updates the value at the given index.
@@ -21,4 +22,7 @@ This is a rough outline of upcoming tasks:
 [ ] Prove that CompleteTree.heapRemoveAt leaves all values in the tree except at the input index.
 
 
+Stuff below is not scheduled to happen any time soon.
+[ ] Make proofs that currently aren't rigorous rigorous.
+    - For instance by using element counts instead of just contains.
 [ ] Write the performance part of this file.
