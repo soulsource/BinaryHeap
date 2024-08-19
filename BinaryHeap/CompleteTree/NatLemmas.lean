@@ -190,3 +190,31 @@ theorem lt_of_add {a b c : Nat} : a + b < c → a < c ∧ b < c := by
     exact lt_of_add_left h₁
   case right =>
     exact lt_of_add_right h₁
+
+theorem pred_ne_of_ne {a b : Nat} (h₁ : a > 0) (h₂ : b > 0) : a ≠ b ↔ a - 1 ≠ b - 1 :=
+  Iff.intro
+    (λh₃ h₄ ↦
+      congrArg Nat.succ h₄
+      |> (Nat.succ_pred (Nat.ne_of_gt h₁)).subst (motive := λx ↦ x = b.pred.succ)
+      |> (Nat.succ_pred (Nat.ne_of_gt h₂)).subst
+      |> flip absurd h₃
+    )
+    (λh₃ h₄ ↦
+      h₄
+      |> (Nat.succ_pred (Nat.ne_of_gt h₁)).substr
+      |> (Nat.succ_pred (Nat.ne_of_gt h₂)).substr
+      |> Nat.succ.inj
+      |> flip absurd h₃
+    )
+
+theorem sub_ne_of_ne {a b c : Nat} (h₁ : a ≥ c) (h₂ : b ≥ c) : a ≠ b ↔ a - c ≠ b - c := by
+  induction c
+  case zero => rfl
+  case succ cc hc =>
+    rw[←Nat.sub_sub]
+    rw[←Nat.sub_sub]
+    have h₃ := (Nat.lt_of_succ_le h₁)
+    have h₄ := (Nat.lt_of_succ_le h₂)
+    have h₅ := hc (Nat.le_of_lt h₃) (Nat.le_of_lt h₄)
+    rw[h₅]
+    apply pred_ne_of_ne (Nat.sub_pos_of_lt h₃) (Nat.sub_pos_of_lt h₄)

@@ -1,5 +1,6 @@
 import BinaryHeap.CompleteTree.HeapOperations
 import BinaryHeap.CompleteTree.Lemmas
+import BinaryHeap.CompleteTree.NatLemmas
 import BinaryHeap.CompleteTree.HeapProofs.HeapUpdateRoot
 
 namespace BinaryHeap.CompleteTree

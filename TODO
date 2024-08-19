@@ -15,14 +15,14 @@ This is a rough outline of upcoming tasks:
 [x] Prove that heapPop leaves all values in the tree, except the root.
     - Current proof is not rigorous. Needs more work in the future.
 [x] Prove that heapPop returns the root
-[ ] Prove that CompleteTree.heapUpdateAt returns the element at the given index
-[ ] Prove that CompleteTree.heapUpdateAt indeed updates the value at the given index.
+[x] Prove that CompleteTree.heapUpdateAt returns the element at the given index
+[x] Prove that CompleteTree.heapUpdateAt indeed updates the value at the given index.
     - Use the same approach as heapUpdateRoot
 [ ] Prove that CompleteTree.heapRemoveAt returns the element at the given index
 [ ] Prove that CompleteTree.heapRemoveAt leaves all values in the tree except at the input index.
 
 
-Stuff below is not scheduled to happen any time soon.
+Stuff below is not scheduled to happen any time soon. Feel free to contribute though.
 [ ] Make proofs that currently aren't rigorous rigorous.
-    - For instance by using element counts instead of just contains.
+    - For instance by using element counts instead of contains.
 [ ] Write the performance part of this file.
