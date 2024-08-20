@@ -3,3 +3,4 @@ import BinaryHeap.CompleteTree.AdditionalProofs.HeapRemoveLast
 import BinaryHeap.CompleteTree.AdditionalProofs.HeapUpdateRoot
 import BinaryHeap.CompleteTree.AdditionalProofs.HeapPop
 import BinaryHeap.CompleteTree.AdditionalProofs.HeapUpdateAt
+import BinaryHeap.CompleteTree.AdditionalProofs.HeapRemoveAt
