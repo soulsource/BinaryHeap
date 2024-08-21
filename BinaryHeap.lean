@@ -61,15 +61,14 @@ instance : GetElem (BinaryHeap α le n) (Fin n) α (λ _ _ ↦ n > 0) where
   | (_+1), {tree, ..}, index => tree.get' index
 
 /--Helper for the common case of using natural numbers for sorting.-/
-theorem nat_ble_to_heap_le_total : total_le Nat.ble := by
-  unfold total_le
-  simp only [Nat.ble_eq]
-  exact Nat.le_total
+theorem nat_ble_to_heap_le_total : total_le Nat.ble :=
+  λa b ↦ Nat.ble_eq.substr $ Nat.ble_eq.substr (Nat.le_total a b)
 
 /--Helper for the common case of using natural numbers for sorting.-/
-theorem nat_ble_to_heap_transitive_le : transitive_le Nat.ble := by
-  unfold transitive_le
-  intros a b c
-  repeat rw[Nat.ble_eq]
-  rw[and_imp]
-  exact Nat.le_trans
+theorem nat_ble_to_heap_transitive_le : transitive_le Nat.ble :=
+  λ a b c ↦
+    Nat.le_trans (n := a) (m := b) (k := c)
+    |> Nat.ble_eq.substr
+    |> Nat.ble_eq.substr
+    |> Nat.ble_eq.substr
+    |> and_imp.mpr
