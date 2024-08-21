@@ -19,7 +19,7 @@ This is a rough outline of upcoming tasks:
 [x] Prove that CompleteTree.heapUpdateAt indeed updates the value at the given index.
     - Use the same approach as heapUpdateRoot
 [x] Prove that CompleteTree.heapRemoveAt returns the element at the given index
-[ ] Prove that CompleteTree.heapRemoveAt leaves all values in the tree except at the input index.
+[x] Prove that CompleteTree.heapRemoveAt leaves all values in the tree except at the input index.
 
 
 Stuff below is not scheduled to happen any time soon. Feel free to contribute though.
