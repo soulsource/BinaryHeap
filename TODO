@@ -2,7 +2,7 @@ This is a rough outline of upcoming tasks:
 
 [x] Prove that an index exists such that after CompleteTree.heapPush the pushed element can be obtained by
     CompleteTree.get
-[ ] Prove that CompleteTree.heapPush leaves all elements that were already in the heap in the heap.
+[x] Prove that CompleteTree.heapPush leaves all elements that were already in the heap in the heap.
 [x] Prove that CompleteTree.heapRemoveLastWithIndex and CompleteTree.heapRemoveLast yield the same tree
 [x] Prove that CompleteTree.heapRemoveLastWithIndex and CompleteTree.heapRemoveLast yield the same element
 [x] Prove that CompleteTree.heapRemoveLastWithIndex only removes one element and leaves the rest unchanged

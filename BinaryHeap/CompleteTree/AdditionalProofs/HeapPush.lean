@@ -45,3 +45,71 @@ theorem heapPushContainsValue {α : Type u} {n : Nat} (le : α → α → Bool) 
       left
       rw[left_unfold]
       exact heapPushContainsValue le l val
+
+theorem heapPushRetainsHeapValues {α : Type u} {n: Nat} (le : α → α → Bool) (heap : CompleteTree α n) (val : α) (index : Fin n) (h₁ : n > 0) : (heap.heapPush le val).contains (heap.get index h₁) := by
+  unfold heapPush
+  split
+  case h_1 =>
+    contradiction
+  case h_2 =>
+    rename_i o p v l r p_le_o max_height_difference subtree_complete
+    if h₂ : index = ⟨0, h₁⟩ then
+      subst h₂
+      cases le val v
+      <;> dsimp
+      <;> rw[←Fin.zero_eta]
+      <;> split
+      case' true.isFalse | false.isFalse => rw[←containsSeesThroughCast]
+      case false.isFalse | false.isTrue =>
+        rw[←get_zero_eq_root _ (Nat.succ_pos _), contains_as_root_left_right _ _ (Nat.succ_pos _)]
+        left
+        rw[root_unfold]
+        rw[root_unfold]
+      case' true.isFalse | true.isTrue =>
+        rw[←get_zero_eq_root _ (Nat.succ_pos _), root_unfold]
+        rw[contains_as_root_left_right _ _ (Nat.succ_pos _)]
+      case true.isFalse =>
+        right; left
+        rw[left_unfold]
+        exact heapPushContainsValue _ _ _
+      case true.isTrue =>
+        right;right
+        rw[right_unfold]
+        exact heapPushContainsValue _ _ _
+    else
+      cases le val v
+      <;> dsimp
+      case false | true =>
+        have h₂₂ : index > ⟨0, h₁⟩ := Fin.pos_iff_ne_zero.mpr h₂
+        if h₃ : index.val ≤ o then
+          split
+          case' isFalse => rw[←containsSeesThroughCast]
+          case' isTrue | isFalse =>
+            rw[get_left (.branch v l r p_le_o max_height_difference subtree_complete) index (Nat.succ_pos _) h₂₂ h₃]
+            rw[contains_as_root_left_right _ _ (Nat.succ_pos _)]
+            right; left
+            rw[left_unfold]
+            rw[left_unfold]
+          case isTrue =>
+            rw[contains_iff_index_exists _ _ (Nat.lt_of_lt_of_le (Fin.lt_iff_val_lt_val.mp h₂₂) h₃)]
+            have : index.val - 1 < o := Nat.sub_one_lt_of_le h₂₂ h₃
+            exists ⟨index.val - 1, this⟩
+          case isFalse =>
+            exact heapPushRetainsHeapValues le l _ ⟨index.val - 1, _⟩ _
+        else
+          split
+          case' isFalse => rw[←containsSeesThroughCast]
+          case' isTrue | isFalse =>
+            rw[get_right (.branch v l r p_le_o max_height_difference subtree_complete) index (Nat.succ_pos _) (Nat.gt_of_not_le h₃)]
+            rw[contains_as_root_left_right _ _ (Nat.succ_pos _)]
+            right; right
+            rw[right_unfold]
+            rw[right_unfold]
+            simp only [Nat.succ_eq_add_one, leftLen_unfold]
+          case isTrue =>
+            exact heapPushRetainsHeapValues le r _ ⟨index.val - o - 1, _⟩ _
+          case isFalse =>
+            have : (o.add p).succ = p + (o + 1) := (Nat.add_assoc p o 1).substr $ (Nat.add_comm o p).subst (motive := λx ↦ (o+p)+1 = x + 1) rfl
+            have : p > 0 := by omega
+            rw[contains_iff_index_exists _ _ this]
+            exists ⟨index.val - o - 1, by omega⟩
