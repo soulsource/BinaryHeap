@@ -5,3 +5,4 @@ import BinaryHeap.CompleteTree.AdditionalProofs.HeapPop
 import BinaryHeap.CompleteTree.AdditionalProofs.HeapUpdateAt
 import BinaryHeap.CompleteTree.AdditionalProofs.HeapRemoveAt
 import BinaryHeap.CompleteTree.AdditionalProofs.HeapPush
+import BinaryHeap.CompleteTree.AdditionalProofs.Find

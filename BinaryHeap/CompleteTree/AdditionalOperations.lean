@@ -7,7 +7,7 @@ namespace BinaryHeap.CompleteTree
 -- indexOf
 
 /--Helper function for CompleteTree.indexOf.-/
-private def indexOfAux {α : Type u} (heap : CompleteTree α o) (pred : α → Bool) (currentIndex : Nat) : Option (Fin (o+currentIndex)) :=
+protected def Internal.indexOfAux {α : Type u} (heap : CompleteTree α o) (pred : α → Bool) (currentIndex : Nat) : Option (Fin (o+currentIndex)) :=
   match o, heap with
   | 0, .leaf => none
   | (n+m+1), .branch a left right _ _ _ =>
@@ -16,17 +16,17 @@ private def indexOfAux {α : Type u} (heap : CompleteTree α o) (pred : α → B
       let result := Fin.ofNat' currentIndex sum_n_m_succ_curr
       some result
     else
-      let found_left := left.indexOfAux pred (currentIndex + 1)
+      let found_left := CompleteTree.Internal.indexOfAux left pred (currentIndex + 1)
       let found_left : Option (Fin (n+m+1+currentIndex)) := found_left.map λ a ↦ Fin.ofNat' a sum_n_m_succ_curr
       let found_right :=
         found_left
         <|>
-        (right.indexOfAux pred (currentIndex + n + 1)).map ((λ a ↦ Fin.ofNat' a sum_n_m_succ_curr) : _ → Fin (n+m+1+currentIndex))
+        (CompleteTree.Internal.indexOfAux right pred (currentIndex + n + 1)).map ((λ a ↦ Fin.ofNat' a sum_n_m_succ_curr) : _ → Fin (n+m+1+currentIndex))
       found_right
 
 /--Finds the first occurance of a given element in the heap and returns its index. Indices are depth first.-/
 def indexOf {α : Type u} (heap : CompleteTree α o) (pred : α → Bool) : Option (Fin o) :=
-  indexOfAux heap pred 0
+  CompleteTree.Internal.indexOfAux heap pred 0
 
 
 ----------------------------------------------------------------------------------------------

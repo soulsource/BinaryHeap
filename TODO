@@ -9,6 +9,7 @@ This is a rough outline of upcoming tasks:
     [x] This automatically serves as a proof for CompleteTree.heapRemoveLast, once it is shown that they
       yield the same tree
     - Done by showing how indices relate between both trees.
+[x] Prove that if CompleteTree.indexOf returns none, no index exists for which the predicate is true.
 [ ] Prove that if CompleteTree.indexOf returns some, CompleteTree.get with that result fulfills the predicate.
 [x] Prove that CompleteTree.heapUpdateRoot indeed exchanges the value at the root.
     - Done by showing that the new tree contains all elements except the root, and the updated value.
