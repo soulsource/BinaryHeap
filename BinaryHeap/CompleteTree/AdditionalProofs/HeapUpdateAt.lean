@@ -5,22 +5,23 @@ import BinaryHeap.CompleteTree.AdditionalProofs.Get
 
 namespace BinaryHeap.CompleteTree.AdditionalProofs
 
-theorem heapUpdateAtReturnsElementAt {α : Type u} {n : Nat} (le : α → α → Bool) (val : α) (heap : CompleteTree α n) (index : Fin n) (h₁ : n > 0) : heap.get index h₁ =  (heap.heapUpdateAt le index val h₁).snd := by
+theorem heapUpdateAtReturnsElementAt {α : Type u} {n : Nat} (le : α → α → Bool) (val : α) (heap : CompleteTree α n) (index : Fin n) : heap.get index = (heap.heapUpdateAt le index val).snd := by
   cases index
   rename_i i isLt
   cases i
   case mk.zero =>
-    unfold get get' heapUpdateAt
+    unfold get get'
     split
     split
     case h_2 hx =>
       have hx := Fin.val_eq_of_eq hx
       contradiction
-    case h_1 v l r h₂ h₃ h₄ _ _ _=>
+    case h_1 v l r h₂ h₃ h₄ _ _=>
       exact Eq.symm $ heapUpdateRootReturnsRoot le val (.branch v l r h₂ h₃ h₄) (Nat.succ_pos _)
   case mk.succ j =>
-    unfold heapUpdateAt
+    unfold heapUpdateAt heapUpdateAtAux
     generalize hj : (⟨j + 1, isLt⟩ : Fin n) = index -- otherwise split fails...
+    generalize heapUpdateAt.proof_1 index = h₁ -- this sounds fragile... It's the n > 0 proof
     split
     case isTrue h => simp only [←hj, beq_iff_eq, Fin.mk.injEq, Nat.add_one_ne_zero] at h --contradiction
     case isFalse =>
@@ -32,23 +33,25 @@ theorem heapUpdateAtReturnsElementAt {α : Type u} {n : Nat} (le : α → α →
         rw[get_left]
         case h₂ => exact Nat.succ_pos j
         case h₃ =>
-          rw[leftLen_unfold]
+          rw[leftLen_unfold _ _ _ _ _ _ (Nat.succ_pos _)]
           exact h₂
         apply heapUpdateAtReturnsElementAt
       case isFalse h₂ =>
-        rw[get_right]
+        rw[get_right _ _]
+        case h₁ => exact Nat.succ_pos _
         case h₂ =>
           simp only [Nat.not_le] at h₂
           simp only [leftLen_unfold, gt_iff_lt, h₂]
         apply heapUpdateAtReturnsElementAt
 
-theorem heapUpdatAtRootEqUpdateRoot {α : Type u} {le : α → α → Bool} : CompleteTree.heapUpdateAt le ⟨0, h₁⟩ = CompleteTree.heapUpdateRoot le := by
+theorem heapUpdatAtRootEqUpdateRoot {α : Type u} {le : α → α → Bool} : CompleteTree.heapUpdateAt le ⟨0, h₁⟩ = CompleteTree.heapUpdateRoot h₁ le := by
   funext
-  unfold heapUpdateAt
+  unfold heapUpdateAt heapUpdateAtAux
   rfl
 
-theorem heapUpdateAtContainsValue {α : Type u} {n : Nat} (le : α → α → Bool) (heap : CompleteTree α n) (h₁ : n > 0) (value : α) (index : Fin n) : (heap.heapUpdateAt le index value h₁).fst.contains value := by
-  unfold heapUpdateAt
+theorem heapUpdateAtContainsValue {α : Type u} {n : Nat} (le : α → α → Bool) (heap : CompleteTree α n) (value : α) (index : Fin n) : (heap.heapUpdateAt le index value).fst.contains value := by
+  unfold heapUpdateAt heapUpdateAtAux
+  generalize heapUpdateAt.proof_1 index = h₁
   split
   case isTrue h₂ =>
     apply heapUpdateRootContainsUpdatedElement
@@ -77,16 +80,18 @@ theorem heapUpdateAtContainsValue {α : Type u} {n : Nat} (le : α → α → Bo
         apply heapUpdateAtContainsValue
 termination_by n
 
-theorem heapUpdateAtOnlyUpdatesAt {α : Type u} {n : Nat} (le : α → α → Bool) (val : α) (heap : CompleteTree α n) (updateIndex : Fin n) (otherIndex : Fin n) (h₁ : n > 0) (h₂ : updateIndex ≠ otherIndex) : (heap.heapUpdateAt le updateIndex val h₁).fst.contains $ heap.get otherIndex h₁ :=
+theorem heapUpdateAtOnlyUpdatesAt {α : Type u} {n : Nat} (le : α → α → Bool) (val : α) (heap : CompleteTree α n) (updateIndex : Fin n) (otherIndex : Fin n) (h₂ : updateIndex ≠ otherIndex) : (heap.heapUpdateAt le updateIndex val).fst.contains $ heap.get otherIndex :=
+  have h₁ : n > 0 := Nat.zero_lt_of_lt otherIndex.isLt
   if h₃ : updateIndex = ⟨0, h₁⟩ then
     have h₄ : otherIndex ≠ ⟨0, h₁⟩ := h₃.subst h₂.symm
     heapUpdateRootOnlyUpdatesRoot le heap h₁ otherIndex h₄ val
-    |> heapUpdatAtRootEqUpdateRoot.substr (p := λx↦(x val heap h₁).fst.contains (heap.get otherIndex h₁))
-    |> h₃.substr (p := λx↦((heap.heapUpdateAt le x val h₁).fst.contains $ heap.get otherIndex h₁))
+    |> heapUpdatAtRootEqUpdateRoot.substr (p := λx↦(x val heap).fst.contains (heap.get otherIndex))
+    |> h₃.substr (p := λx↦((heap.heapUpdateAt le x val).fst.contains $ heap.get otherIndex))
   else if h₄ : otherIndex = ⟨0, h₁⟩ then by
     subst h₄
     rw[←get_zero_eq_root]
-    unfold heapUpdateAt
+    unfold heapUpdateAt heapUpdateAtAux
+    generalize heapUpdateAt.proof_1 updateIndex = h₁
     --cannot use h₃ here already - it makes split fail. So, splitting twice it is...
     split
     case isTrue h => exact absurd ((beq_iff_eq _ _).mp h) h₃
@@ -116,7 +121,8 @@ theorem heapUpdateAtOnlyUpdatesAt {α : Type u} {n : Nat} (le : α → α → Bo
         rewrite[root_unfold]
         apply heapUpdateAtContainsValue
   else by
-    unfold heapUpdateAt
+    unfold heapUpdateAt heapUpdateAtAux
+    generalize heapUpdateAt.proof_1 updateIndex = h₁
     split
     case isTrue hx => exact absurd ((beq_iff_eq _ _).mp hx) h₃
     case isFalse =>
@@ -152,6 +158,9 @@ theorem heapUpdateAtOnlyUpdatesAt {α : Type u} {n : Nat} (le : α → α → Bo
           rw[contains_iff_index_exists]
           generalize (⟨↑otherIndex - o - 1, _⟩ : Fin _) = solution -- Allows to skip the annoying proof that Lean already has...
           exists solution --also solves h.h₁ goal? Okay, I don't know why, but I won't complain.
+          rw[rightLen_unfold]
+          have : (o.add p).succ = p + (o + 1) := (Nat.add_assoc p o 1).substr $ (Nat.add_comm o p).subst (motive := λx ↦ (o+p)+1 = x + 1) rfl
+          omega
       case false.isFalse h₅ | true.isFalse h₅ =>
         if h₆ : otherIndex ≤ o then
           have : otherIndex ≤ (branch v l r olep mhd stc).leftLen (Nat.succ_pos _) := by simp only [leftLen_unfold, h₆]
@@ -162,6 +171,8 @@ theorem heapUpdateAtOnlyUpdatesAt {α : Type u} {n : Nat} (le : α → α → Bo
           rw[contains_iff_index_exists]
           generalize (⟨↑otherIndex - 1, _⟩ : Fin _) = solution
           exists solution
+          rw[leftLen_unfold]
+          omega
         else
           have h₆ : otherIndex > (branch v l r olep mhd stc).leftLen (Nat.succ_pos _) := by rw[leftLen_unfold]; exact Nat.gt_of_not_le h₆
           rw[get_right _ _ (Nat.succ_pos _) h₆]

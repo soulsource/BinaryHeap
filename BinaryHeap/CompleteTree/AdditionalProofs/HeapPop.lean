@@ -29,7 +29,7 @@ theorem heapPopReturnsRoot {α : Type u} {n : Nat} (tree : CompleteTree α (n+1)
   This is not a rigorous proof that the rest of the tree remained unchanged, as (1 (1 (1 1)) (2)).heapPop = (1 (2 (2 _)) (2)) would pass it too...
   Imho it is still a good indication that there are no obvious bugs.
   -/
-theorem heapPopOnlyRemovesRoot {α : Type u} {n : Nat} (tree : CompleteTree α (n+1)) (le: α → α → Bool) (index : Fin (n+1)) (h₁ : index ≠ ⟨0, Nat.succ_pos _⟩) : (tree.heapPop le).fst.contains $ tree.get index (Nat.succ_pos _) := by
+theorem heapPopOnlyRemovesRoot {α : Type u} {n : Nat} (tree : CompleteTree α (n+1)) (le: α → α → Bool) (index : Fin (n+1)) (h₁ : index ≠ ⟨0, Nat.succ_pos _⟩) : (tree.heapPop le).fst.contains $ tree.get index := by
   unfold heapPop
   split <;> simp
   case isFalse h₃ => omega --contradiction. if n == 0 then index cannot be ≠ 0

@@ -46,13 +46,15 @@ theorem heapPushContainsValue {α : Type u} {n : Nat} (le : α → α → Bool) 
       rw[left_unfold]
       exact heapPushContainsValue le l val
 
-theorem heapPushRetainsHeapValues {α : Type u} {n: Nat} (le : α → α → Bool) (heap : CompleteTree α n) (val : α) (index : Fin n) (h₁ : n > 0) : (heap.heapPush le val).contains (heap.get index h₁) := by
+theorem heapPushRetainsHeapValues {α : Type u} {n: Nat} (le : α → α → Bool) (heap : CompleteTree α n) (val : α) (index : Fin n) : (heap.heapPush le val).contains (heap.get index) := by
   unfold heapPush
   split
   case h_1 =>
+    have := index.isLt
     contradiction
   case h_2 =>
     rename_i o p v l r p_le_o max_height_difference subtree_complete
+    have h₁ : o+p+1 > 0 := Nat.succ_pos _
     if h₂ : index = ⟨0, h₁⟩ then
       subst h₂
       cases le val v
@@ -95,7 +97,7 @@ theorem heapPushRetainsHeapValues {α : Type u} {n: Nat} (le : α → α → Boo
             have : index.val - 1 < o := Nat.sub_one_lt_of_le h₂₂ h₃
             exists ⟨index.val - 1, this⟩
           case isFalse =>
-            exact heapPushRetainsHeapValues le l _ ⟨index.val - 1, _⟩ _
+            exact heapPushRetainsHeapValues le l _ ⟨index.val - 1, _⟩
         else
           split
           case' isFalse => rw[←containsSeesThroughCast]
@@ -107,7 +109,7 @@ theorem heapPushRetainsHeapValues {α : Type u} {n: Nat} (le : α → α → Boo
             rw[right_unfold]
             simp only [Nat.succ_eq_add_one, leftLen_unfold]
           case isTrue =>
-            exact heapPushRetainsHeapValues le r _ ⟨index.val - o - 1, _⟩ _
+            exact heapPushRetainsHeapValues le r _ ⟨index.val - o - 1, _⟩
           case isFalse =>
             have : (o.add p).succ = p + (o + 1) := (Nat.add_assoc p o 1).substr $ (Nat.add_comm o p).subst (motive := λx ↦ (o+p)+1 = x + 1) rfl
             have : p > 0 := by omega

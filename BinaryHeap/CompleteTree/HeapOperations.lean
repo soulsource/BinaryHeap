@@ -200,7 +200,7 @@ protected def Internal.heapRemoveLastWithIndex {α : Type u} {o : Nat} (heap : C
 /--
   Helper for heapUpdateAt. Makes proofing heap predicate work in Lean 4.9
   -/
-def heapUpdateRoot  {α : Type u} {n : Nat} (le : α → α → Bool) (value : α) (heap : CompleteTree α n) (_ : n > 0) : CompleteTree α n × α :=
+def heapUpdateRoot  {α : Type u} {n : Nat} (_ : n > 0) (le : α → α → Bool) (value : α) (heap : CompleteTree α n) : CompleteTree α n × α :=
 match n, heap with
   | (o+p+1), .branch v l r h₃ h₄ h₅ =>
     if h₆ : o = 0 then
@@ -216,7 +216,7 @@ match n, heap with
           -- We would not need to recurse further, because we know o = 1.
           -- However, that would introduce type casts, what makes proving harder...
           -- have h₉: o = 1 := Nat.le_antisymm (by simp_arith[h₈] at h₄; exact h₄) (Nat.succ_le_of_lt h₇)
-          let ln := heapUpdateRoot le value l h₇
+          let ln := heapUpdateRoot h₇ le value l
           (.branch ln.snd ln.fst r h₃ h₄ h₅, v)
       else
         have h₉ : p > 0 := Nat.zero_lt_of_ne_zero h₈
@@ -224,23 +224,18 @@ match n, heap with
         if le value lr ∧ le value rr then
           (.branch value l r h₃ h₄ h₅, v)
         else if le lr rr then -- value is gt either left or right root. Move it down accordingly
-          let ln := heapUpdateRoot le value l h₇
+          let ln := heapUpdateRoot h₇ le value l
           (.branch ln.snd ln.fst r h₃ h₄ h₅, v)
         else
-          let rn := heapUpdateRoot le value r h₉
+          let rn := heapUpdateRoot h₉ le value r
           (.branch rn.snd l rn.fst h₃ h₄ h₅, v)
 
 ----------------------------------------------------------------------------------------------
 -- heapRemoveAt
 
-/--
-  Helper for heapRemoveAt.
-  Removes the element at index, and instead inserts the given value.
-  Returns the element at index, and the resulting tree.
-  -/
-def heapUpdateAt {α : Type u} {n : Nat} (le : α → α → Bool) (index : Fin n) (value : α) (heap : CompleteTree α n) (h₁ : n > 0) : CompleteTree α n × α :=
+def heapUpdateAtAux {α : Type u} {n : Nat} (le : α → α → Bool) (index : Fin n) (value : α) (heap : CompleteTree α n) (h₁ : n > 0) : CompleteTree α n × α :=
   if h₂ : index == ⟨0,h₁⟩ then
-    heapUpdateRoot le value heap h₁
+    heapUpdateRoot h₁ le value heap
   else
     match n, heap with
     | (o+p+1), .branch v l r h₃ h₄ h₅ =>
@@ -249,7 +244,7 @@ def heapUpdateAt {α : Type u} {n : Nat} (le : α → α → Bool) (index : Fin 
         have h₇ : Nat.pred index.val < o := Nat.lt_of_lt_of_le (Nat.pred_lt $ Fin.val_ne_of_ne (ne_of_beq_false $ Bool.of_not_eq_true h₂)) h₆
         let index_in_left : Fin o := ⟨index.val.pred, h₇⟩
         have h₈ : 0 < o := Nat.zero_lt_of_lt h₇
-        let result := heapUpdateAt le index_in_left value l h₈
+        let result := heapUpdateAtAux le index_in_left value l h₈
         (.branch v result.fst r h₃ h₄ h₅, result.snd)
       else
         have h₇ : index.val - (o + 1) < p :=
@@ -262,8 +257,16 @@ def heapUpdateAt {α : Type u} {n : Nat} (le : α → α → Bool) (index : Fin 
           Nat.sub_lt_of_lt_add h₈ $ (Nat.not_le_eq index.val o).mp h₆
         let index_in_right : Fin p := ⟨index.val - o - 1, h₇⟩
         have h₈ : 0 < p := Nat.zero_lt_of_lt h₇
-        let result := heapUpdateAt le index_in_right value r h₈
+        let result := heapUpdateAtAux le index_in_right value r h₈
         (.branch v l result.fst h₃ h₄ h₅, result.snd)
+
+/--
+  Helper for heapRemoveAt.
+  Removes the element at index, and instead inserts the given value.
+  Returns the element at index, and the resulting tree.
+  -/
+def heapUpdateAt {α : Type u} {n : Nat} (le : α → α → Bool) (index : Fin n) (value : α) (heap : CompleteTree α n) : CompleteTree α n × α :=
+  heapUpdateAtAux le index value heap (Nat.zero_lt_of_lt index.isLt)
 
 ----------------------------------------------------------------------------------------------
 -- heapPop
@@ -271,7 +274,7 @@ def heapUpdateAt {α : Type u} {n : Nat} (le : α → α → Bool) (index : Fin 
 def heapPop {α : Type u} {n : Nat} (le : α → α → Bool) (heap : CompleteTree α (n+1)) : CompleteTree α n × α :=
   let l := Internal.heapRemoveLast heap
   if p : n > 0 then
-    heapUpdateRoot le l.snd l.fst p
+    heapUpdateRoot p le l.snd l.fst
   else
     l
 
@@ -288,17 +291,13 @@ def heapRemoveAt {α : Type u} {n : Nat} (le : α → α → Bool) (index : Fin 
     heapPop le heap
   else
     let (remaining_tree, removed_element, removed_index) := Internal.heapRemoveLastWithIndex heap
-    if p : index = removed_index then
+    if index = removed_index then
       (remaining_tree, removed_element)
     else
-      have n_gt_zero : n > 0 := by
-        cases n
-        case succ nn => exact Nat.zero_lt_succ nn
-        case zero => omega
       if index_lt_lastIndex : index ≥ removed_index then
         let index := index.pred index_ne_zero
-        heapUpdateAt le index removed_element remaining_tree n_gt_zero
+        heapUpdateAt le index removed_element remaining_tree
       else
         let h₁ : index < n := by omega
         let index : Fin n := ⟨index, h₁⟩
-        heapUpdateAt le index removed_element remaining_tree n_gt_zero
+        heapUpdateAt le index removed_element remaining_tree

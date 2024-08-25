@@ -16,8 +16,8 @@ abbrev heapUpdateRootReturnsRoot {α : Type u} {n : Nat} (le : α → α → Boo
   This is not a rigorous proof that the rest of the tree remained unchanged. See comment on heapPopOnlyRemovesRoot.
   Imho it is still a good indication that there are no obvious bugs.
   -/
-theorem heapUpdateRootOnlyUpdatesRoot {α : Type u} {n : Nat} (le : α → α → Bool) (tree : CompleteTree α n) (h₁ : n > 0) (index : Fin n) (h₂ : index ≠ ⟨0, h₁⟩) (value : α) : (tree.heapUpdateRoot le value h₁).fst.contains $ tree.get index h₁ := by
-  generalize h₃ : (get index tree h₁) = oldVal
+theorem heapUpdateRootOnlyUpdatesRoot {α : Type u} {n : Nat} (le : α → α → Bool) (tree : CompleteTree α n) (h₁ : n > 0) (index : Fin n) (h₂ : index ≠ ⟨0, h₁⟩) (value : α) : (tree.heapUpdateRoot h₁ le value).fst.contains $ tree.get index := by
+  generalize h₃ : (get index tree) = oldVal
   unfold get at h₃
   unfold heapUpdateRoot
   split
@@ -163,7 +163,7 @@ theorem heapUpdateRootOnlyUpdatesRoot {α : Type u} {n : Nat} (le : α → α �
                 simp only [Nat.add_one_ne_zero, not_false_eq_true]
 termination_by n
 
-theorem heapUpdateRootContainsUpdatedElement {α : Type u} {n : Nat} (tree : CompleteTree α n) (le : α → α → Bool) (value : α) (h₁ : n > 0): (tree.heapUpdateRoot le value h₁).fst.contains value := by
+theorem heapUpdateRootContainsUpdatedElement {α : Type u} {n : Nat} (tree : CompleteTree α n) (le : α → α → Bool) (value : α) (h₁ : n > 0): (tree.heapUpdateRoot h₁ le value).fst.contains value := by
   unfold heapUpdateRoot
   split
   rename_i o p v l r _ _ _ h₁

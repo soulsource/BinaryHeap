@@ -41,17 +41,9 @@ private theorem if_get_eq_contains {α : Type u} {o : Nat} (tree : CompleteTree 
         apply if_get_eq_contains
         done
 
-private theorem if_contains_get_eq_auxl {α : Type u} {o : Nat} (tree : CompleteTree α (o+1)) (element : α) (h₁ : o > 0) :
-  have : tree.leftLen (Nat.lt_succ_of_lt h₁) > 0 := by
-    unfold leftLen;
-    split
-    unfold length
-    rename_i hx _ _
-    simp only [Nat.add_eq, Nat.succ_eq_add_one, Nat.reduceEqDiff] at hx
-    omega
-  ∀(indexl : Fin (tree.leftLen (Nat.succ_pos o))), (tree.left _).get indexl this = element → ∃(index : Fin (o+1)), tree.get index (Nat.lt_succ_of_lt h₁) = element
+private theorem if_contains_get_eq_auxl {α : Type u} {o : Nat} (tree : CompleteTree α (o+1)) (element : α) :
+  ∀(indexl : Fin (tree.leftLen (Nat.succ_pos o))), (tree.left _).get indexl = element → ∃(index : Fin (o+1)), tree.get index = element
 := by
-  simp
   intro indexl
   let index : Fin (o+1) := indexl.succ.castLT (by
     simp only [Nat.succ_eq_add_one, Fin.val_succ, Nat.succ_lt_succ_iff, gt_iff_lt]
@@ -76,9 +68,9 @@ private theorem if_contains_get_eq_auxl {α : Type u} {o : Nat} (tree : Complete
     simp only [h₅, ↓reduceDIte, Nat.add_eq]
     unfold get at prereq
     split at prereq
-    rename_i pp ii ll _ hel hei heq _
+    rename_i pp ii ll hel hei heq
     split
-    rename_i ppp lll _ _ _ _ _ _ _
+    rename_i ppp lll _ _ _ _ _ _
     have : pp = ppp := by omega
     subst pp
     simp only [gt_iff_lt, Nat.succ_eq_add_one, Nat.add_eq, heq_eq_eq, Nat.zero_lt_succ] at *
@@ -90,8 +82,8 @@ private theorem if_contains_get_eq_auxl {α : Type u} {o : Nat} (tree : Complete
     rw[heq]
     assumption
 
-private theorem if_contains_get_eq_auxr {α : Type u} {o : Nat} (tree : CompleteTree α (o+1)) (element : α) (h₁ : tree.rightLen (Nat.succ_pos o) > 0) :
-  ∀(indexl : Fin (tree.rightLen (Nat.succ_pos o))), (tree.right _).get indexl h₁ = element → ∃(index : Fin (o+1)), tree.get index (Nat.succ_pos o) = element
+private theorem if_contains_get_eq_auxr {α : Type u} {o : Nat} (tree : CompleteTree α (o+1)) (element : α) :
+  ∀(indexl : Fin (tree.rightLen (Nat.succ_pos o))), (tree.right _).get indexl = element → ∃(index : Fin (o+1)), tree.get index = element
 := by
   intro indexr
   let index : Fin (o+1) := ⟨(tree.leftLen (Nat.succ_pos o) + indexr.val + 1), by
@@ -124,9 +116,9 @@ private theorem if_contains_get_eq_auxr {α : Type u} {o : Nat} (tree : Complete
     simp only [h₅, ↓reduceDIte, Nat.add_eq]
     unfold get at prereq
     split at prereq
-    rename_i pp ii rr _ hel hei heq _
+    rename_i pp ii rr hel hei heq
     split
-    rename_i ppp rrr _ _ _ _ _ _ _ _
+    rename_i ppp rrr _ _ _ _ _ _ _
     have : pp = ppp := by rw[rightLen_unfold] at hel; exact Nat.succ.inj hel.symm
     subst pp
     simp only [gt_iff_lt, ne_eq, Nat.succ_eq_add_one, Nat.add_eq, Nat.reduceEqDiff, heq_eq_eq, Nat.zero_lt_succ] at *
@@ -161,7 +153,7 @@ private theorem if_contains_get_eq {α : Type u} {o : Nat} (tree : CompleteTree 
       | (nn+1), l => by
         have nn_lt_o : nn < o := by have : o = nn + 1 + m := Nat.succ.inj he; omega --also for termination
         have h₃ := if_contains_get_eq l element h₂
-        have h₄ := if_contains_get_eq_auxl tree element $ Nat.zero_lt_of_lt nn_lt_o
+        have h₄ := if_contains_get_eq_auxl tree element
         simp only at h₄
         simp[get_eq_get'] at h₃ ⊢
         apply h₃.elim
@@ -179,12 +171,7 @@ private theorem if_contains_get_eq {α : Type u} {o : Nat} (tree : CompleteTree 
       | (mm+1), r => by
         have mm_lt_o : mm < o := by have : o = n + (mm + 1) := Nat.succ.inj he; omega --termination
         have h₃ := if_contains_get_eq r element h₂
-        have : tree.rightLen (Nat.succ_pos o) > 0 := by
-          have := heqSameRightLen (he) (Nat.succ_pos o) heq
-          simp[rightLen_unfold] at this
-          rw[this]
-          exact Nat.succ_pos mm
-        have h₄ := if_contains_get_eq_auxr tree element this
+        have h₄ := if_contains_get_eq_auxr tree element
         simp[get_eq_get'] at h₃ ⊢
         apply h₃.elim
         match o, tree with
@@ -206,6 +193,6 @@ theorem contains_iff_index_exists' {α : Type u} {o : Nat} (tree : CompleteTree 
   case mp =>
     exact if_contains_get_eq tree element
 
-theorem contains_iff_index_exists {α : Type u} {n : Nat} (tree : CompleteTree α n) (element : α) (h₁ : n > 0): tree.contains element ↔ ∃ (index : Fin n), tree.get index h₁ = element :=
+theorem contains_iff_index_exists {α : Type u} {n : Nat} (tree : CompleteTree α n) (element : α) (_ : n > 0): tree.contains element ↔ ∃ (index : Fin n), tree.get index = element :=
   match n, tree with
   | _+1, tree => contains_iff_index_exists' tree element

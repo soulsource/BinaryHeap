@@ -21,12 +21,12 @@ theorem heapRemoveAtReturnsElementAt {α : Type u} {n : Nat} (le : α → α →
         simp only[h₂, h₃, ↓reduceDIte]
         have h₄ := CompleteTree.AdditionalProofs.heapRemoveLastWithIndexRelationGt heap index $ Nat.lt_of_le_of_ne h₃ (Fin.val_ne_iff.mpr (Ne.symm h₂))
         rewrite[get_eq_get', ←h₄]
-        exact Eq.symm $ heapUpdateAtReturnsElementAt le _ _ _ _
+        exact Eq.symm $ heapUpdateAtReturnsElementAt le _ _ _
       else
         simp only[h₂, h₃, ↓reduceDIte]
         have h₄ := CompleteTree.AdditionalProofs.heapRemoveLastWithIndexRelationLt heap index (Nat.gt_of_not_le h₃)
         rewrite[get_eq_get', ←h₄]
-        exact Eq.symm $ heapUpdateAtReturnsElementAt le _ _ _ _
+        exact Eq.symm $ heapUpdateAtReturnsElementAt le _ _ _
 
 theorem heapRemoveAtOnlyRemovesAt {α : Type u} {n : Nat} (le : α → α → Bool) (heap : CompleteTree α (n+1)) (removeIndex : Fin (n+1)) (otherIndex : Fin (n+1)) (h₁ : removeIndex ≠ otherIndex) : (heap.heapRemoveAt le removeIndex).fst.contains (heap.get' otherIndex) := by
   unfold heapRemoveAt
@@ -62,7 +62,7 @@ theorem heapRemoveAtOnlyRemovesAt {α : Type u} {n : Nat} (le : α → α → Bo
             subst h₉
             subst h₈
             rw[CompleteTree.AdditionalProofs.heapRemoveLastWithIndexReturnsItemAtIndex]
-            exact heapUpdateAtContainsValue _ _ _ _ _
+            exact heapUpdateAtContainsValue _ _ _ _
       else
         simp only [h₃, h₄, ↓reduceDIte]
         have h₅ := CompleteTree.AdditionalProofs.heapRemoveLastWithIndexRelation heap otherIndex
@@ -87,4 +87,4 @@ theorem heapRemoveAtOnlyRemovesAt {α : Type u} {n : Nat} (le : α → α → Bo
             subst h₉
             subst h₈
             rw[CompleteTree.AdditionalProofs.heapRemoveLastWithIndexReturnsItemAtIndex]
-            exact heapUpdateAtContainsValue _ _ _ _ _
+            exact heapUpdateAtContainsValue _ _ _ _

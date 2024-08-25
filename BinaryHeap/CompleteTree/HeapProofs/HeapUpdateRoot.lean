@@ -3,7 +3,7 @@ import BinaryHeap.CompleteTree.Lemmas
 
 namespace BinaryHeap.CompleteTree
 
-theorem heapUpdateRootReturnsRoot {α : Type u} {n : Nat} (le : α → α → Bool) (value : α) (heap : CompleteTree α n) (h₁ : n > 0) : (heap.heapUpdateRoot le value h₁).snd = heap.root h₁ := by
+theorem heapUpdateRootReturnsRoot {α : Type u} {n : Nat} (le : α → α → Bool) (value : α) (heap : CompleteTree α n) (h₁ : n > 0) : (heap.heapUpdateRoot h₁ le value).snd = heap.root h₁ := by
   unfold heapUpdateRoot
   split
   rename_i o p v l r h₃ h₄ h₅ h₁
@@ -37,7 +37,7 @@ private theorem heapUpdateRootPossibleRootValuesAuxR {α : Type u} (heap : Compl
     case zero => simp_arith at h₁; simp at h₃; exact absurd h₁ (Nat.not_le_of_gt h₃)
     case succ q => exact Nat.zero_lt_succ q
 
-private theorem heapUpdateRootPossibleRootValues1 {α : Type u} (le : α → α → Bool) (value : α) (heap : CompleteTree α n) (h₁ : n = 1) : (heap.heapUpdateRoot le value (h₁.substr (Nat.lt_succ_self 0))).fst.root (h₁.substr (Nat.lt_succ_self 0)) = value := by
+private theorem heapUpdateRootPossibleRootValues1 {α : Type u} (le : α → α → Bool) (value : α) (heap : CompleteTree α n) (h₁ : n = 1) : (heap.heapUpdateRoot (h₁.substr (p := λx ↦ 0<x) (Nat.lt_succ_self 0)) le value).fst.root (h₁.substr (Nat.lt_succ_self 0)) = value := by
   unfold heapUpdateRoot
   generalize (h₁.substr (Nat.lt_succ_self 0) : n > 0) = hx
   split
@@ -48,8 +48,8 @@ private theorem heapUpdateRootPossibleRootValues1 {α : Type u} (le : α → α 
 private theorem heapUpdateRootPossibleRootValues2 {α : Type u} (le : α → α → Bool) (value : α) (heap : CompleteTree α n) (h₁ : n = 2) :
 have h₂ : 0 < n := Nat.lt_trans (Nat.lt_succ_self 0) $  h₁.substr (Nat.lt_succ_self 1)
 have h₃ : 0 < leftLen heap h₂ := heapUpdateRootPossibleRootValuesAuxL heap (h₁.substr (Nat.lt_succ_self 1))
-(heap.heapUpdateRoot le value h₂).fst.root h₂ = value
-∨ (heap.heapUpdateRoot le value h₂).fst.root h₂ = (heap.left h₂).root h₃
+(heap.heapUpdateRoot h₂ le value).fst.root h₂ = value
+∨ (heap.heapUpdateRoot h₂ le value).fst.root h₂ = (heap.left h₂).root h₃
 := by
   simp
   unfold heapUpdateRoot
@@ -68,9 +68,9 @@ private theorem heapUpdateRootPossibleRootValues3 {α : Type u} (le : α → α 
 have h₂ : 0 < n := Nat.lt_trans (Nat.lt_succ_self 0) $ Nat.lt_trans (Nat.lt_succ_self 1) h₁
 have h₃ : 0 < leftLen heap h₂ := heapUpdateRootPossibleRootValuesAuxL heap $ Nat.lt_trans (Nat.lt_succ_self 1) h₁
 have h₄ : 0 < rightLen heap h₂ := heapUpdateRootPossibleRootValuesAuxR heap h₁
-(heap.heapUpdateRoot le value h₂).fst.root h₂ = value
-∨ (heap.heapUpdateRoot le value h₂).fst.root h₂ = (heap.left h₂).root h₃
-∨ (heap.heapUpdateRoot le value h₂).fst.root h₂ = (heap.right h₂).root h₄
+(heap.heapUpdateRoot h₂ le value).fst.root h₂ = value
+∨ (heap.heapUpdateRoot h₂ le value).fst.root h₂ = (heap.left h₂).root h₃
+∨ (heap.heapUpdateRoot h₂ le value).fst.root h₂ = (heap.right h₂).root h₄
 := by
   simp only
   unfold heapUpdateRoot
@@ -90,9 +90,9 @@ have h₄ : 0 < rightLen heap h₂ := heapUpdateRootPossibleRootValuesAuxR heap 
       cases le (l.root _) (r.root _)
       <;> simp only [Bool.false_eq_true, ↓reduceIte, heapUpdateRootReturnsRoot, root_unfold, left_unfold, right_unfold, true_or, or_true]
 
-protected theorem heapUpdateRootIsHeapLeRootAux {α : Type u} (le : α → α → Bool) (value : α) (heap : CompleteTree α n) (h₁ : HeapPredicate heap le) (h₂ : n > 0) (h₃ : le (root heap h₂) value) : HeapPredicate.leOrLeaf le (root heap h₂) (heapUpdateRoot le value heap h₂).fst :=
+protected theorem heapUpdateRootIsHeapLeRootAux {α : Type u} (le : α → α → Bool) (value : α) (heap : CompleteTree α n) (h₁ : HeapPredicate heap le) (h₂ : n > 0) (h₃ : le (root heap h₂) value) : HeapPredicate.leOrLeaf le (root heap h₂) (heapUpdateRoot h₂ le value heap).fst :=
   if h₄ : n = 1 then by
-    have h₅ : le (heap.root h₂) ( (heapUpdateRoot le value heap h₂).fst.root h₂) := by simp only[h₃, h₄, heapUpdateRootPossibleRootValues1]
+    have h₅ : le (heap.root h₂) ( (heapUpdateRoot h₂ le value heap).fst.root h₂) := by simp only[h₃, h₄, heapUpdateRootPossibleRootValues1]
     unfold HeapPredicate.leOrLeaf
     split
     · rfl
@@ -101,7 +101,7 @@ protected theorem heapUpdateRootIsHeapLeRootAux {α : Type u} (le : α → α �
     have h₆ := heapUpdateRootPossibleRootValues2 le value heap h₅
     cases h₆
     case inl h₆ =>
-      have h₇ : le (heap.root h₂) ( (heapUpdateRoot le value heap h₂).fst.root h₂) := by simp only [h₆, h₃]
+      have h₇ : le (heap.root h₂) ((heapUpdateRoot h₂ le value heap).fst.root h₂) := by simp only [h₆, h₃]
       unfold HeapPredicate.leOrLeaf
       split
       · rfl
@@ -130,7 +130,7 @@ protected theorem heapUpdateRootIsHeapLeRootAux {α : Type u} (le : α → α �
     unfold HeapPredicate at h₁
     cases h₇
     case inl h₇ =>
-      have h₈ : le (heap.root h₂) ( (heapUpdateRoot le value heap h₂).fst.root h₂) := by simp only [h₇, h₃]
+      have h₈ : le (heap.root h₂) ( (heapUpdateRoot h₂ le value heap).fst.root h₂) := by simp only [h₇, h₃]
       unfold HeapPredicate.leOrLeaf
       split
       · rfl
@@ -155,7 +155,7 @@ private theorem heapUpdateRootIsHeapLeRootAuxLe {α : Type u} (le : α → α �
 | .inr h₅ => not_le_imp_le h₂ _ _ h₅
 | .inl h₅ => h₁ b c a ⟨h₃,not_le_imp_le h₂ _ _ h₅⟩
 
-theorem heapUpdateRootIsHeap {α : Type u} {n: Nat} (le : α → α → Bool) (value : α) (heap : CompleteTree α n) (h₁ : n > 0) (h₂ : HeapPredicate heap le) (h₃ : transitive_le le) (h₄ : total_le le) : HeapPredicate (heap.heapUpdateRoot le value h₁).fst le := by
+theorem heapUpdateRootIsHeap {α : Type u} {n: Nat} (le : α → α → Bool) (value : α) (heap : CompleteTree α n) (h₁ : n > 0) (h₂ : HeapPredicate heap le) (h₃ : transitive_le le) (h₄ : total_le le) : HeapPredicate (heap.heapUpdateRoot h₁ le value).fst le := by
     unfold heapUpdateRoot
     split
     rename_i o p v l r h₇ h₈ h₉ heq

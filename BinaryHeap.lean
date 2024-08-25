@@ -41,14 +41,14 @@ def removeAt {α : Type u} {le : α → α → Bool} {n : Nat} : (BinaryHeap α 
   ({ tree := result.fst, valid := resultValid, wellDefinedLe}, result.snd)
 
 /-- Updates the element at the given (depth-first) index and returns its previous value. O(log(n)) -/
-def updateAt {α : Type u} {le : α → α → Bool} {n : Nat} : (BinaryHeap α le (n+1)) → (Fin (n+1)) → α → (BinaryHeap α le (n+1) × α)
+def updateAt {α : Type u} {le : α → α → Bool} {n : Nat} : (BinaryHeap α le n) → (Fin n) → α → (BinaryHeap α le n × α)
 | {tree, valid, wellDefinedLe}, index, value =>
-  let result := tree.heapUpdateAt le index value $ Nat.succ_pos n
-  let resultValid := CompleteTree.heapUpdateAtIsHeap le index value tree _ valid wellDefinedLe.left wellDefinedLe.right
+  let result := tree.heapUpdateAt le index value
+  let resultValid := CompleteTree.heapUpdateAtIsHeap le index value tree valid wellDefinedLe.left wellDefinedLe.right
   ({ tree := result.fst, valid := resultValid, wellDefinedLe}, result.snd)
 
 /-- Searches for an element in the heap and returns its index. **O(n)** -/
-def indexOf {α : Type u} {le : α → α → Bool} {n : Nat} : BinaryHeap α le (n+1) → (pred : α → Bool) → Option (Fin (n+1))
+def indexOf {α : Type u} {le : α → α → Bool} {n : Nat} : BinaryHeap α le n → (pred : α → Bool) → Option (Fin n)
 | {tree, valid := _, wellDefinedLe := _}, pred =>
   tree.indexOf pred
 

@@ -50,7 +50,7 @@ def get' {α : Type u} {n : Nat} (index : Fin (n+1)) (heap : CompleteTree α (n+
       match p with
       | (pp + 1) => get' ⟨j - o, h₆⟩ r
 
-def get {α : Type u} {n : Nat} (index : Fin n) (heap : CompleteTree α n) (_ : n > 0) : α :=
+def get {α : Type u} {n : Nat} (index : Fin n) (heap : CompleteTree α n) : α :=
   match n, index, heap with
   | (_+1), index, heap => heap.get' index
 

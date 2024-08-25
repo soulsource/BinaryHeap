@@ -3,9 +3,9 @@ import BinaryHeap.CompleteTree.Lemmas
 
 namespace BinaryHeap.CompleteTree.AdditionalProofs
 
-theorem get_eq_get' {α : Type u} {n : Nat} (tree : CompleteTree α (n+1)) (index : Fin (n+1)) : tree.get' index = tree.get index (Nat.succ_pos n) := rfl
+theorem get_eq_get' {α : Type u} {n : Nat} (tree : CompleteTree α (n+1)) (index : Fin (n+1)) : tree.get' index = tree.get index := rfl
 
-theorem get_zero_eq_root {α : Type u} {n : Nat} (tree : CompleteTree α n) (h₁ : n > 0): tree.root h₁ = tree.get ⟨0,h₁⟩ h₁ := by
+theorem get_zero_eq_root {α : Type u} {n : Nat} (tree : CompleteTree α n) (h₁ : n > 0): tree.root h₁ = tree.get ⟨0,h₁⟩ := by
   unfold get
   match n with
   | nn+1 =>
@@ -29,14 +29,13 @@ theorem get_right {α : Type u} {n : Nat} (tree : CompleteTree α n) (index : Fi
     have : p+1+o = (o.add p).succ := by simp_arith
     rw[this]
     assumption
-  have h₄ : tree.rightLen h₁ > 0 := Nat.zero_lt_of_lt h₃
-  tree.get index h₁ = (tree.right h₁).get ⟨index.val - (tree.leftLen h₁) - 1, h₃⟩ h₄
+  tree.get index = (tree.right h₁).get ⟨index.val - (tree.leftLen h₁) - 1, h₃⟩
 :=
   match n, tree with
   | (o+p+1), .branch v l r _ _ _ => by
     simp[right_unfold, leftLen_unfold]
     rw[leftLen_unfold] at h₂
-    generalize hnew : get ⟨↑index - o - 1, _⟩ r _ = new
+    generalize hnew : get ⟨↑index - o - 1, _⟩ r = new
     unfold get get'
     split
     case h_1 =>
@@ -73,19 +72,18 @@ theorem get_right' {α : Type u} {n m : Nat} {v : α} {l : CompleteTree α n} {r
     have : m + 1 + n = n + m + 1 := by simp_arith
     rw[this]
     assumption
-  (branch v l r m_le_n max_height_diff subtree_complete).get index (Nat.succ_pos _) = r.get ⟨index.val - n - 1, h₂⟩  (Nat.zero_lt_of_lt h₂)
+  (branch v l r m_le_n max_height_diff subtree_complete).get index = r.get ⟨index.val - n - 1, h₂⟩
 :=
   get_right (branch v l r m_le_n max_height_diff subtree_complete) index (Nat.succ_pos _) h₁
 
 theorem get_left {α : Type u} {n : Nat} (tree : CompleteTree α n) (index : Fin n) (h₁ : n > 0) (h₂ : index > ⟨0, h₁⟩) (h₃ : index ≤ tree.leftLen h₁) :
   have h₃ : ↑index - 1 < tree.leftLen h₁ := Nat.lt_of_lt_of_le (Nat.pred_lt_self h₂) h₃
-  have h₄ : tree.leftLen h₁ > 0 := Nat.zero_lt_of_lt h₃
-  tree.get index h₁ = (tree.left h₁).get ⟨index.val - 1, h₃⟩ h₄
+  tree.get index = (tree.left h₁).get ⟨index.val - 1, h₃⟩
 :=
   match n, tree with
   | (o+p+1), .branch v l r _ _ _ => by
     simp[left_unfold]
-    generalize hnew : get ⟨↑index - 1, _⟩ l _ = new
+    generalize hnew : get ⟨↑index - 1, _⟩ l = new
     unfold get get'
     split
     case h_1 => contradiction
@@ -106,6 +104,6 @@ theorem get_left {α : Type u} {n : Nat} (tree : CompleteTree α n) (index : Fin
 
 theorem get_left' {α : Type u} {n m : Nat} {v : α} {l : CompleteTree α n} {r : CompleteTree α m} {m_le_n : m ≤ n} {max_height_diff : n < 2 * (m + 1)} {subtree_complete : (n + 1).isPowerOfTwo ∨ (m + 1).isPowerOfTwo} (index : Fin (n + m + 1)) (h₁ : index > ⟨0, Nat.succ_pos _⟩) (h₂ : index ≤ n) :
   have h₃ : ↑index - 1 < n := Nat.lt_of_lt_of_le (Nat.pred_lt_self h₁) h₂
-  (branch v l r m_le_n max_height_diff subtree_complete).get index (Nat.succ_pos _) = l.get ⟨index.val - 1, h₃⟩  (Nat.zero_lt_of_lt h₃)
+  (branch v l r m_le_n max_height_diff subtree_complete).get index = l.get ⟨index.val - 1, h₃⟩
 :=
   get_left (branch v l r m_le_n max_height_diff subtree_complete) index (Nat.succ_pos _) h₁ h₂
