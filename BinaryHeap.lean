@@ -12,7 +12,7 @@ deriving Repr
 namespace BinaryHeap
 
 /-- Creates an empty heap. O(1) -/
-def new (α : Type u) {le : α → α → Bool} (h₁ : BinaryHeap.transitive_le le) (h₂ : BinaryHeap.total_le le) : BinaryHeap α le 0 :=
+def new (α : Type u) {le : α → α → Bool} (h₁ : transitive_le le) (h₂ : total_le le) : BinaryHeap α le 0 :=
   {
     tree := CompleteTree.empty,
     valid := CompleteTree.emptyIsHeap le
@@ -56,7 +56,7 @@ instance : GetElem (BinaryHeap α le n) (Nat) α (λ _ index ↦ index < n) wher
   getElem := λ heap index h₁ ↦ match n, heap, index with
   | (_+1), {tree, ..}, index => tree.get' ⟨index, h₁⟩
 
-instance : GetElem (BinaryHeap α le n) (Fin n) α (λ _ _ ↦ n > 0) where
+instance : GetElem (BinaryHeap α le n) (Fin n) α (λ _ _ ↦ True) where
   getElem := λ heap index _ ↦ match n, heap, index with
   | (_+1), {tree, ..}, index => tree.get' index
 
