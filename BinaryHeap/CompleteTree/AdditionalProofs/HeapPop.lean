@@ -37,8 +37,6 @@ theorem heapPopOnlyRemovesRoot {α : Type u} {n : Nat} (tree : CompleteTree α (
     if h₂ : index = (Internal.heapRemoveLastWithIndex tree).snd.snd then
       have h₃ := CompleteTree.AdditionalProofs.heapRemoveLastWithIndexReturnsItemAtIndex tree
       rw[←h₂] at h₃
-      unfold get
-      simp only
       have := CompleteTree.AdditionalProofs.heapRemoveLastWithIndexHeapRemoveLastSameElement tree
       rw[←this] at h₃
       simp[h₃, heapUpdateRootContainsUpdatedElement]

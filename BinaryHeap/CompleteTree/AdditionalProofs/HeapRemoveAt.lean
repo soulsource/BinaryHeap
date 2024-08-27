@@ -5,11 +5,11 @@ import BinaryHeap.CompleteTree.AdditionalProofs.HeapRemoveLast
 
 namespace BinaryHeap.CompleteTree.AdditionalProofs
 
-theorem heapRemoveAtReturnsElementAt {α : Type u} {n : Nat} (le : α → α → Bool) (heap : CompleteTree α (n+1)) (index : Fin (n+1)) : (heap.heapRemoveAt le index).snd = heap.get' index := by
+theorem heapRemoveAtReturnsElementAt {α : Type u} {n : Nat} (le : α → α → Bool) (heap : CompleteTree α (n+1)) (index : Fin (n+1)) : (heap.heapRemoveAt le index).snd = heap.get index := by
   unfold heapRemoveAt
   if h₁ : index = 0 then
     simp only [h₁, ↓reduceDIte]
-    rw[get_eq_get', ←Fin.zero_eta, ←get_zero_eq_root]
+    rw[←Fin.zero_eta, ←get_zero_eq_root]
     exact heapPopReturnsRoot heap le
   else
     simp only [h₁, ↓reduceDIte, ge_iff_le]
@@ -20,15 +20,15 @@ theorem heapRemoveAtReturnsElementAt {α : Type u} {n : Nat} (le : α → α →
       if h₃ : (Internal.heapRemoveLastWithIndex heap).2.snd ≤ index then
         simp only[h₂, h₃, ↓reduceDIte]
         have h₄ := CompleteTree.AdditionalProofs.heapRemoveLastWithIndexRelationGt heap index $ Nat.lt_of_le_of_ne h₃ (Fin.val_ne_iff.mpr (Ne.symm h₂))
-        rewrite[get_eq_get', ←h₄]
+        rewrite[←h₄]
         exact Eq.symm $ heapUpdateAtReturnsElementAt le _ _ _
       else
         simp only[h₂, h₃, ↓reduceDIte]
         have h₄ := CompleteTree.AdditionalProofs.heapRemoveLastWithIndexRelationLt heap index (Nat.gt_of_not_le h₃)
-        rewrite[get_eq_get', ←h₄]
+        rewrite[←h₄]
         exact Eq.symm $ heapUpdateAtReturnsElementAt le _ _ _
 
-theorem heapRemoveAtOnlyRemovesAt {α : Type u} {n : Nat} (le : α → α → Bool) (heap : CompleteTree α (n+1)) (removeIndex : Fin (n+1)) (otherIndex : Fin (n+1)) (h₁ : removeIndex ≠ otherIndex) : (heap.heapRemoveAt le removeIndex).fst.contains (heap.get' otherIndex) := by
+theorem heapRemoveAtOnlyRemovesAt {α : Type u} {n : Nat} (le : α → α → Bool) (heap : CompleteTree α (n+1)) (removeIndex : Fin (n+1)) (otherIndex : Fin (n+1)) (h₁ : removeIndex ≠ otherIndex) : (heap.heapRemoveAt le removeIndex).fst.contains (heap.get otherIndex) := by
   unfold heapRemoveAt
   if h₂ : removeIndex = 0 then
     subst removeIndex
@@ -45,13 +45,13 @@ theorem heapRemoveAtOnlyRemovesAt {α : Type u} {n : Nat} (le : α → α → Bo
         simp only [gt_iff_lt] at h₅
         split at h₅
         case isTrue h₆ =>
-          rw[get_eq_get', ←h₅]
+          rw[←h₅]
           apply heapUpdateAtOnlyUpdatesAt
           simp only [ne_eq, Fin.pred_inj, h₁, not_false_eq_true]
         case isFalse h₆ =>
           split at h₅
           case isTrue h₇ =>
-            rw[get_eq_get', ←h₅]
+            rw[←h₅]
             apply heapUpdateAtOnlyUpdatesAt
             simp only [ne_eq, Fin.ext_iff, Fin.coe_pred, Fin.coe_castLT]
             generalize (Internal.heapRemoveLastWithIndex heap).snd.snd = j at *
@@ -69,7 +69,7 @@ theorem heapRemoveAtOnlyRemovesAt {α : Type u} {n : Nat} (le : α → α → Bo
         simp only [gt_iff_lt] at h₅
         split at h₅
         case isTrue h₆ =>
-          rw[get_eq_get', ←h₅]
+          rw[←h₅]
           apply heapUpdateAtOnlyUpdatesAt
           simp[Fin.ext_iff]
           generalize (Internal.heapRemoveLastWithIndex heap).snd.snd = j at *
@@ -77,7 +77,7 @@ theorem heapRemoveAtOnlyRemovesAt {α : Type u} {n : Nat} (le : α → α → Bo
         case isFalse h₆ =>
           split at h₅
           case isTrue h₇ =>
-            rw[get_eq_get', ←h₅]
+            rw[←h₅]
             apply heapUpdateAtOnlyUpdatesAt
             rw[←Fin.val_ne_iff] at h₁ ⊢
             exact h₁

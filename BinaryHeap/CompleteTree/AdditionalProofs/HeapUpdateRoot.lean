@@ -18,10 +18,8 @@ abbrev heapUpdateRootReturnsRoot {α : Type u} {n : Nat} (le : α → α → Boo
   -/
 theorem heapUpdateRootOnlyUpdatesRoot {α : Type u} {n : Nat} (le : α → α → Bool) (tree : CompleteTree α n) (h₁ : n > 0) (index : Fin n) (h₂ : index ≠ ⟨0, h₁⟩) (value : α) : (tree.heapUpdateRoot h₁ le value).fst.contains $ tree.get index := by
   generalize h₃ : (get index tree) = oldVal
-  unfold get at h₃
   unfold heapUpdateRoot
   split
-  simp at h₃
   rename_i o p v l r p_le_o _ _ _
   cases o
   case zero =>
@@ -30,50 +28,46 @@ theorem heapUpdateRootOnlyUpdatesRoot {α : Type u} {n : Nat} (le : α → α �
     exact absurd (Fin.fin_one_eq_zero index) h₂
   case succ oo _ _ _ =>
     simp
-    unfold get' at h₃
-    split at h₃
-    case h_1 => omega
-    case h_2 j _ o2 p2 v2 l2 r2 _ _ _ _ he1 he2 =>
-      have : oo+1 = o2 := heqSameLeftLen (congrArg Nat.succ he1) (by simp_arith) he2
-      have : p = p2 := heqSameRightLen (congrArg Nat.succ he1) (by simp_arith) he2
-      subst o2
-      subst p2
-      simp at he2
-      have := he2.left
-      have := he2.right.left
-      have := he2.right.right
-      subst v2 l2 r2
-      simp at h₃
-      cases p
-      case zero =>
-        have : j < oo + 1 := by omega
-        simp[this] at h₃ ⊢
-        cases le value (l.root _) <;> simp
-        case false =>
-          cases j
-          case zero =>
-            rw[heapUpdateRootReturnsRoot]
-            rw[get_zero_eq_root]
-            unfold get; simp only
-            rw[h₃, contains_as_root_left_right _ _ (Nat.succ_pos _)]
-            left
-            rw[root_unfold]
-          case succ jj h₄ =>
-            have h₅ : oo = 0 := by omega
-            have h₆ : jj < oo := Nat.lt_of_succ_lt_succ this
-            have h₆ : jj < 0 := h₅.subst h₆
-            exact absurd h₆ $ Nat.not_lt_zero jj
-        case true h₄ _ _ _ _ _=>
-          rw[contains_as_root_left_right _ _ h₄]
-          right
+    rw[get_unfold'] at h₃
+    simp only[h₂, reduceDIte] at h₃
+    cases p
+    case zero =>
+      let j := index.val.pred
+      simp at h₃ ⊢
+      have : index.val ≤ oo + 1 := Nat.le_of_lt_succ index.isLt
+      simp only [this, reduceDIte] at h₃
+      cases le value (l.root _) <;> simp
+      case false =>
+        cases hj : j
+        case zero =>
+          rw[heapUpdateRootReturnsRoot]
+          rw[get_zero_eq_root]
+          rw[contains_as_root_left_right _ _ (Nat.succ_pos _)]
           left
-          rewrite[contains_iff_index_exists']
-          exists ⟨j,this⟩
-      case succ pp _ _ _ _ _ _ _ _ =>
+          rw[root_unfold]
+          simp only[←hj]
+          exact h₃
+        case succ jj =>
+          have h₅ : oo = 0 := by omega
+          have h₆ : index.val = jj + 1 + 1 := hj.subst (motive := λx ↦ index.val = x + 1) $ Eq.symm $ Nat.succ_pred (Fin.val_ne_iff.mpr h₂)
+          have h₇ : jj < 0 := h₅.subst $ Nat.le_of_succ_le_succ $ h₆.subst (motive := λx ↦ x ≤ oo + 1) this
+          exact absurd h₇ $ Nat.not_lt_zero jj
+      case true h₄ =>
+        rw[contains_as_root_left_right _ _ h₄]
+        right
+        left
+        rewrite[contains_iff_index_exists']
+        exists ⟨j, (Nat.succ_pred (Fin.val_ne_iff.mpr h₂)).substr (p := λx ↦ x ≤ oo + 1) this⟩
+    case succ pp _ _ _ =>
+      have h₂ := Fin.val_ne_iff.mpr h₂
+      generalize hi :  index.val = i at h₂ ⊢
+      simp only[hi] at h₃
+      cases i; contradiction
+      case succ j =>
         simp
         if h : j < oo + 1 then
           -- index was in l
-          simp only [h, ↓reduceDIte] at h₃
+          simp only [Nat.succ_le_of_lt h, ↓reduceDIte] at h₃
           split
           case isTrue =>
             simp
@@ -91,8 +85,6 @@ theorem heapUpdateRootOnlyUpdatesRoot {α : Type u} {n : Nat} (le : α → α �
               cases j
               case zero =>
                 rw[get_zero_eq_root]
-                unfold get
-                simp only
                 rw[h₃, contains_as_root_left_right _ _ (Nat.succ_pos _)]
                 left
                 rw[root_unfold]
@@ -104,8 +96,8 @@ theorem heapUpdateRootOnlyUpdatesRoot {α : Type u} {n : Nat} (le : α → α �
                 rw[←h₃, left_unfold]
                 have : oo + 1 < oo + 1 + pp + 1 + 1 := by simp_arith --termination
                 apply heapUpdateRootOnlyUpdatesRoot
-                apply Fin.ne_of_val_ne
-                simp only [Nat.add_one_ne_zero, not_false_eq_true]
+                apply Fin.val_ne_iff.mp
+                exact Nat.succ_ne_zero _
             case isFalse =>
               -- r.root gets moved up
               rw[contains_as_root_left_right _ _ (Nat.succ_pos _)]
@@ -116,9 +108,9 @@ theorem heapUpdateRootOnlyUpdatesRoot {α : Type u} {n : Nat} (le : α → α �
               exists ⟨j, h⟩
         else
           -- index was in r
-          simp only [h, ↓reduceDIte] at h₃
-          rename_i h₄ _ _ _ _
-          have h₄ : j - (oo + 1) < pp + 1 := Nat.sub_lt_left_of_lt_add (Nat.le_of_not_gt h) (Nat.lt_of_succ_lt_succ h₄)
+          have : j + 1 - (oo + 1) - 1 = j - oo - 1 := (Nat.sub_sub (j+1) 1 oo).substr $ (Nat.add_comm oo 1).substr rfl
+          simp only [this, Not.intro $ h ∘ Nat.lt_of_succ_le ∘ (Nat.succ_eq_add_one j).substr, ↓reduceDIte] at h₃
+          have h₄ : j - (oo + 1) < pp + 1 := Nat.sub_lt_left_of_lt_add (Nat.le_of_not_gt h) (Nat.lt_of_succ_lt_succ $ hi.subst (motive := λx ↦ x < _) index.isLt)
           split
           case isTrue h₄ _ _ _ _ _ =>
             simp
@@ -141,14 +133,12 @@ theorem heapUpdateRootOnlyUpdatesRoot {α : Type u} {n : Nat} (le : α → α �
             case isFalse =>
               --r.root gets moved up
               simp only
-              generalize h₅ : j - (oo + 1) = jr
+              generalize h₅ : j - oo - 1 = jr
               simp only [h₅] at h₃
               have h₄ : jr < pp+1 := h₅.subst (motive := λx ↦ x < pp+1) h₄
               cases jr
               case zero =>
                 rw[get_zero_eq_root]
-                unfold get
-                simp only
                 rw[h₃, contains_as_root_left_right _ _ (Nat.succ_pos _)]
                 left
                 rw[root_unfold]
@@ -161,7 +151,6 @@ theorem heapUpdateRootOnlyUpdatesRoot {α : Type u} {n : Nat} (le : α → α �
                 apply heapUpdateRootOnlyUpdatesRoot
                 apply Fin.ne_of_val_ne
                 simp only [Nat.add_one_ne_zero, not_false_eq_true]
-termination_by n
 
 theorem heapUpdateRootContainsUpdatedElement {α : Type u} {n : Nat} (tree : CompleteTree α n) (le : α → α → Bool) (value : α) (h₁ : n > 0): (tree.heapUpdateRoot h₁ le value).fst.contains value := by
   unfold heapUpdateRoot

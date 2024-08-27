@@ -5,19 +5,18 @@ import BinaryHeap.CompleteTree.AdditionalProofs.Get
 
 namespace BinaryHeap.CompleteTree.AdditionalProofs
 
+theorem heapUpdatAtRootEqUpdateRoot {α : Type u} {le : α → α → Bool} : CompleteTree.heapUpdateAt le ⟨0, h₁⟩ = CompleteTree.heapUpdateRoot h₁ le := by
+  funext
+  unfold heapUpdateAt heapUpdateAtAux
+  rfl
+
 theorem heapUpdateAtReturnsElementAt {α : Type u} {n : Nat} (le : α → α → Bool) (val : α) (heap : CompleteTree α n) (index : Fin n) : heap.get index = (heap.heapUpdateAt le index val).snd := by
   cases index
   rename_i i isLt
   cases i
   case mk.zero =>
-    unfold get get'
-    split
-    split
-    case h_2 hx =>
-      have hx := Fin.val_eq_of_eq hx
-      contradiction
-    case h_1 v l r h₂ h₃ h₄ _ _=>
-      exact Eq.symm $ heapUpdateRootReturnsRoot le val (.branch v l r h₂ h₃ h₄) (Nat.succ_pos _)
+    rw[←get_zero_eq_root, heapUpdatAtRootEqUpdateRoot]
+    exact Eq.symm $ heapUpdateRootReturnsRoot le val heap isLt
   case mk.succ j =>
     unfold heapUpdateAt heapUpdateAtAux
     generalize hj : (⟨j + 1, isLt⟩ : Fin n) = index -- otherwise split fails...
@@ -37,17 +36,11 @@ theorem heapUpdateAtReturnsElementAt {α : Type u} {n : Nat} (le : α → α →
           exact h₂
         apply heapUpdateAtReturnsElementAt
       case isFalse h₂ =>
-        rw[get_right _ _]
-        case h₁ => exact Nat.succ_pos _
+        rw[get_right]
         case h₂ =>
           simp only [Nat.not_le] at h₂
           simp only [leftLen_unfold, gt_iff_lt, h₂]
         apply heapUpdateAtReturnsElementAt
-
-theorem heapUpdatAtRootEqUpdateRoot {α : Type u} {le : α → α → Bool} : CompleteTree.heapUpdateAt le ⟨0, h₁⟩ = CompleteTree.heapUpdateRoot h₁ le := by
-  funext
-  unfold heapUpdateAt heapUpdateAtAux
-  rfl
 
 theorem heapUpdateAtContainsValue {α : Type u} {n : Nat} (le : α → α → Bool) (heap : CompleteTree α n) (value : α) (index : Fin n) : (heap.heapUpdateAt le index value).fst.contains value := by
   unfold heapUpdateAt heapUpdateAtAux
@@ -141,7 +134,7 @@ theorem heapUpdateAtOnlyUpdatesAt {α : Type u} {n : Nat} (le : α → α → Bo
       case false.isTrue h₅ | true.isTrue h₅ =>
         if h₆ : otherIndex ≤ o then
           have : otherIndex ≤ (branch v l r olep mhd stc).leftLen (Nat.succ_pos _) := by simp only [leftLen_unfold, h₆]
-          rw[get_left _ _ (Nat.succ_pos _) h₄₂ this]
+          rw[get_left _ _ h₄₂ this]
           left
           --rw[left_unfold]
           have : o < o + p + 1 := Nat.lt_of_le_of_lt (Nat.le_add_right o p) (Nat.lt_succ_self (o+p))
@@ -150,7 +143,7 @@ theorem heapUpdateAtOnlyUpdatesAt {α : Type u} {n : Nat} (le : α → α → Bo
           exact (Nat.pred_ne_of_ne (Fin.pos_iff_ne_zero.mpr h₃) (Fin.pos_iff_ne_zero.mpr h₄)).mp $ Fin.val_ne_iff.mpr h₂
         else
           have : otherIndex > (branch v l r olep mhd stc).leftLen (Nat.succ_pos _) := by rw[leftLen_unfold]; exact Nat.gt_of_not_le h₆
-          rw[get_right _ _ (Nat.succ_pos _) this]
+          rw[get_right _ _ this]
           right
           --rw[right_unfold]
           --rw[right_unfold]
@@ -164,7 +157,7 @@ theorem heapUpdateAtOnlyUpdatesAt {α : Type u} {n : Nat} (le : α → α → Bo
       case false.isFalse h₅ | true.isFalse h₅ =>
         if h₆ : otherIndex ≤ o then
           have : otherIndex ≤ (branch v l r olep mhd stc).leftLen (Nat.succ_pos _) := by simp only [leftLen_unfold, h₆]
-          rw[get_left _ _ (Nat.succ_pos _) h₄₂ this]
+          rw[get_left _ _ h₄₂ this]
           left
           --rw[left_unfold]
           --rw[left_unfold]
@@ -175,7 +168,7 @@ theorem heapUpdateAtOnlyUpdatesAt {α : Type u} {n : Nat} (le : α → α → Bo
           omega
         else
           have h₆ : otherIndex > (branch v l r olep mhd stc).leftLen (Nat.succ_pos _) := by rw[leftLen_unfold]; exact Nat.gt_of_not_le h₆
-          rw[get_right _ _ (Nat.succ_pos _) h₆]
+          rw[get_right _ _ h₆]
           right
           --rw[right_unfold]
           have : p < o + p + 1 := Nat.lt_of_le_of_lt (Nat.le_add_left p o) (Nat.lt_succ_self (o+p))

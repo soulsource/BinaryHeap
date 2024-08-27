@@ -32,27 +32,16 @@ def indexOf {α : Type u} (heap : CompleteTree α o) (pred : α → Bool) : Opti
 ----------------------------------------------------------------------------------------------
 -- get
 
-/--Returns the lement at the given index. Indices are depth first.-/
-def get' {α : Type u} {n : Nat} (index : Fin (n+1)) (heap : CompleteTree α (n+1)) : α :=
-  match h₁ : index, h₂ : n, heap with
-  | 0, (_+_), .branch v _ _ _ _ _ => v
-  | ⟨j+1,h₃⟩, (o+p), .branch _ l r _ _ _ =>
-    if h₄ : j < o then
-      match o with
-      | (oo+1) => get' ⟨j, h₄⟩ l
-    else
-      have h₅ : n - o = p := Nat.sub_eq_of_eq_add $ (Nat.add_comm o p).subst h₂
-      have : p ≠ 0 :=
-        have h₆ : o < n := Nat.lt_of_le_of_lt (Nat.ge_of_not_lt h₄) (Nat.lt_of_succ_lt_succ h₃)
-        h₅.symm.substr $ Nat.sub_ne_zero_of_lt h₆
-      have h₆ : j - o < p := h₅.subst $ Nat.sub_lt_sub_right (Nat.ge_of_not_lt h₄) $ Nat.lt_of_succ_lt_succ h₃
-      have _termination : j - o < index.val := (Fin.val_inj.mpr h₁).substr (Nat.sub_lt_succ j o)
-      match p with
-      | (pp + 1) => get' ⟨j - o, h₆⟩ r
-
+/--Returns the element at the given index. Indices are depth first.-/
 def get {α : Type u} {n : Nat} (index : Fin n) (heap : CompleteTree α n) : α :=
   match n, index, heap with
-  | (_+1), index, heap => heap.get' index
+  | (_+_+1), 0, .branch v _ _ _ _ _ => v
+  | (o+p+1), ⟨j+1,h₃⟩, .branch _ l r _ _ _ =>
+    if h₄ : j < o then
+      get ⟨j, h₄⟩ l
+    else
+      have h₄ : j - o < p := Nat.sub_lt_left_of_lt_add (Nat.ge_of_not_lt h₄) $ Nat.lt_of_succ_lt_succ h₃
+      get ⟨j - o, h₄⟩ r
 
 ----------------------------------------------------------------------------------------------
 -- contains - implemented as decidable proposition

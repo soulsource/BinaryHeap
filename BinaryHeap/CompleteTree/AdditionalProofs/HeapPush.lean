@@ -87,7 +87,7 @@ theorem heapPushRetainsHeapValues {α : Type u} {n: Nat} (le : α → α → Boo
           split
           case' isFalse => rw[←containsSeesThroughCast]
           case' isTrue | isFalse =>
-            rw[get_left (.branch v l r p_le_o max_height_difference subtree_complete) index (Nat.succ_pos _) h₂₂ h₃]
+            rw[get_left (.branch v l r p_le_o max_height_difference subtree_complete) index h₂₂ h₃]
             rw[contains_as_root_left_right _ _ (Nat.succ_pos _)]
             right; left
             rw[left_unfold]
@@ -102,7 +102,7 @@ theorem heapPushRetainsHeapValues {α : Type u} {n: Nat} (le : α → α → Boo
           split
           case' isFalse => rw[←containsSeesThroughCast]
           case' isTrue | isFalse =>
-            rw[get_right (.branch v l r p_le_o max_height_difference subtree_complete) index (Nat.succ_pos _) (Nat.gt_of_not_le h₃)]
+            rw[get_right (.branch v l r p_le_o max_height_difference subtree_complete) index (Nat.gt_of_not_le h₃)]
             rw[contains_as_root_left_right _ _ (Nat.succ_pos _)]
             right; right
             rw[right_unfold]

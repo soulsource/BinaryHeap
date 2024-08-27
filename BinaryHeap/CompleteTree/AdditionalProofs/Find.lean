@@ -44,14 +44,14 @@ private theorem indexOfNoneImpPredFalseAux {α : Type u} {n : Nat} (tree : Compl
     else
       have h₃₂ : index > ⟨0,h₁⟩ := Fin.pos_iff_ne_zero.mpr h₃
       if h₄ : index ≤ o then
-        rw[get_left (.branch v l r p_le_o max_height_difference subtree_complete) _ h₁ h₃₂ h₄]
+        rw[get_left (.branch v l r p_le_o max_height_difference subtree_complete) _ h₃₂ h₄]
         rw[left_unfold]
         have := indexOfNoneImpPredFalseAux l pred (currentIndex + 1)
         simp only [Option.isNone_iff_eq_none, Bool.not_eq_true] at this
         exact this h₂₂.left _
       else
         have h₄₂ : index > o := Nat.gt_of_not_le h₄
-        rw[get_right (.branch v l r p_le_o max_height_difference subtree_complete) _ (Nat.succ_pos _) h₄₂]
+        rw[get_right (.branch v l r p_le_o max_height_difference subtree_complete) _ h₄₂]
         rw[right_unfold]
         have := indexOfNoneImpPredFalseAux r pred (currentIndex + o + 1)
         simp only [Option.isNone_iff_eq_none, Bool.not_eq_true] at this
