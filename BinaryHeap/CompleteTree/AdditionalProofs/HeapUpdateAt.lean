@@ -150,10 +150,7 @@ theorem heapUpdateAtOnlyUpdatesAt {α : Type u} {n : Nat} (le : α → α → Bo
           simp only[leftLen_unfold]
           rw[contains_iff_index_exists]
           generalize (⟨↑otherIndex - o - 1, _⟩ : Fin _) = solution -- Allows to skip the annoying proof that Lean already has...
-          exists solution --also solves h.h₁ goal? Okay, I don't know why, but I won't complain.
-          rw[rightLen_unfold]
-          have : (o.add p).succ = p + (o + 1) := (Nat.add_assoc p o 1).substr $ (Nat.add_comm o p).subst (motive := λx ↦ (o+p)+1 = x + 1) rfl
-          omega
+          exists solution
       case false.isFalse h₅ | true.isFalse h₅ =>
         if h₆ : otherIndex ≤ o then
           have : otherIndex ≤ (branch v l r olep mhd stc).leftLen (Nat.succ_pos _) := by simp only [leftLen_unfold, h₆]
@@ -164,8 +161,6 @@ theorem heapUpdateAtOnlyUpdatesAt {α : Type u} {n : Nat} (le : α → α → Bo
           rw[contains_iff_index_exists]
           generalize (⟨↑otherIndex - 1, _⟩ : Fin _) = solution
           exists solution
-          rw[leftLen_unfold]
-          omega
         else
           have h₆ : otherIndex > (branch v l r olep mhd stc).leftLen (Nat.succ_pos _) := by rw[leftLen_unfold]; exact Nat.gt_of_not_le h₆
           rw[get_right _ _ h₆]

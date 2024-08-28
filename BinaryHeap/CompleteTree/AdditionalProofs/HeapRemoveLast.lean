@@ -428,8 +428,7 @@ protected theorem heapRemoveLastWithIndexOnlyRemovesOneElement {α : Type u} {n 
 := by
   simp only [ne_eq]
   intro h₁
-  have h₂ : n > 0 := by omega
-  rw[contains_iff_index_exists _ _ h₂]
+  rw[contains_iff_index_exists _ _]
   have h₃ := CompleteTree.AdditionalProofs.heapRemoveLastWithIndexRelation heap index
   simp at h₃
   split at h₃

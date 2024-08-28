@@ -82,14 +82,10 @@ private theorem if_contains_get_eq {α : Type u} {n : Nat} (tree : CompleteTree 
         assumption
 
 
-theorem contains_iff_index_exists' {α : Type u} {n : Nat} (tree : CompleteTree α n) (element : α) : tree.contains element ↔ ∃ (index : Fin n), tree.get index = element := by
+theorem contains_iff_index_exists {α : Type u} {n : Nat} (tree : CompleteTree α n) (element : α) : tree.contains element ↔ ∃ (index : Fin n), tree.get index = element := by
   constructor
   case mpr =>
     simp only [forall_exists_index]
     exact if_get_eq_contains tree element
   case mp =>
     exact if_contains_get_eq tree element
-
-theorem contains_iff_index_exists {α : Type u} {n : Nat} (tree : CompleteTree α n) (element : α) (_ : n > 0): tree.contains element ↔ ∃ (index : Fin n), tree.get index = element :=
-  match n, tree with
-  | _+1, tree => contains_iff_index_exists' tree element

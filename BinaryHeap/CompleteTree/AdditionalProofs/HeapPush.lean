@@ -93,7 +93,7 @@ theorem heapPushRetainsHeapValues {α : Type u} {n: Nat} (le : α → α → Boo
             rw[left_unfold]
             rw[left_unfold]
           case isTrue =>
-            rw[contains_iff_index_exists _ _ (Nat.lt_of_lt_of_le (Fin.lt_iff_val_lt_val.mp h₂₂) h₃)]
+            rw[contains_iff_index_exists _ _]
             have : index.val - 1 < o := Nat.sub_one_lt_of_le h₂₂ h₃
             exists ⟨index.val - 1, this⟩
           case isFalse =>
@@ -113,5 +113,6 @@ theorem heapPushRetainsHeapValues {α : Type u} {n: Nat} (le : α → α → Boo
           case isFalse =>
             have : (o.add p).succ = p + (o + 1) := (Nat.add_assoc p o 1).substr $ (Nat.add_comm o p).subst (motive := λx ↦ (o+p)+1 = x + 1) rfl
             have : p > 0 := by omega
-            rw[contains_iff_index_exists _ _ this]
-            exists ⟨index.val - o - 1, by omega⟩
+            rw[contains_iff_index_exists _ _]
+            have : index.val - o - 1 < p := by omega
+            exists ⟨index.val - o - 1, this⟩

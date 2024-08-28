@@ -56,7 +56,7 @@ theorem heapUpdateRootOnlyUpdatesRoot {α : Type u} {n : Nat} (le : α → α �
         rw[contains_as_root_left_right _ _ h₄]
         right
         left
-        rewrite[contains_iff_index_exists']
+        rewrite[contains_iff_index_exists]
         exists ⟨j, (Nat.succ_pred (Fin.val_ne_iff.mpr h₂)).substr (p := λx ↦ x ≤ oo + 1) this⟩
     case succ pp _ _ _ =>
       have h₂ := Fin.val_ne_iff.mpr h₂
@@ -74,7 +74,7 @@ theorem heapUpdateRootOnlyUpdatesRoot {α : Type u} {n : Nat} (le : α → α �
             rw[contains_as_root_left_right _ _ (Nat.succ_pos _)]
             right
             left
-            rw[←h₃, contains_iff_index_exists', left_unfold]
+            rw[←h₃, contains_iff_index_exists, left_unfold]
             exists ⟨j,h⟩
           case isFalse =>
             split
@@ -104,7 +104,7 @@ theorem heapUpdateRootOnlyUpdatesRoot {α : Type u} {n : Nat} (le : α → α �
               right
               left
               simp only [left_unfold]
-              rw[←h₃, contains_iff_index_exists']
+              rw[←h₃, contains_iff_index_exists]
               exists ⟨j, h⟩
         else
           -- index was in r
@@ -117,7 +117,7 @@ theorem heapUpdateRootOnlyUpdatesRoot {α : Type u} {n : Nat} (le : α → α �
             rw[contains_as_root_left_right _ _ (Nat.succ_pos _)]
             right
             right
-            rw[←h₃, contains_iff_index_exists', right_unfold]
+            rw[←h₃, contains_iff_index_exists, right_unfold]
             exists ⟨j-(oo+1), h₄⟩
           case isFalse =>
             split
@@ -128,7 +128,7 @@ theorem heapUpdateRootOnlyUpdatesRoot {α : Type u} {n : Nat} (le : α → α �
               right
               right
               simp only [right_unfold]
-              rw[←h₃, contains_iff_index_exists']
+              rw[←h₃, contains_iff_index_exists]
               exists ⟨j- (oo + 1), h₄⟩
             case isFalse =>
               --r.root gets moved up
