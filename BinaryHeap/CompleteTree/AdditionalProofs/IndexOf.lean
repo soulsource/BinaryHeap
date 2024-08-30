@@ -146,17 +146,27 @@ private theorem indexOfAuxAddsCurrentIndex {α : Type u} {n : Nat} (tree : Compl
         contradiction
       all_goals
         simp only [Option.some.injEq] at hsplit₂ hsplit₁
-      case h_1.h_1 he₁ _ _ _ he₂ =>
+      case' h_1.h_1 =>
         have hsplit₂ := hsplit₂.symm
         have hsplit₁ := hsplit₁.symm
         subst hsplit₂ hsplit₁
-        have h₃ : (Internal.indexOfAux l pred (currentIndex + 1)).isSome :=
+        let o1 := currentIndex + 1
+        let o2 := 1
+        let t := l
+      case' h_2.h_2 =>
+        let o1 := currentIndex + o + 1
+        let o2 := 0 + o + 1
+        let he₁ := hsplit₁
+        let he₂ := hsplit₂
+        let t := r
+      case h_1.h_1 he₂ he₁ | h_2.h_2 =>
+        have h₃ : (Internal.indexOfAux t pred o1).isSome :=
           match Option.eq_some_iff_get_eq.mp he₁ with
           | Exists.intro he₁ _ => Option.is_some_map.mp he₁
-        have h₄ : (Internal.indexOfAux l pred 1).isSome := indexOfSomeImpPredTrueAux2 _ _ h₃
-        have h₅ : (Internal.indexOfAux l pred 0).isSome := indexOfSomeImpPredTrueAux2 _ _ h₃
-        have h₆ := indexOfAuxAddsCurrentIndex l pred 1 h₄ h₅
-        have h₇ := indexOfAuxAddsCurrentIndex l pred (currentIndex + 1) h₃ h₅
+        have h₄ : (Internal.indexOfAux t pred o2).isSome := indexOfSomeImpPredTrueAux2 _ _ h₃
+        have h₅ : (Internal.indexOfAux t pred 0).isSome := indexOfSomeImpPredTrueAux2 _ _ h₃
+        have h₆ := indexOfAuxAddsCurrentIndex t pred o2 h₄ h₅
+        have h₇ := indexOfAuxAddsCurrentIndex t pred o1 h₃ h₅
         rw[Option.eq_some_iff_get_eq] at he₂ he₁
         match he₁, he₂ with
         | Exists.intro he₁ h₈, Exists.intro he₂ h₉ =>
@@ -164,23 +174,8 @@ private theorem indexOfAuxAddsCurrentIndex {α : Type u} {n : Nat} (tree : Compl
           rw[Nat.mod_eq_of_lt (by omega), h₇] at h₈
           rw[Nat.mod_eq_of_lt (by omega), h₆] at h₉
           rw[←h₈, ←h₉]
-          simp_arith
-      case h_2.h_2 =>
-        have h₃ : (Internal.indexOfAux r pred (currentIndex + o + 1)).isSome :=
-          match Option.eq_some_iff_get_eq.mp hsplit₁ with
-          | Exists.intro he₁ _ => Option.is_some_map.mp he₁
-        have h₄ : (Internal.indexOfAux r pred (0 + o + 1)).isSome := indexOfSomeImpPredTrueAux2 _ _ h₃
-        have h₅ : (Internal.indexOfAux r pred 0).isSome := indexOfSomeImpPredTrueAux2 _ _ h₃
-        have h₆ := indexOfAuxAddsCurrentIndex r pred (0 + o + 1) h₄ h₅
-        have h₇ := indexOfAuxAddsCurrentIndex r pred (currentIndex + o + 1) h₃ h₅
-        rw[Option.eq_some_iff_get_eq] at hsplit₁ hsplit₂
-        match hsplit₁, hsplit₂ with
-        | Exists.intro hsplit₁ h₈, Exists.intro hsplit₂ h₉ =>
-          simp[Fin.ext_iff, Option.map_get] at h₈ h₉
-          rw[Nat.mod_eq_of_lt (by omega), h₇] at h₈
-          rw[Nat.mod_eq_of_lt (by omega), h₆] at h₉
-          rw[←h₈, ←h₉]
-          simp_arith
+          simp_arith[o1, o2]
+
 
 private theorem indexOfSomeImpPredTrueAuxR {α : Type u} {p : Nat} (r : CompleteTree α p) (pred : α → Bool) {o : Nat} (index : Fin ((o+p)+1)) (h₁ : o + p + 1 > 0) (h₂ : (Internal.indexOfAux r pred 0).isSome) : ∀(a : Fin (p + (o + 1))), (Internal.indexOfAux r pred (o + 1) = some a ∧ Fin.ofNat' ↑a h₁ = index) → (Internal.indexOfAux r pred 0).get h₂ + o + 1 = index.val := by
   simp only [Nat.add_zero, and_imp]
