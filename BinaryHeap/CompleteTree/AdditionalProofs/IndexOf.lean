@@ -19,7 +19,7 @@ private theorem Option.bind_some_eq_map {α β : Type u} (f : α → β) (a : Op
   case none => rfl
   case some => rfl
 
-private theorem Option.is_some_map {α : Type u} {β : Type v} (f : α → β) (a : Option α) : (Option.map f a).isSome = a.isSome := by
+private theorem Option.is_some_map {α : Type u} {β : Type v} {f : α → β} {a : Option α} : (Option.map f a).isSome ↔ a.isSome := by
   cases a
   case none => simp only [Option.map_none', Option.isSome_none]
   case some => simp only [Option.map_some', Option.isSome_some]
@@ -28,6 +28,17 @@ private theorem Option.orElse_is_some {α : Type u} (a b : Option α) : (HOrElse
   cases a
   case none => simp only [Option.none_orElse, Option.isSome_none, Bool.false_or]
   case some _ => simp only [Option.some_orElse, Option.isSome_some, Bool.true_or]
+
+private theorem Option.isSome_of_eq_some {α : Type u} {a : α} {o : Option α} : o = some a → o.isSome := by
+  intro h₁
+  cases o
+  case none => contradiction
+  case some => rfl
+
+private theorem Option.map_get {α: Type u} {β : Type v} {o : Option α} {f : α → β} (h₁ : (Option.map f o).isSome) : (Option.map f o).get h₁ = (f $ o.get (Option.is_some_map.mp h₁)) := by
+  cases o
+  case none => contradiction
+  case some => rfl
 
 private theorem indexOfNoneImpPredFalseAux {α : Type u} {n : Nat} (tree : CompleteTree α n) (pred : α → Bool) (currentIndex : Nat) : (CompleteTree.Internal.indexOfAux tree pred currentIndex).isNone → ∀(index : Fin n), ¬pred (tree.get index) := by
   if h₁ : n > 0 then
@@ -99,11 +110,104 @@ private theorem indexOfSomeImpPredTrueAux2 {α : Type u} {p : Nat} {r : Complete
         right
         exact indexOfSomeImpPredTrueAux2 _ _ h₁
 
+private theorem indexOfAuxAddsCurrentIndex {α : Type u} {n : Nat} (tree : CompleteTree α n) (pred : α → Bool) (currentIndex : Nat) (h₁ : Option.isSome $ Internal.indexOfAux tree pred currentIndex) (h₂ : Option.isSome $ Internal.indexOfAux tree pred 0) : Fin.val ((Internal.indexOfAux tree pred currentIndex).get h₁) = (Fin.val ((Internal.indexOfAux tree pred 0).get h₂)) + currentIndex := by
+  unfold Internal.indexOfAux
+  split
+  case h_1 => omega --Good that omega can solve this. I really wouldn't want to dig for that proof by hand.
+  case h_2 o p v l r _ _ _ =>
+    split
+    case isTrue =>
+      have : currentIndex < o + p + 1 + currentIndex := by simp_arith
+      simp only [Nat.add_eq, Nat.succ_eq_add_one, Option.get_some, Fin.val_ofNat', this,
+        Nat.mod_eq_of_lt, Nat.add_zero, Nat.zero_lt_succ, Nat.zero_add]
+    case isFalse =>
+      simp only [Nat.add_eq, Nat.succ_eq_add_one, Option.pure_def, Option.bind_eq_bind,
+        Option.bind_some_eq_map, Option.map_map, Nat.add_zero, Nat.reduceAdd]
+      unfold HOrElse.hOrElse instHOrElseOfOrElse OrElse.orElse Option.instOrElse Option.orElse
+      -- All the cool tactics fail here. So, I hate to do this, but:
+      simp only
+      unfold Option.get
+      split
+      rename_i d1 d2 index₁ h₃ hsplit₁ _
+      clear d1 d2
+      split
+      rename_i d1 d2 index₂ h₃₂ hsplit₂ _
+      clear d1 d2
+      -- In Lean, you know you are in for a world of pain if you split <;> split.
+      split at hsplit₁ <;> split at hsplit₂
+      case' h_1.h_2 => let off := 1
+      case' h_2.h_1 => let off := currentIndex + 1
+      case h_1.h_2 hx₂ _ _ hx₁ | h_2.h_1 hx₁ _ _ _ hx₂ =>
+        have hx₂ := Option.isSome_of_eq_some hx₂
+        have hx₂ : (Internal.indexOfAux l pred _).isSome := Option.is_some_map.mp hx₂
+        have hx₂ := indexOfSomeImpPredTrueAux2 _ off hx₂
+        have hx₁ := Option.map_eq_none.mp hx₁
+        have hx₁ := Option.not_isSome_iff_eq_none.mpr hx₁
+        contradiction
+      all_goals
+        simp only [Option.some.injEq] at hsplit₂ hsplit₁
+      case h_1.h_1 he₁ _ _ _ he₂ =>
+        have hsplit₂ := hsplit₂.symm
+        have hsplit₁ := hsplit₁.symm
+        subst hsplit₂ hsplit₁
+        have h₃ : (Internal.indexOfAux l pred (currentIndex + 1)).isSome :=
+          match Option.eq_some_iff_get_eq.mp he₁ with
+          | Exists.intro he₁ _ => Option.is_some_map.mp he₁
+        have h₄ : (Internal.indexOfAux l pred 1).isSome := indexOfSomeImpPredTrueAux2 _ _ h₃
+        have h₅ : (Internal.indexOfAux l pred 0).isSome := indexOfSomeImpPredTrueAux2 _ _ h₃
+        have h₆ := indexOfAuxAddsCurrentIndex l pred 1 h₄ h₅
+        have h₇ := indexOfAuxAddsCurrentIndex l pred (currentIndex + 1) h₃ h₅
+        rw[Option.eq_some_iff_get_eq] at he₂ he₁
+        match he₁, he₂ with
+        | Exists.intro he₁ h₈, Exists.intro he₂ h₉ =>
+          simp[Fin.ext_iff, Option.map_get] at h₈ h₉
+          rw[Nat.mod_eq_of_lt (by omega), h₇] at h₈
+          rw[Nat.mod_eq_of_lt (by omega), h₆] at h₉
+          rw[←h₈, ←h₉]
+          simp_arith
+      case h_2.h_2 =>
+        have h₃ : (Internal.indexOfAux r pred (currentIndex + o + 1)).isSome :=
+          match Option.eq_some_iff_get_eq.mp hsplit₁ with
+          | Exists.intro he₁ _ => Option.is_some_map.mp he₁
+        have h₄ : (Internal.indexOfAux r pred (0 + o + 1)).isSome := indexOfSomeImpPredTrueAux2 _ _ h₃
+        have h₅ : (Internal.indexOfAux r pred 0).isSome := indexOfSomeImpPredTrueAux2 _ _ h₃
+        have h₆ := indexOfAuxAddsCurrentIndex r pred (0 + o + 1) h₄ h₅
+        have h₇ := indexOfAuxAddsCurrentIndex r pred (currentIndex + o + 1) h₃ h₅
+        rw[Option.eq_some_iff_get_eq] at hsplit₁ hsplit₂
+        match hsplit₁, hsplit₂ with
+        | Exists.intro hsplit₁ h₈, Exists.intro hsplit₂ h₉ =>
+          simp[Fin.ext_iff, Option.map_get] at h₈ h₉
+          rw[Nat.mod_eq_of_lt (by omega), h₇] at h₈
+          rw[Nat.mod_eq_of_lt (by omega), h₆] at h₉
+          rw[←h₈, ←h₉]
+          simp_arith
+
 private theorem indexOfSomeImpPredTrueAuxR {α : Type u} {p : Nat} (r : CompleteTree α p) (pred : α → Bool) {o : Nat} (index : Fin ((o+p)+1)) (h₁ : o + p + 1 > 0) (h₂ : (Internal.indexOfAux r pred 0).isSome) : ∀(a : Fin (p + (o + 1))), (Internal.indexOfAux r pred (o + 1) = some a ∧ Fin.ofNat' ↑a h₁ = index) → (Internal.indexOfAux r pred 0).get h₂ + o + 1 = index.val := by
-  sorry
+  simp only [Nat.add_zero, and_imp]
+  intros index₂ h₃ h₄
+  have : index₂.val = index.val := by
+    rw[Fin.ext_iff, Fin.val_ofNat'] at h₄
+    have : index₂.val % (o + p + 1) = index₂.val := Nat.mod_eq_of_lt $ (Nat.add_comm o p).substr $ (Nat.add_assoc o p 1).substr index₂.isLt
+    exact this.subst (motive := λx↦x=index.val) h₄
+  rw[←this]
+  have := indexOfAuxAddsCurrentIndex r pred (o+1) (indexOfSomeImpPredTrueAux2 0 _ h₂) h₂
+  simp_arith at this
+  rw[←this]
+  simp only [h₃, Option.get_some]
 
 private theorem indexOfSomeImpPredTrueAuxL {α : Type u} {o : Nat} (l : CompleteTree α o) (pred : α → Bool) {p : Nat} (index : Fin ((o+p)+1)) (h₁ : o + p + 1 > 0) (h₂ : (Internal.indexOfAux l pred 0).isSome) : ∀(a : Fin ((o + 1))), (Internal.indexOfAux l pred 1 = some a ∧ Fin.ofNat' ↑a h₁ = index) → (Internal.indexOfAux l pred 0).get h₂ + 1 = index.val := by
-  sorry
+  simp only [Nat.add_zero, and_imp]
+  intros index₂ h₃ h₄
+  have : index₂.val = index.val := by
+    rw[Fin.ext_iff, Fin.val_ofNat'] at h₄
+    have : o + 1 ≤ o+p+1 := Nat.succ_le_succ $ Nat.le_add_right o p
+    have : index₂.val % (o + p + 1) = index₂.val := Nat.mod_eq_of_lt $ Nat.lt_of_lt_of_le index₂.isLt this
+    exact this.subst (motive := λx↦x=index.val) h₄
+  rw[←this]
+  have := indexOfAuxAddsCurrentIndex l pred 1 (indexOfSomeImpPredTrueAux2 0 _ h₂) h₂
+  simp_arith at this
+  rw[←this]
+  simp only [h₃, Option.get_some]
 
 theorem indexOfSomeImpPredTrue {α : Type u} {n : Nat} (tree : CompleteTree α n) (pred : α → Bool) : (h₁ : (tree.indexOf pred).isSome) → pred (tree.get ((tree.indexOf pred).get h₁)) := by
   intro h₁
