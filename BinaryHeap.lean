@@ -58,6 +58,19 @@ instance : GetElem (BinaryHeap α le n) (Nat) α (λ _ index ↦ index < n) wher
 instance : GetElem (BinaryHeap α le n) (Fin n) α (λ _ _ ↦ True) where
   getElem := λ heap index _ ↦ heap.tree.get index
 
+def forM [Monad m] (heap : BinaryHeap α le n) (f : α → m PUnit) : m PUnit :=
+  match n with
+  | .zero => pure ()
+  | .succ _ =>
+    let a := heap.tree.root' --this is faster than pop here, in case of a break.
+    f a >>= λ _ ↦ heap.pop.fst.forM f
+
+instance : ForM m (BinaryHeap α le n) α where
+  forM := BinaryHeap.forM
+
+instance : ForIn m (BinaryHeap α le n) α where
+  forIn := ForM.forIn
+
 /--Helper for the common case of using natural numbers for sorting.-/
 theorem nat_ble_to_heap_le_total : total_le Nat.ble :=
   λa b ↦ Nat.ble_eq.substr $ Nat.ble_eq.substr (Nat.le_total a b)
