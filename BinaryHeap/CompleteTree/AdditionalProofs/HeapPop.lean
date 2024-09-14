@@ -4,7 +4,7 @@ import BinaryHeap.CompleteTree.AdditionalProofs.HeapUpdateRoot
 
 namespace BinaryHeap.CompleteTree.AdditionalProofs
 
-theorem heapPopReturnsRoot {α : Type u} {n : Nat} (tree : CompleteTree α (n+1)) (le : α → α → Bool) : (tree.heapPop le).snd = tree.root (Nat.succ_pos n) := by
+theorem heapPopReturnsRoot {α : Type u} {n : Nat} (tree : CompleteTree α (n+1)) (le : α → α → Bool) : (tree.heapPop le).fst = tree.root (Nat.succ_pos n) := by
   unfold heapPop
   split
   <;> simp only
@@ -22,14 +22,14 @@ theorem heapPopReturnsRoot {α : Type u} {n : Nat} (tree : CompleteTree α (n+1)
   case isTrue h₁ =>
     have h₂ := CompleteTree.AdditionalProofs.heapRemoveLastWithIndexLeavesRoot tree h₁
     have h₃ := CompleteTree.AdditionalProofs.heapRemoveLastWithIndexHeapRemoveLastSameTree tree
-    simp only [h₃, heapUpdateRootReturnsRoot, h₂]
+    simp only [heapPop.Prod.swap, h₃, heapUpdateRootReturnsRoot, h₂]
 
 /--
   Shows that each element contained before removing the root that is not the root is still contained after removing the root.
   This is not a rigorous proof that the rest of the tree remained unchanged, as (1 (1 (1 1)) (2)).heapPop = (1 (2 (2 _)) (2)) would pass it too...
   Imho it is still a good indication that there are no obvious bugs.
   -/
-theorem heapPopOnlyRemovesRoot {α : Type u} {n : Nat} (tree : CompleteTree α (n+1)) (le: α → α → Bool) (index : Fin (n+1)) (h₁ : index ≠ ⟨0, Nat.succ_pos _⟩) : (tree.heapPop le).fst.contains $ tree.get index := by
+theorem heapPopOnlyRemovesRoot {α : Type u} {n : Nat} (tree : CompleteTree α (n+1)) (le: α → α → Bool) (index : Fin (n+1)) (h₁ : index ≠ ⟨0, Nat.succ_pos _⟩) : (tree.heapPop le).snd.contains $ tree.get index := by
   unfold heapPop
   split <;> simp
   case isFalse h₃ => omega --contradiction. if n == 0 then index cannot be ≠ 0
@@ -39,7 +39,7 @@ theorem heapPopOnlyRemovesRoot {α : Type u} {n : Nat} (tree : CompleteTree α (
       rw[←h₂] at h₃
       have := CompleteTree.AdditionalProofs.heapRemoveLastWithIndexHeapRemoveLastSameElement tree
       rw[←this] at h₃
-      simp[h₃, heapUpdateRootContainsUpdatedElement]
+      simp[heapPop.Prod.swap,h₃, heapUpdateRootContainsUpdatedElement]
     else
       have h₄ : (Internal.heapRemoveLastWithIndex tree).snd.snd ≠ 0 := by
         have a : n ≠ 0 := Nat.ne_of_gt h₃

@@ -271,18 +271,19 @@ def heapUpdateAt {α : Type u} {n : Nat} (le : α → α → Bool) (index : Fin 
 ----------------------------------------------------------------------------------------------
 -- heapPop
 
-def heapPop {α : Type u} {n : Nat} (le : α → α → Bool) (heap : CompleteTree α (n+1)) : CompleteTree α n × α :=
+def heapPop {α : Type u} {n : Nat} (le : α → α → Bool) (heap : CompleteTree α (n+1)) : α × CompleteTree α n :=
   let l := Internal.heapRemoveLast heap
   if p : n > 0 then
-    heapUpdateRoot p le l.snd l.fst
+    Prod.swap $ heapUpdateRoot p le l.snd l.fst
   else
-    l
+    Prod.swap l
+where Prod.swap := λ(a,b)↦(b,a)
 
 ----------------------------------------------------------------------------------------------
 -- heapRemoveAt
 
 /--Removes the element at a given index. Use `indexOf` to find the respective index.-/
-def heapRemoveAt {α : Type u} {n : Nat} (le : α → α → Bool) (index : Fin (n+1)) (heap : CompleteTree α (n+1)) : CompleteTree α n × α :=
+def heapRemoveAt {α : Type u} {n : Nat} (le : α → α → Bool) (index : Fin (n+1)) (heap : CompleteTree α (n+1)) : α × CompleteTree α n :=
   --Since we cannot even temporarily break the completeness property, we go with the
   --version from Wikipedia: We first remove the last element, and then update values in the tree
   --indices are depth first, but "last" means last element of the complete tree.
@@ -292,12 +293,13 @@ def heapRemoveAt {α : Type u} {n : Nat} (le : α → α → Bool) (index : Fin 
   else
     let (remaining_tree, removed_element, removed_index) := Internal.heapRemoveLastWithIndex heap
     if index = removed_index then
-      (remaining_tree, removed_element)
+      (removed_element, remaining_tree)
     else
       if index_lt_lastIndex : index ≥ removed_index then
         let index := index.pred index_ne_zero
-        heapUpdateAt le index removed_element remaining_tree
+        Prod.swap $ heapUpdateAt le index removed_element remaining_tree
       else
         let h₁ : index < n := by omega
         let index : Fin n := ⟨index, h₁⟩
-        heapUpdateAt le index removed_element remaining_tree
+        Prod.swap $ heapUpdateAt le index removed_element remaining_tree
+where Prod.swap := λ(a,b)↦(b,a)

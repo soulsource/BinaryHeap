@@ -5,7 +5,7 @@ import BinaryHeap.CompleteTree.AdditionalProofs.HeapRemoveLast
 
 namespace BinaryHeap.CompleteTree.AdditionalProofs
 
-theorem heapRemoveAtReturnsElementAt {α : Type u} {n : Nat} (le : α → α → Bool) (heap : CompleteTree α (n+1)) (index : Fin (n+1)) : (heap.heapRemoveAt le index).snd = heap.get index := by
+theorem heapRemoveAtReturnsElementAt {α : Type u} {n : Nat} (le : α → α → Bool) (heap : CompleteTree α (n+1)) (index : Fin (n+1)) : (heap.heapRemoveAt le index).fst = heap.get index := by
   unfold heapRemoveAt
   if h₁ : index = 0 then
     simp only [h₁, ↓reduceDIte]
@@ -28,7 +28,7 @@ theorem heapRemoveAtReturnsElementAt {α : Type u} {n : Nat} (le : α → α →
         rewrite[←h₄]
         exact Eq.symm $ heapUpdateAtReturnsElementAt le _ _ _
 
-theorem heapRemoveAtOnlyRemovesAt {α : Type u} {n : Nat} (le : α → α → Bool) (heap : CompleteTree α (n+1)) (removeIndex : Fin (n+1)) (otherIndex : Fin (n+1)) (h₁ : removeIndex ≠ otherIndex) : (heap.heapRemoveAt le removeIndex).fst.contains (heap.get otherIndex) := by
+theorem heapRemoveAtOnlyRemovesAt {α : Type u} {n : Nat} (le : α → α → Bool) (heap : CompleteTree α (n+1)) (removeIndex : Fin (n+1)) (otherIndex : Fin (n+1)) (h₁ : removeIndex ≠ otherIndex) : (heap.heapRemoveAt le removeIndex).snd.contains (heap.get otherIndex) := by
   unfold heapRemoveAt
   if h₂ : removeIndex = 0 then
     subst removeIndex
