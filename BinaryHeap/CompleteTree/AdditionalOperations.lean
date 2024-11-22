@@ -11,17 +11,17 @@ protected def Internal.indexOfAux {α : Type u} (heap : CompleteTree α o) (pred
   match o, heap with
   | 0, .leaf => none
   | (n+m+1), .branch a left right _ _ _ =>
-    have sum_n_m_succ_curr : n + m.succ + currentIndex > 0 := Nat.add_pos_left (Nat.add_pos_right n (Nat.succ_pos m)) currentIndex
+    have : NeZero (n + m + 1 + currentIndex) := ⟨Nat.pos_iff_ne_zero.mp $ Nat.add_pos_left (Nat.add_pos_right n (Nat.succ_pos m)) currentIndex⟩
     if pred a then
-      let result := Fin.ofNat' currentIndex sum_n_m_succ_curr
+      let result := Fin.ofNat' _ currentIndex
       some result
     else
       let found_left := CompleteTree.Internal.indexOfAux left pred (currentIndex + 1)
-      let found_left : Option (Fin (n+m+1+currentIndex)) := found_left.map λ a ↦ Fin.ofNat' a sum_n_m_succ_curr
+      let found_left : Option (Fin (n+m+1+currentIndex)) := found_left.map λ a ↦ Fin.ofNat' _ a
       let found_right :=
         found_left
         <|>
-        (CompleteTree.Internal.indexOfAux right pred (currentIndex + n + 1)).map ((λ a ↦ Fin.ofNat' a sum_n_m_succ_curr) : _ → Fin (n+m+1+currentIndex))
+        (CompleteTree.Internal.indexOfAux right pred (currentIndex + n + 1)).map ((λ a ↦ Fin.ofNat' _ a) : _ → Fin (n+m+1+currentIndex))
       found_right
 
 /--Finds the first occurance of a given element in the heap and returns its index. Indices are depth first.-/

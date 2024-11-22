@@ -44,7 +44,7 @@ def heapPush (le : α → α → Bool) (elem : α) (heap : CompleteTree α o) : 
           simp at subtree_complete
           exact subtree_complete
         else if h₁ : leftIsFull then by
-          rewrite[Decidable.not_and_iff_or_not (m<n) leftIsFull] at r
+          rewrite[Decidable.not_and_iff_or_not (p := m<n) (q := leftIsFull)] at r
           cases r
           case inl h₂ => rewrite[Nat.not_lt_eq] at h₂
                          have h₃ := Nat.not_le_of_gt $ Nat.lt_of_le_of_ne h₂ s
@@ -58,7 +58,7 @@ def heapPush (le : α → α → Bool) (elem : α) (heap : CompleteTree α o) : 
           case inl => contradiction
           case inr => trivial
       have still_in_range : n + 1 < 2 * (m + 1) := by
-        rewrite[Decidable.not_and_iff_or_not (m<n) leftIsFull] at r
+        rewrite[Decidable.not_and_iff_or_not (p := m<n) (q := leftIsFull)] at r
         cases r
         case inl h₁ => rewrite[Nat.not_gt_eq n m] at h₁
                        simp_arith[Nat.le_antisymm h₁ p]

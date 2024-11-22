@@ -118,5 +118,5 @@ theorem heapPushIsHeap {α : Type u} {elem : α} {heap : CompleteTree α o} {le 
       unfold HeapPredicate
       cases h₆ : (le elem v)
       <;> simp only [h₆, Bool.false_eq_true, reduceIte] at h
-      <;> simp only [instDecidableEqBool, Bool.decEq, h, and_self]
+      <;> simp only [Bool.false_eq_true, ↓reduceIte, h, and_self]
 end

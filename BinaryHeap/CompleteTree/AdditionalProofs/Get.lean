@@ -8,7 +8,8 @@ theorem get_zero_eq_root {α : Type u} {n : Nat} (tree : CompleteTree α n) (h�
   | (_+_+1), 0, .branch v _ _ _ _ _ => rfl
   | nn+1, ⟨j+1,h₄⟩, _ => by
     subst h₂
-    simp only [heq_eq_eq, Fin.ext_iff] at h₃
+    simp only [Nat.succ_eq_add_one, Fin.zero_eta, heq_eq_eq, Fin.ext_iff, Fin.val_zero,
+      Nat.self_eq_add_left, Nat.add_one_ne_zero] at h₃
 
 theorem get_right {α : Type u} {n : Nat} (tree : CompleteTree α n) (index : Fin n) (h₂ : index > tree.leftLen (Nat.zero_lt_of_lt index.isLt))
   : have h₁ : n > 0 := Nat.zero_lt_of_lt index.isLt

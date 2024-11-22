@@ -98,8 +98,9 @@ private theorem indexOfSomeImpPredTrueAux2 {α : Type u} {p : Nat} {r : Complete
     case isTrue =>
       simp only [Option.isSome_some, imp_self]
     case isFalse =>
+      unfold Function.comp
+      simp only [Option.map_some']
       repeat rw[Option.bind_some_eq_map]
-      simp only [Option.map_map]
       simp only [Option.orElse_is_some, Bool.or_eq_true, Option.is_some_map]
       intro h₁
       cases h₁
@@ -177,7 +178,7 @@ private theorem indexOfAuxAddsCurrentIndex {α : Type u} {n : Nat} (tree : Compl
           simp_arith[o1, o2]
 
 
-private theorem indexOfSomeImpPredTrueAuxR {α : Type u} {p : Nat} (r : CompleteTree α p) (pred : α → Bool) {o : Nat} (index : Fin ((o+p)+1)) (h₁ : o + p + 1 > 0) (h₂ : (Internal.indexOfAux r pred 0).isSome) : ∀(a : Fin (p + (o + 1))), (Internal.indexOfAux r pred (o + 1) = some a ∧ Fin.ofNat' ↑a h₁ = index) → (Internal.indexOfAux r pred 0).get h₂ + o + 1 = index.val := by
+private theorem indexOfSomeImpPredTrueAuxR {α : Type u} {p : Nat} (r : CompleteTree α p) (pred : α → Bool) {o : Nat} (index : Fin ((o+p)+1)) (h₂ : (Internal.indexOfAux r pred 0).isSome) : ∀(a : Fin (p + (o + 1))), (Internal.indexOfAux r pred (o + 1) = some a ∧ Fin.ofNat' (o+p+1) ↑a = index) → (Internal.indexOfAux r pred 0).get h₂ + o + 1 = index.val := by
   simp only [Nat.add_zero, and_imp]
   intros index₂ h₃ h₄
   have : index₂.val = index.val := by
@@ -190,7 +191,7 @@ private theorem indexOfSomeImpPredTrueAuxR {α : Type u} {p : Nat} (r : Complete
   rw[←this]
   simp only [h₃, Option.get_some]
 
-private theorem indexOfSomeImpPredTrueAuxL {α : Type u} {o : Nat} (l : CompleteTree α o) (pred : α → Bool) {p : Nat} (index : Fin ((o+p)+1)) (h₁ : o + p + 1 > 0) (h₂ : (Internal.indexOfAux l pred 0).isSome) : ∀(a : Fin ((o + 1))), (Internal.indexOfAux l pred 1 = some a ∧ Fin.ofNat' ↑a h₁ = index) → (Internal.indexOfAux l pred 0).get h₂ + 1 = index.val := by
+private theorem indexOfSomeImpPredTrueAuxL {α : Type u} {o : Nat} (l : CompleteTree α o) (pred : α → Bool) {p : Nat} (index : Fin ((o+p)+1)) (h₂ : (Internal.indexOfAux l pred 0).isSome) : ∀(a : Fin ((o + 1))), (Internal.indexOfAux l pred 1 = some a ∧ Fin.ofNat' (o+p+1) ↑a = index) → (Internal.indexOfAux l pred 0).get h₂ + 1 = index.val := by
   simp only [Nat.add_zero, and_imp]
   intros index₂ h₃ h₄
   have : index₂.val = index.val := by
@@ -226,15 +227,16 @@ theorem indexOfSomeImpPredTrue {α : Type u} {n : Nat} (tree : CompleteTree α n
       assumption
     case false =>
       --unfold HOrElse.hOrElse instHOrElseOfOrElse at he₁
-      simp only [h₃, Bool.false_eq_true, ↓reduceIte, Option.bind_some_eq_map ] at he₁
-      cases h₄ : (Option.map (fun a => Fin.ofNat' a _) (Option.map Fin.val (Internal.indexOfAux l pred 1)))
+      unfold Function.comp at he₁
+      simp only [h₃, Bool.false_eq_true, ↓reduceIte, Option.map_some', Option.bind_some_eq_map] at he₁
+      cases h₄ : (Option.map (fun a => Fin.ofNat' (o+p+1) a.val) (Internal.indexOfAux l pred 1))
       case none =>
         rw[h₄, Option.none_orElse] at he₁
         simp only [Option.map_map, Option.map_eq_some', Function.comp_apply] at he₁
         rw[Nat.zero_add] at he₁
         have h₅ : (Internal.indexOfAux r pred (o + 1)).isSome := Option.isSome_iff_exists.mpr (Exists.imp (λx ↦ And.left) he₁)
         have h₆ := indexOfSomeImpPredTrueAux2 _ 0 h₅
-        have h₇ := indexOfSomeImpPredTrueAuxR r pred index (Nat.succ_pos _) h₆
+        have h₇ := indexOfSomeImpPredTrueAuxR r pred index h₆
         have h₈ := he₁.elim h₇
         have h₉ := indexOfSomeImpPredTrue r pred h₆
         rw[get_right' _ (Nat.lt_of_add_right $ Nat.lt_of_succ_le $ Nat.le_of_eq h₈)] at h₂
@@ -249,7 +251,7 @@ theorem indexOfSomeImpPredTrue {α : Type u} {n : Nat} (tree : CompleteTree α n
         subst lindex
         have h₅ : (Internal.indexOfAux l pred 1).isSome := Option.isSome_iff_exists.mpr (Exists.imp (λx ↦ And.left) h₄)
         have h₆ := indexOfSomeImpPredTrueAux2 _ 0 h₅
-        have h₇ := indexOfSomeImpPredTrueAuxL l pred index (Nat.succ_pos _) h₆
+        have h₇ := indexOfSomeImpPredTrueAuxL l pred index h₆
         have h₈ := h₄.elim h₇
         have h₉ := indexOfSomeImpPredTrue l pred h₆
         have h₁₀ : index.val ≤ o := Nat.le_trans (Nat.le_of_eq h₈.symm) (((Internal.indexOfAux l pred 0).get h₆).isLt)

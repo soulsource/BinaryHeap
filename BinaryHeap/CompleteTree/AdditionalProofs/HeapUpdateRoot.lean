@@ -150,7 +150,7 @@ theorem heapUpdateRootOnlyUpdatesRoot {α : Type u} {n : Nat} (le : α → α �
                 have : pp + 1 < oo + 1 + pp + 1 + 1 := by simp_arith --termination
                 apply heapUpdateRootOnlyUpdatesRoot
                 apply Fin.ne_of_val_ne
-                simp only [Nat.add_one_ne_zero, not_false_eq_true]
+                simp only [ne_eq, Nat.add_one_ne_zero, not_false_eq_true]
 
 theorem heapUpdateRootContainsUpdatedElement {α : Type u} {n : Nat} (tree : CompleteTree α n) (le : α → α → Bool) (value : α) (h₁ : n > 0): (tree.heapUpdateRoot h₁ le value).fst.contains value := by
   unfold heapUpdateRoot

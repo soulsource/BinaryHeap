@@ -87,7 +87,7 @@ theorem heapUpdateAtOnlyUpdatesAt {α : Type u} {n : Nat} (le : α → α → Bo
     generalize heapUpdateAt.proof_1 updateIndex = h₁
     --cannot use h₃ here already - it makes split fail. So, splitting twice it is...
     split
-    case isTrue h => exact absurd ((beq_iff_eq _ _).mp h) h₃
+    case isTrue h => exact absurd (beq_iff_eq.mp h) h₃
     split
     rename_i d1 d2 d3 d4 d5 o p v l r _ _ _ updateIndex _ _
     clear d1 d2 d3 d4 d5
@@ -117,7 +117,7 @@ theorem heapUpdateAtOnlyUpdatesAt {α : Type u} {n : Nat} (le : α → α → Bo
     unfold heapUpdateAt heapUpdateAtAux
     generalize heapUpdateAt.proof_1 updateIndex = h₁
     split
-    case isTrue hx => exact absurd ((beq_iff_eq _ _).mp hx) h₃
+    case isTrue hx => exact absurd (beq_iff_eq.mp hx) h₃
     case isFalse =>
       split
       rename_i d1 d2 d3 d4 d5 o p v l r olep mhd stc index _ _

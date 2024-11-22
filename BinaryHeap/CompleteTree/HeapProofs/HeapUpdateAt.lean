@@ -29,7 +29,7 @@ private theorem heapUpdateAtIsHeapLeRootAux_ValueLeRoot {α : Type u} {n : Nat} 
     unfold heapUpdateRoot
     split
     rename_i o p v l r h₆ h₇ h₈ h₂
-    cases o <;> cases p <;> simp only [↓reduceDIte,HeapPredicate.leOrLeaf, root_unfold, h₄, reflexive_le]
+    cases o <;> cases p <;> simp [↓reduceDIte,HeapPredicate.leOrLeaf, Nat.add_one_ne_zero, root_unfold, h₄, reflexive_le]
     <;> unfold HeapPredicate at h₁
     <;> have h₁₀ : le value $ l.root (by omega) := h₅ value v (l.root _) ⟨h₃, h₁.right.right.left⟩
     simp only [↓reduceIte, Nat.add_zero, h₁₀, root_unfold, h₄, reflexive_le]
@@ -42,7 +42,7 @@ private theorem heapUpdateAtIsHeapLeRootAux_ValueLeRoot {α : Type u} {n : Nat} 
     <;> simp (config := { ground := true }) only [root_unfold, Nat.pred_eq_sub_one] at h₃ ⊢
     <;> split
     <;> unfold HeapPredicate.leOrLeaf
-    <;> simp only [root_unfold, h₃, h₄, reflexive_le]
+    <;> simp only [reduceIte, root_unfold, h₃, h₄, reflexive_le]
 
 theorem heapUpdateAtIsHeap {α : Type u} {n : Nat} (le : α → α → Bool) (index : Fin n) (value : α) (heap : CompleteTree α n) (h₂ : HeapPredicate heap le) (h₃ : transitive_le le) (h₄ : total_le le) : HeapPredicate (heap.heapUpdateAt le index value).fst le := by
   unfold heapUpdateAt heapUpdateAtAux

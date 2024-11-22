@@ -153,9 +153,9 @@ protected theorem heapRemoveLastWithIndexIndexNeZeroForNGt1 {α : Type u} {n : N
     rename_i o p v l r _ _ _
     simp at h₁
     simp[h₁]
-    have : o = 0 := And.left $ Nat.add_eq_zero_iff.mp h₁
+    have : o = 0 := And.left h₁
     subst o
-    have : p = 0 := And.right $ Nat.add_eq_zero_iff.mp h₁
+    have : p = 0 := And.right h₁
     subst p
     rfl
 

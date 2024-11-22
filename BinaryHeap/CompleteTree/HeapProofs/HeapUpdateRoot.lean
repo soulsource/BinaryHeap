@@ -78,7 +78,7 @@ have h₄ : 0 < rightLen heap h₂ := heapUpdateRootPossibleRootValuesAuxR heap 
   split
   rename_i o p v l r h₃ h₄ h₅ h₂
   cases o
-  case zero => simp only[root, true_or]
+  case zero => simp only [root, reduceDIte, true_or]
   case succ oo =>
     have h₆ : p ≠ 0 := by simp at h₁; omega
     simp only [Nat.add_one_ne_zero, ↓reduceDIte, h₆]
@@ -211,7 +211,7 @@ theorem heapUpdateRootIsHeap {α : Type u} {n: Nat} (le : α → α → Bool) (v
           · assumption
       else by
         simp only [↓reduceDIte, ↓reduceIte, h₁₀, h₁₁, h₁₂]
-        have h₁₃ : ¬le value (root l _) ∨ ¬le value (root r _) := (Decidable.not_and_iff_or_not (le value (root l (Nat.zero_lt_of_ne_zero h₁₀)) = true) (le value (root r (Nat.zero_lt_of_ne_zero h₁₁)) = true)).mp h₁₂
+        have h₁₃ : ¬le value (root l _) ∨ ¬le value (root r _) := Decidable.not_and_iff_or_not.mp h₁₂
         cases h₁₄ : le (root l (_ : 0 < o)) (root r (_ : 0 < p))
         <;> simp only [Bool.false_eq_true, ↓reduceIte]
         <;> unfold HeapPredicate at *
