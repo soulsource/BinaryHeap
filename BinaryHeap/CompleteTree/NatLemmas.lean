@@ -32,7 +32,6 @@ private theorem power_of_two_go_one_eq (n : Nat) (power : Nat) (h₁ : n.isPower
                      exact Nat.le_antisymm h₃ h₄
 termination_by n - power
 decreasing_by
-  simp_wf
   have := Nat.pos_of_isPowerOfTwo h₂
   apply Nat.nextPowerOfTwo_dec <;> assumption
 
