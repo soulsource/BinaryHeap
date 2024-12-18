@@ -27,7 +27,7 @@ def ofList {α : Type u} {le : α → α → Bool} (h₁ : TotalAndTransitiveLe 
     | a :: as => (Nat.add_comm_right n as.length 1).subst rfl ▸ worker as (heap.push a)
   Nat.zero_add l.length ▸ worker l $ BinaryHeap.new h₁
 
-/- Converts the tree to a sorted list. -/
+/-- Converts the tree to a sorted list. -/
 def toList (heap : BinaryHeap α le n) : List α :=
   let rec worker : (l : List α) → {n : Nat} → (BinaryHeap α le n) → List α := λ(l : List α) {n : Nat} (heap : BinaryHeap α le n) ↦
     match n with
@@ -36,6 +36,14 @@ def toList (heap : BinaryHeap α le n) : List α :=
       let (h, hs) := heap.pop
       worker (h :: l) hs
   worker [] heap
+
+/-- Adds all elements in a list -/
+def pushList {α : Type u} {n : Nat} {le : α → α → Bool} (heap : BinaryHeap α le n) (l : List α) : BinaryHeap α le (n+l.length) :=
+  match l with
+  | [] => heap
+  | a :: as =>
+    have : n + 1 + as.length = n + (a :: as).length := by simp_arith[List.length_cons a as]
+    this▸pushList (heap.push a) as
 
 private def ofForInAux [ForIn Id ρ α] {le : α → α → Bool} (h₁ : TotalAndTransitiveLe le) (c : ρ) : (h : Nat) ×' BinaryHeap α le h := Id.run do
   let mut r : (h : Nat) ×' BinaryHeap α le h := ⟨0, BinaryHeap.new h₁⟩
