@@ -33,7 +33,7 @@ def heapPush (le : α → α → Bool) (elem : α) (heap : CompleteTree α o) : 
                                rewrite[s]
                                simp[r]
       have difference_decreased := Nat.le_succ_of_le $ Nat.le_succ_of_le max_height_difference
-      let result := branch a left (right.heapPush le elem) (q) difference_decreased (by simp[(Nat.power_of_two_iff_next_power_eq (n+1)), r])
+      let result := branch a left (right.heapPush le elem) (q) difference_decreased (Or.inl $ (Nat.power_of_two_iff_next_power_eq (n+1)).mpr r.right)
       result
     else
       have q : m ≤ n+1 := by apply (Nat.le_of_succ_le)

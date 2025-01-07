@@ -76,7 +76,7 @@ protected theorem heapRemoveLastWithIndexHeapRemoveLastSameTree {α : Type u} {n
       simp only
       cases p
       case zero =>
-        simp (config := { ground := true }) only [Nat.zero_add, decide_True, and_true, Nat.not_lt, Nat.le_zero_eq] at h₂
+        simp (config := { ground := true }) only [Nat.zero_add, decide_true, and_true, Nat.not_lt, Nat.le_zero_eq] at h₂
         simp only [Nat.add_zero] at h₁
         exact absurd h₂.symm h₁
       case succ pp =>
@@ -111,7 +111,7 @@ protected theorem heapRemoveLastWithIndexHeapRemoveLastSameElement {α : Type u}
       simp only
       cases p
       case zero =>
-        simp (config := { ground := true }) only [Nat.zero_add, decide_True, and_true, Nat.not_lt, Nat.le_zero_eq] at h₂
+        simp (config := { ground := true }) only [Nat.zero_add, decide_true, and_true, Nat.not_lt, Nat.le_zero_eq] at h₂
         simp only [Nat.add_zero] at h₁
         exact absurd h₂.symm h₁
       case succ pp =>
