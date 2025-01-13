@@ -40,8 +40,9 @@ def heapPush (le : α → α → Bool) (elem : α) (heap : CompleteTree α o) : 
                              simp_arith[p]
       have right_is_power_of_two : (m+1).isPowerOfTwo :=
         if s : n = m then
-          s.subst (motive := λx ↦ (x+1).isPowerOfTwo ∨ (m+1).isPowerOfTwo) subtree_complete
-          |> (or_self _).mp
+          match subtree_complete with
+          | .inl h₂ => (congrArg Nat.succ s).subst h₂
+          | .inr h₂ => h₂
         else if h₁ : leftIsFull then by
           rewrite[Decidable.not_and_iff_or_not (p := m<n) (q := leftIsFull)] at r
           cases r
