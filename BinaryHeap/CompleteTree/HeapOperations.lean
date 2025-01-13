@@ -20,7 +20,7 @@ private theorem power_of_two_mul_two_lt {n m : Nat} (h₁ : m.isPowerOfTwo) (h�
 /--Adds a new element to a given CompleteTree.-/
 def heapPush (le : α → α → Bool) (elem : α) (heap : CompleteTree α o) : CompleteTree α (o+1) :=
   match o, heap with
-  | 0, .leaf => .branch elem (.leaf) (.leaf) (by simp) (by simp) (by simp[Nat.one_isPowerOfTwo])
+  | 0, .leaf => .branch elem (.leaf) (.leaf) (Nat.le_refl 0) (by decide) (Or.inl Nat.one_isPowerOfTwo)
   | (n+m+1), .branch a left right p max_height_difference subtree_complete =>
     let (elem, a) := if le elem a then (a, elem) else (elem, a)
     -- okay, based on n and m we know if we want to add left or right.
@@ -39,10 +39,9 @@ def heapPush (le : α → α → Bool) (elem : α) (heap : CompleteTree α o) : 
       have q : m ≤ n+1 := by apply (Nat.le_of_succ_le)
                              simp_arith[p]
       have right_is_power_of_two : (m+1).isPowerOfTwo :=
-        if s : n = m then by
-          rewrite[s] at subtree_complete
-          simp at subtree_complete
-          exact subtree_complete
+        if s : n = m then
+          s.subst (motive := λx ↦ (x+1).isPowerOfTwo ∨ (m+1).isPowerOfTwo) subtree_complete
+          |> (or_self _).mp
         else if h₁ : leftIsFull then by
           rewrite[Decidable.not_and_iff_or_not (p := m<n) (q := leftIsFull)] at r
           cases r
@@ -51,12 +50,12 @@ def heapPush (le : α → α → Bool) (elem : α) (heap : CompleteTree α o) : 
                          contradiction
           case inr h₂ => simp at h₂
                          contradiction
-        else by
-          simp[leftIsFull] at h₁
-          rewrite[←Nat.power_of_two_iff_next_power_eq] at h₁
-          cases subtree_complete
-          case inl => contradiction
-          case inr => trivial
+        else
+          have : leftIsFull = ((n + 1).nextPowerOfTwo = n + 1) := rfl
+          have h₁ := h₁ ∘ this.mp ∘ (Nat.power_of_two_iff_next_power_eq (n+1)).mp
+          match subtree_complete with
+          | .inl h₂ => absurd h₂ h₁
+          | .inr h₂ => h₂
       have still_in_range : n + 1 < 2 * (m + 1) := by
         rewrite[Decidable.not_and_iff_or_not (p := m<n) (q := leftIsFull)] at r
         cases r
