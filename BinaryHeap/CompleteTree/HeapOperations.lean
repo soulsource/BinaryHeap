@@ -27,46 +27,48 @@ def heapPush (le : α → α → Bool) (elem : α) (heap : CompleteTree α o) : 
     -- the left tree is full, if (n+1) is a power of two AND n != m
     let leftIsFull := (n+1).nextPowerOfTwo = n+1
     if r : m < n ∧ leftIsFull  then
-      have s : (m + 1 < n + 1) = (m < n) := by simp_arith
-      have q : m + 1 ≤ n := by apply Nat.le_of_lt_succ
-                               rewrite[Nat.succ_eq_add_one]
-                               rewrite[s]
-                               simp[r]
-      have difference_decreased := Nat.le_succ_of_le $ Nat.le_succ_of_le max_height_difference
-      let result := branch a left (right.heapPush le elem) (q) difference_decreased (Or.inl $ (Nat.power_of_two_iff_next_power_eq (n+1)).mpr r.right)
-      result
+      (
+        branch
+          a
+          left
+          (right.heapPush le elem)
+          r.left
+          (Nat.le_succ_of_le ∘ Nat.le_succ_of_le $ max_height_difference)
+          (Or.inl $ (Nat.power_of_two_iff_next_power_eq (n+1)).mpr r.right)
+          : CompleteTree α (n+(m+1)+1)
+      )
     else
-      have q : m ≤ n+1 := by apply (Nat.le_of_succ_le)
-                             simp_arith[p]
       have right_is_power_of_two : (m+1).isPowerOfTwo :=
         if s : n = m then
           match subtree_complete with
           | .inl h₂ => (congrArg Nat.succ s).subst h₂
           | .inr h₂ => h₂
-        else if h₁ : leftIsFull then by
-          rewrite[Decidable.not_and_iff_or_not (p := m<n) (q := leftIsFull)] at r
-          cases r
-          case inl h₂ => rewrite[Nat.not_lt_eq] at h₂
-                         have h₃ := Nat.not_le_of_gt $ Nat.lt_of_le_of_ne h₂ s
-                         contradiction
-          case inr h₂ => simp at h₂
-                         contradiction
+        else if h₁ : leftIsFull then
+          have h₂ : ¬m<n := r ∘ flip And.intro h₁
+          have h₂ : n≤m := (Nat.not_lt_eq m n).mp h₂
+          have h₃ : ¬m≤n := Nat.not_le_of_gt $ Nat.lt_of_le_of_ne h₂ s
+          absurd p h₃
         else
-          have : leftIsFull = ((n + 1).nextPowerOfTwo = n + 1) := rfl
-          have h₁ := h₁ ∘ this.mp ∘ (Nat.power_of_two_iff_next_power_eq (n+1)).mp
+          have h₁ : ¬(n+1).isPowerOfTwo := h₁ ∘ (Nat.power_of_two_iff_next_power_eq (n+1)).mp
           match subtree_complete with
           | .inl h₂ => absurd h₂ h₁
           | .inr h₂ => h₂
-      have still_in_range : n + 1 < 2 * (m + 1) := by
-        rewrite[Decidable.not_and_iff_or_not (p := m<n) (q := leftIsFull)] at r
-        cases r
-        case inl h₁ => rewrite[Nat.not_gt_eq n m] at h₁
-                       simp_arith[Nat.le_antisymm h₁ p]
-        case inr h₁ => simp[←Nat.power_of_two_iff_next_power_eq, leftIsFull] at h₁
-                       simp[h₁] at subtree_complete
-                       exact power_of_two_mul_two_lt subtree_complete max_height_difference h₁
-      let result := branch a (left.heapPush le elem) right q still_in_range (Or.inr right_is_power_of_two)
-      have letMeSpellItOutForYou : n + 1 + m + 1 = n + m + 1 + 1 := by simp_arith
+      have still_in_range : n + 1 < 2 * (m + 1) :=
+        have r := Decidable.not_and_iff_or_not.mp r
+        match r with
+        | .inl h₁ =>
+          have h₁ : n = m := Nat.le_antisymm ((Nat.not_lt_eq m n).mp h₁) p
+          have : ∀ (a : Nat), a > 0 → a < 2 * a := λa ha ↦ (Nat.one_mul _).subst (motive := λx ↦ x < 2*a) $ (Nat.mul_lt_mul_right ha).mpr (Nat.lt.base 1)
+          h₁.subst (motive := λx↦(n+1) < 2*(x+1)) $ this (n+1) (Nat.succ_pos _)
+        | .inr h₁ =>
+          have h₁ : ¬(n+1).isPowerOfTwo := h₁ ∘ (Nat.power_of_two_iff_next_power_eq (n+1)).mp
+          match subtree_complete with
+          | .inl h₂ => absurd h₂ h₁
+          | .inr h₂ => power_of_two_mul_two_lt h₂ max_height_difference h₁
+      let result := branch a (left.heapPush le elem) right (Nat.le_succ_of_le p) still_in_range (Or.inr right_is_power_of_two)
+      have letMeSpellItOutForYou : n + 1 + m + 1 = n + m + 1 + 1 :=
+        (Nat.add_assoc n 1 m).subst (motive := λx↦n+1+m+1=x+1) rfl
+        |> (Nat.add_comm 1 m).subst (motive := λx↦n+1+m+1=n+(x)+1)
       letMeSpellItOutForYou ▸ result
 
 ----------------------------------------------------------------------------------------------
