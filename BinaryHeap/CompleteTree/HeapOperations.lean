@@ -65,7 +65,14 @@ def heapPush (le : α → α → Bool) (elem : α) (heap : CompleteTree α o) : 
           match subtree_complete with
           | .inl h₂ => absurd h₂ h₁
           | .inr h₂ => power_of_two_mul_two_lt h₂ max_height_difference h₁
-      let result := branch a (left.heapPush le elem) right (Nat.le_succ_of_le p) still_in_range (Or.inr right_is_power_of_two)
+      let result :=
+        branch
+        a
+        (left.heapPush le elem)
+        right
+        (Nat.le_succ_of_le p)
+        still_in_range
+        (Or.inr right_is_power_of_two)
       have letMeSpellItOutForYou : n + 1 + m + 1 = n + m + 1 + 1 :=
         (Nat.add_assoc n 1 m).subst (motive := λx↦n+1+m+1=x+1) rfl
         |> (Nat.add_comm 1 m).subst (motive := λx↦n+1+m+1=n+(x)+1)
