@@ -104,19 +104,6 @@ private theorem power_of_two_mul_two_le {n m : Nat} (h₁ : (n+1).isPowerOfTwo) 
     h₅.resolve_left h₆
 
 /-- Helper for heapRemoveLastAux -/
-private theorem removeRightRightNotEmpty {n m : Nat} (m_gt_0_or_rightIsFull : m > 0 ∨ ((m+1).nextPowerOfTwo = m+1 : Bool)) (h₁ : 0 ≠ n + m) (h₂ : ¬(m < n ∧ ((m+1).nextPowerOfTwo = m+1 : Bool))) : m > 0 :=
-  match m_gt_0_or_rightIsFull with
-  | Or.inl h => h
-  | Or.inr h => by
-    simp only [h, and_true, Nat.not_lt] at h₂
-    cases n
-    case zero => exact Nat.zero_lt_of_ne_zero $ (Nat.zero_add m).subst (motive := (·≠0)) h₁.symm
-    case succ q =>
-      cases m
-      . exact absurd h₂ $ Nat.not_succ_le_zero q
-      . exact Nat.succ_pos _
-
-/-- Helper for heapRemoveLastAux -/
 private theorem removeRightLeftIsFull {n m : Nat} (r : ¬(m < n ∧ ((m+1).nextPowerOfTwo = m+1 : Bool))) (m_le_n : m ≤ n) (subtree_complete : (n + 1).isPowerOfTwo ∨ (m + 1).isPowerOfTwo) : (n+1).isPowerOfTwo := by
   rewrite[Decidable.not_and_iff_or_not] at r
   cases r
@@ -161,7 +148,6 @@ protected def Internal.heapRemoveLastAux
       (p▸CompleteTree.leaf, p▸aux0 a)
     else
       let rightIsFull : Bool := (m+1).nextPowerOfTwo = m+1
-      have m_gt_0_or_rightIsFull : m > 0 ∨ rightIsFull := by cases m <;> simp (config := { ground:=true })[rightIsFull]
       if r : m < n ∧ rightIsFull then
         --remove left
         match n, left with
@@ -175,13 +161,20 @@ protected def Internal.heapRemoveLastAux
           (q▸CompleteTree.branch a newLeft right s l_lt_2_m_succ (Or.inr rightIsFull), res)
       else
         --remove right
-        have m_gt_0 : m > 0 := removeRightRightNotEmpty m_gt_0_or_rightIsFull p r
+        have m_gt_0 : m > 0 :=
+          match hm : m with
+          | 0 =>
+            have hn : 0 < n := Nat.pos_of_ne_zero $ Ne.symm p
+            have hr : rightIsFull = true := decide_eq_true $ hm▸(Nat.nextPowerOfTwo.go.eq_def 1 1 _).substr (p := λx↦x = 0+1) rfl
+            absurd ⟨hn, hr⟩ r
+          | mm+1 => Nat.succ_pos mm
         let l := m.pred
-        have h₂ : l.succ = m := (Nat.succ_pred $ Nat.not_eq_zero_of_lt (Nat.gt_of_not_le $ Nat.not_le_of_gt m_gt_0))
-        let ((newRight : CompleteTree α l), res) := Internal.heapRemoveLastAux (h₂.symm▸right : CompleteTree α l.succ) aux0 auxl auxr
+        have h₂ : l.succ = m := Nat.succ_pred $ Nat.not_eq_zero_of_lt m_gt_0
+        let ((newRight : CompleteTree α l), res) := Internal.heapRemoveLastAux (h₂▸right : CompleteTree α l.succ) aux0 auxl auxr
         have leftIsFull : (n+1).isPowerOfTwo := removeRightLeftIsFull r m_le_n subtree_complete
         have still_in_range : n < 2 * (l+1) := h₂.substr (p := λx ↦ n < 2 * x) $ stillInRange r m_le_n m_gt_0 leftIsFull max_height_difference
-        let res := auxr res n (by omega)
+        have : l + 1 + n < n + m + 1 := (Nat.add_comm n (l+1))▸h₂▸Nat.lt_succ_self (n+m)
+        let res := auxr res n this
         (h₂▸CompleteTree.branch a left newRight (Nat.le_of_succ_le (h₂▸m_le_n)) still_in_range (Or.inl leftIsFull), res)
 
 /--
