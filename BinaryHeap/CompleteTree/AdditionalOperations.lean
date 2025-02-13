@@ -34,9 +34,14 @@ def indexOf {α : Type u} (heap : CompleteTree α o) (pred : α → Bool) : Opti
 
 /--Returns the element at the given index. Indices are depth first.-/
 def get {α : Type u} {n : Nat} (index : Fin n) (heap : CompleteTree α n) : α :=
-  match n, index, heap with
-  | (_+_+1), 0, .branch v _ _ _ _ _ => v
-  | (o+p+1), ⟨j+1,h₃⟩, .branch _ l r _ _ _ =>
+  --this all was one match in Lean 4.15, but I couldn't get it to unfold properly in 4.16...
+  match index with
+  | ⟨0, _⟩ =>
+    match n, heap with
+    | (_+_+1), .branch v _ _ _ _ _ => v
+  | ⟨j+1, h₃⟩ =>
+    match n, heap with
+    | (o+p+1), .branch _ l r _ _ _ =>
     if h₄ : j < o then
       get ⟨j, h₄⟩ l
     else

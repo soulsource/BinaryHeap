@@ -36,7 +36,7 @@ theorem get_right {α : Type u} {n : Nat} (tree : CompleteTree α n) (index : Fi
     else by
       simp only[right_unfold, leftLen_unfold]
       have : j + 1 - o - 1 = j - o := by omega
-      simp (config := {autoUnfold := true})[this, h₄]
+      simp only [get, reduceDIte, this, h₄]
 
 theorem get_right' {α : Type u} {n m : Nat} {v : α} {l : CompleteTree α n} {r : CompleteTree α m} {m_le_n : m ≤ n} {max_height_diff : n < 2 * (m + 1)} {subtree_complete : (n + 1).isPowerOfTwo ∨ (m + 1).isPowerOfTwo} (index : Fin (n + m + 1)) (h₁ : index > n) :
   have h₂ : ↑index - n - 1 < m := by
@@ -62,7 +62,7 @@ theorem get_left {α : Type u} {n : Nat} (tree : CompleteTree α n) (index : Fin
     if h₄ : j < o then by
       simp only[left_unfold, leftLen_unfold]
       have : j + 1 - o - 1 = j - o := by omega
-      simp (config := {autoUnfold := true})[this, h₄]
+      simp only [get, h₄, reduceDIte, Nat.add_one_sub_one]
     else
       absurd (Nat.lt_of_succ_le h₃) h₄
 

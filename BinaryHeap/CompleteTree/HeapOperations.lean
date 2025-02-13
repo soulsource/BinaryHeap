@@ -109,12 +109,10 @@ private theorem removeRightLeftIsFull {n m : Nat} (r : ¬(m < n ∧ ((m+1).nextP
   cases r
   case inl h₁ => rewrite[Nat.not_lt_eq] at h₁
                  have h₂ := Nat.le_antisymm h₁ m_le_n
-                 rewrite[←h₂] at subtree_complete
-                 simp at subtree_complete
+                 rewrite[←h₂, or_self] at subtree_complete
                  assumption
-  case inr h₁ => simp(config := {zetaDelta := true })[←Nat.power_of_two_iff_next_power_eq] at h₁
-                 simp[h₁] at subtree_complete
-                 assumption
+  case inr h₁ => simp[←Nat.power_of_two_iff_next_power_eq] at h₁
+                 exact Or.resolve_right subtree_complete h₁
 
 /-- Helper for heapRemoveLastAux -/
 private theorem stillInRange {n m : Nat} (r : ¬(m < n ∧ ((m+1).nextPowerOfTwo = m+1 : Bool))) (m_le_n : m ≤ n) (m_gt_0 : m > 0) (leftIsFull : (n+1).isPowerOfTwo) (max_height_difference: n < 2 * (m + 1)) : n < 2*m := by
