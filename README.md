@@ -2,6 +2,10 @@
 
 This is a toy project, with the goal to formally prove a binary heap implementation.
 
+# MOVED
+
+This repo is no longer updated. The current version can be found at [https://git.grois.info/BinaryHeap/](https://git.grois.info/BinaryHeap/).
+
 # Goal
 
 The original goal of this project was to implement a heap more or less by the book, and to show that its properties are upheld. This means, that the data is stored in a complete tree, and that the usual functions (push, pop, update) conserve the heap predicate.
